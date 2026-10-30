@@ -235,6 +235,15 @@ pub fn uninstall_app(id: String) -> Result<String, String> {
         return Ok(String::from_utf8_lossy(&out.stdout).to_string());
     }
 
+    if id.starts_with("portage:") {
+        let pkg_name = id.trim_start_matches("portage:");
+        let out = Command::new("pkexec")
+            .args(["emerge", "--depclean", pkg_name])
+            .output()
+            .map_err(|e| e.to_string())?;
+        return Ok(String::from_utf8_lossy(&out.stdout).to_string());
+    }
+
     if id.starts_with("appimage:") {
         let path_str = id.trim_start_matches("appimage:");
         let _ = managers::appimage::unintegrate_appimage(path_str);

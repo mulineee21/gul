@@ -46,6 +46,8 @@ pub fn detect_os() -> OsInfo {
         "fedora".to_string()
     } else if id.contains("suse") || id_like.contains("suse") {
         "suse".to_string()
+    } else if id == "gentoo" || id_like.contains("gentoo") {
+        "gentoo".to_string()
     } else {
         // Fallback by binary detection
         if command_exists("pacman") {
@@ -56,6 +58,8 @@ pub fn detect_os() -> OsInfo {
             "fedora".to_string()
         } else if command_exists("zypper") {
             "suse".to_string()
+        } else if command_exists("emerge") {
+            "gentoo".to_string()
         } else {
             "generic".to_string()
         }
@@ -66,6 +70,7 @@ pub fn detect_os() -> OsInfo {
         "debian" if command_exists("apt") || command_exists("apt-get") => "apt",
         "fedora" if command_exists("dnf") => "dnf",
         "suse" if command_exists("zypper") => "zypper",
+        "gentoo" if command_exists("emerge") => "portage",
         _ => {
             if command_exists("pacman") {
                 "pacman"
@@ -73,6 +78,8 @@ pub fn detect_os() -> OsInfo {
                 "apt"
             } else if command_exists("dnf") {
                 "dnf"
+            } else if command_exists("emerge") {
+                "portage"
             } else if command_exists("zypper") {
                 "zypper"
             } else {

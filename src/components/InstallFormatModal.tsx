@@ -13,6 +13,7 @@ import {
   Sparkles,
   Layers,
   Check,
+  PackageCheck,
 } from "lucide-react";
 import { CatalogItem, InstallOption, OsInfo, SourceType } from "../types";
 
@@ -73,6 +74,8 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
         return <Globe className="w-5 h-5 text-sky-400" />;
       case "appimage":
         return <Zap className="w-5 h-5 text-emerald-400" />;
+      case "snap":
+        return <PackageCheck className="w-5 h-5 text-orange-400" />;
       default:
         return <Cpu className="w-5 h-5 text-amber-400" />;
     }
@@ -95,6 +98,14 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
           accentColor: "text-emerald-400",
           badgeBg: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
           btnBg: "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/20",
+        };
+      case "snap":
+        return {
+          border: isSelected ? "border-orange-500 shadow-orange-500/10 shadow-lg" : "border-zinc-800 hover:border-zinc-700",
+          headerBg: "bg-orange-500/10",
+          accentColor: "text-orange-400",
+          badgeBg: "bg-orange-500/20 text-orange-300 border-orange-500/40",
+          btnBg: "bg-orange-600 hover:bg-orange-500 text-white shadow-orange-500/20",
         };
       default:
         return {

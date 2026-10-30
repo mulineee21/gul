@@ -28,6 +28,7 @@ pub async fn run_update_manager(app: AppHandle, manager: String) -> Result<(), S
         "snap" => ("pkexec", vec!["snap", "refresh"]),
         "apt" => ("pkexec", vec!["sh", "-c", "apt-get update && apt-get dist-upgrade -y"]),
         "dnf" => ("pkexec", vec!["dnf", "upgrade", "-y"]),
+        "portage" => ("pkexec", vec!["emerge", "--update", "--deep", "--newuse", "@world"]),
         _ => return Err(format!("Gestor no reconocido: {}", manager)),
     };
 

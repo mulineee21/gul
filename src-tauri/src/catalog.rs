@@ -220,6 +220,7 @@ pub fn search_native_repo(query: &str, native_manager: &str) -> Vec<CatalogItem>
         "pacman" => search_pacman_repo(query),
         "apt" => search_apt_repo(query),
         "dnf" => search_dnf_repo(query),
+        "portage" => search_portage_repo(query),
         _ => Vec::new(),
     }
 }
@@ -380,6 +381,140 @@ fn search_dnf_repo(query: &str) -> Vec<CatalogItem> {
     items
 }
 
+fn search_snap_repo(query: &str) -> Vec<CatalogItem> {
+    if !crate::managers::snap::is_available() {
+        return Vec::new();
+    }
+
+    let output = match Command::new("snap")
+        .args(["find", query])
+        .output()
+    {
+        Ok(out) => out,
+        Err(_) => return Vec::new(),
+    };
+
+    let text = String::from_utf8_lossy(&output.stdout);
+    let installed_identities = crate::desktop_apps::get_installed_canonical_identities();
+    let mut items = Vec::new();
+
+    for line in text.lines().skip(1).take(25) {
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        if parts.len() < 3 {
+            continue;
+        }
+
+        let name = parts[0];
+        let version = parts[1];
+        let publisher = parts.get(2).unwrap_or(&"-");
+        let summary = if parts.len() > 4 {
+            parts[4..].join(" ")
+        } else if parts.len() == 4 {
+            parts[3].to_string()
+        } else {
+            String::new()
+        };
+
+        let canonical = crate::duplicates::normalize_name(name);
+        let is_installed = installed_identities.contains(&name.to_lowercase())
+            || installed_identities.contains(&format!("snap:{}", name.to_lowercase()));
+
+        items.push(CatalogItem {
+            id: format!("snap:{}", name),
+            name: name.to_string(),
+            canonical_name: canonical,
+            summary: summary.clone(),
+            description: summary,
+            version: version.to_string(),
+            source: SourceType::Snap,
+            icon_url: None,
+            developer: Some(format!("Snapcraft ({})", publisher)),
+            is_installed,
+            pkg_id: name.to_string(),
+            category: Some("Paquete Snap".to_string()),
+        });
+    }
+
+    items
+}
+
+fn search_portage_repo(query: &str) -> Vec<CatalogItem> {
+    if !crate::managers::portage::is_available() {
+        return Vec::new();
+    }
+
+    let output = match Command::new("emerge")
+        .args(["--search", query])
+        .output()
+    {
+        Ok(out) => out,
+        Err(_) => return Vec::new(),
+    };
+
+    let text = String::from_utf8_lossy(&output.stdout);
+    let installed_identities = crate::desktop_apps::get_installed_canonical_identities();
+    let mut items = Vec::new();
+
+    let mut current_pkg = String::new();
+    let mut current_desc = String::new();
+    let mut current_ver = String::new();
+
+    for line in text.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("*  ") {
+            if !current_pkg.is_empty() {
+                let canonical = crate::duplicates::normalize_name(&current_pkg);
+                let is_installed = installed_identities.contains(&current_pkg.to_lowercase());
+                items.push(CatalogItem {
+                    id: format!("portage:{}", current_pkg),
+                    name: current_pkg.clone(),
+                    canonical_name: canonical,
+                    summary: current_desc.clone(),
+                    description: current_desc.clone(),
+                    version: if current_ver.is_empty() { "ebuild".to_string() } else { current_ver.clone() },
+                    source: SourceType::Portage,
+                    icon_url: None,
+                    developer: Some("Gentoo Portage".to_string()),
+                    is_installed,
+                    pkg_id: current_pkg.clone(),
+                    category: Some("Ebuild Nativo".to_string()),
+                });
+                if items.len() >= 25 {
+                    break;
+                }
+            }
+            current_pkg = trimmed.trim_start_matches("*  ").trim().to_string();
+            current_desc.clear();
+            current_ver.clear();
+        } else if trimmed.starts_with("Latest version available:") {
+            current_ver = trimmed.trim_start_matches("Latest version available:").trim().to_string();
+        } else if trimmed.starts_with("Description:") {
+            current_desc = trimmed.trim_start_matches("Description:").trim().to_string();
+        }
+    }
+
+    if !current_pkg.is_empty() && items.len() < 25 {
+        let canonical = crate::duplicates::normalize_name(&current_pkg);
+        let is_installed = installed_identities.contains(&current_pkg.to_lowercase());
+        items.push(CatalogItem {
+            id: format!("portage:{}", current_pkg),
+            name: current_pkg.clone(),
+            canonical_name: canonical,
+            summary: current_desc.clone(),
+            description: current_desc,
+            version: if current_ver.is_empty() { "ebuild".to_string() } else { current_ver },
+            source: SourceType::Portage,
+            icon_url: None,
+            developer: Some("Gentoo Portage".to_string()),
+            is_installed,
+            pkg_id: current_pkg,
+            category: Some("Ebuild Nativo".to_string()),
+        });
+    }
+
+    items
+}
+
 pub fn search_all_catalog(query: &str, filter_source: Option<&str>) -> Vec<CatalogItem> {
     let os_info = detect_os();
     let filter = filter_source.unwrap_or("all");
@@ -420,6 +555,11 @@ pub fn search_all_catalog(query: &str, filter_source: Option<&str>) -> Vec<Catal
                 category: Some(format!("★ {} votos", hit.num_votes)),
             });
         }
+    }
+
+    // 4. Search Snap Store if enabled/filtered and system has snap
+    if (filter == "all" || filter == "snap") && !query.trim().is_empty() && (os_info.has_snap || crate::managers::snap::is_available()) {
+        results.extend(search_snap_repo(query));
     }
 
     // Sort: exact matches first, then installed status, then name
@@ -619,6 +759,14 @@ pub async fn run_install_package(
         "snap" => (
             "pkexec".to_string(),
             vec!["snap".to_string(), "install".to_string(), pkg_id.clone()],
+        ),
+        "portage" => (
+            "pkexec".to_string(),
+            vec![
+                "emerge".to_string(),
+                "--autounmask-continue".to_string(),
+                pkg_id.clone(),
+            ],
         ),
         "aur" => {
             let helper = if Command::new("which").arg("paru").output().map(|o| o.status.success()).unwrap_or(false) {

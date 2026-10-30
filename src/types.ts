@@ -1,4 +1,12 @@
-export type SourceType = "pacman" | "apt" | "dnf" | "flatpak" | "snap" | "appimage" | "aur";
+export type SourceType =
+  | "pacman"
+  | "apt"
+  | "dnf"
+  | "flatpak"
+  | "snap"
+  | "appimage"
+  | "aur"
+  | "portage";
 
 export interface SizeBreakdown {
   binary_bytes: number;
@@ -231,5 +239,6 @@ export interface OmniProfile {
   native_manager: string;
   native_packages: string[];
   flatpak_apps: string[];
+  snap_apps?: string[];
   total_apps: number;
 }

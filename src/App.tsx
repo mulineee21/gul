@@ -498,7 +498,7 @@ export function App() {
 
     setInstallModalData({
       appName: "Restauración de Perfil en Lote",
-      source: source === "flatpak" ? "flatpak" : "pacman",
+      source: (source as SourceType) || "pacman",
       pkgId: `${packages.length} paquetes seleccionados`,
     });
     setInstallProgressPct(5);

@@ -66,6 +66,13 @@ export function getSourceBadgeInfo(source: SourceType): {
         textColor: "text-fuchsia-300",
         borderColor: "border-fuchsia-600/30",
       };
+    case "portage":
+      return {
+        label: "Portage (Gentoo)",
+        bgColor: "bg-teal-950/40",
+        textColor: "text-teal-300",
+        borderColor: "border-teal-600/30",
+      };
     default:
       return {
         label: source,

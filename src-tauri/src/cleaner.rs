@@ -110,6 +110,30 @@ pub fn execute_clean(item_ids: &[String]) -> CleanResult {
                         total_cleaned += item.size_bytes;
                     }
                 }
+                "clean:snap:revisions" => {
+                    let script = r#"snap list --all | awk '/disabled/{print $1, $3}' | while read snapname revision; do snap remove "$snapname" --revision="$revision"; done"#;
+                    let res = Command::new("pkexec").args(["sh", "-c", script]).output();
+                    if let Ok(o) = res {
+                        logs.push(String::from_utf8_lossy(&o.stdout).to_string());
+                        total_cleaned += item.size_bytes;
+                    }
+                }
+                "clean:portage:distfiles" => {
+                    let res = Command::new("pkexec")
+                        .args(["sh", "-c", "eclean-dist -d || rm -rf /var/cache/distfiles/*"])
+                        .output();
+                    if let Ok(o) = res {
+                        logs.push(String::from_utf8_lossy(&o.stdout).to_string());
+                        total_cleaned += item.size_bytes;
+                    }
+                }
+                "clean:portage:orphans" => {
+                    let res = Command::new("pkexec").args(["emerge", "--depclean", "-q"]).output();
+                    if let Ok(o) = res {
+                        logs.push(String::from_utf8_lossy(&o.stdout).to_string());
+                        total_cleaned += item.size_bytes;
+                    }
+                }
                 _ => {
                     logs.push(format!("Limpieza personalizada para {}", id));
                 }

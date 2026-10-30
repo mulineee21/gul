@@ -38,6 +38,15 @@ pub fn export_profile() -> OmniProfile {
                 }
             }
         }
+    } else if os_info.native_manager == "portage" {
+        if let Ok(content) = fs::read_to_string("/var/lib/portage/world") {
+            for line in content.lines() {
+                let pkg = line.trim();
+                if !pkg.is_empty() && !pkg.starts_with('#') {
+                    native_packages.push(pkg.to_string());
+                }
+            }
+        }
     }
 
     // 2. Gather installed Flatpaks
@@ -52,7 +61,28 @@ pub fn export_profile() -> OmniProfile {
         }
     }
 
-    let total = native_packages.len() + flatpak_apps.len();
+    // 3. Gather installed Snaps
+    let mut snap_apps = Vec::new();
+    if let Ok(out) = Command::new("snap").args(["list"]).output() {
+        let text = String::from_utf8_lossy(&out.stdout);
+        for line in text.lines().skip(1) {
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            if let Some(name) = parts.first() {
+                if *name != "core"
+                    && *name != "core18"
+                    && *name != "core20"
+                    && *name != "core22"
+                    && *name != "core24"
+                    && *name != "snapd"
+                    && *name != "bare"
+                {
+                    snap_apps.push(name.to_string());
+                }
+            }
+        }
+    }
+
+    let total = native_packages.len() + flatpak_apps.len() + snap_apps.len();
 
     let date_str = chrono_or_date();
 
@@ -63,6 +93,7 @@ pub fn export_profile() -> OmniProfile {
         native_manager: os_info.native_manager,
         native_packages,
         flatpak_apps,
+        snap_apps,
         total_apps: total,
     }
 }

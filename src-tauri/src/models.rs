@@ -10,6 +10,7 @@ pub enum SourceType {
     Snap,
     AppImage,
     Aur,
+    Portage,
 }
 
 impl SourceType {
@@ -22,6 +23,7 @@ impl SourceType {
             SourceType::Snap => "snap",
             SourceType::AppImage => "appimage",
             SourceType::Aur => "aur",
+            SourceType::Portage => "portage",
         }
     }
 }
@@ -276,5 +278,7 @@ pub struct OmniProfile {
     pub native_manager: String,
     pub native_packages: Vec<String>,
     pub flatpak_apps: Vec<String>,
+    #[serde(default)]
+    pub snap_apps: Vec<String>,
     pub total_apps: usize,
 }

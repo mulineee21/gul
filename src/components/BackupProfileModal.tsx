@@ -139,13 +139,13 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
                 </div>
               ) : currentProfile ? (
                 <>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800">
                       <div className="text-[10px] font-mono text-zinc-500 uppercase">Distribución</div>
                       <div className="text-sm font-bold text-white mt-0.5 truncate">{currentProfile.distro}</div>
                     </div>
                     <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800">
-                      <div className="text-[10px] font-mono text-zinc-500 uppercase">Paquetes Nativos</div>
+                      <div className="text-[10px] font-mono text-zinc-500 uppercase">Nativos ({currentProfile.native_manager})</div>
                       <div className="text-sm font-bold text-amber-400 mt-0.5 font-mono">
                         {currentProfile.native_packages.length}
                       </div>
@@ -154,6 +154,12 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
                       <div className="text-[10px] font-mono text-zinc-500 uppercase">Flatpaks</div>
                       <div className="text-sm font-bold text-blue-400 mt-0.5 font-mono">
                         {currentProfile.flatpak_apps.length}
+                      </div>
+                    </div>
+                    <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800">
+                      <div className="text-[10px] font-mono text-zinc-500 uppercase">Snaps</div>
+                      <div className="text-sm font-bold text-orange-400 mt-0.5 font-mono">
+                        {currentProfile.snap_apps?.length || 0}
                       </div>
                     </div>
                   </div>
@@ -191,7 +197,7 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
                       className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-semibold shadow-md shadow-orange-500/20 flex items-center gap-2 transition active:scale-95"
                     >
                       <Download className="w-4 h-4" />
-                      <span>Guardar como omnipkg-perfil.json</span>
+                      <span>Guardar como gul-perfil.json</span>
                     </button>
                   </div>
                 </>
@@ -207,7 +213,7 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
                   <div>
                     <h4 className="text-sm font-bold text-white">Cargar archivo de respaldo</h4>
                     <p className="text-xs text-zinc-400 mt-1 max-w-sm mx-auto">
-                      Selecciona un archivo <span className="font-mono text-amber-400">omnipkg-perfil.json</span> exportado previamente en este u otro equipo.
+                      Selecciona un archivo <span className="font-mono text-amber-400">gul-perfil.json</span> exportado previamente en este u otro equipo.
                     </p>
                   </div>
                   <button
@@ -226,8 +232,9 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
                     </div>
                     <p className="text-xs text-zinc-300">
                       Origen: <strong className="text-amber-400">{loadedProfile.distro}</strong> ({loadedProfile.native_manager.toUpperCase()}).
-                      Contiene <strong className="text-white">{loadedProfile.native_packages.length}</strong> paquetes nativos y{" "}
-                      <strong className="text-blue-400">{loadedProfile.flatpak_apps.length}</strong> aplicaciones Flatpak.
+                      Contiene <strong className="text-white">{loadedProfile.native_packages.length}</strong> paquetes nativos,{" "}
+                      <strong className="text-blue-400">{loadedProfile.flatpak_apps.length}</strong> Flatpaks
+                      {loadedProfile.snap_apps && loadedProfile.snap_apps.length > 0 ? ` y ${loadedProfile.snap_apps.length} Snaps` : ""}.
                     </p>
                   </div>
 

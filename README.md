@@ -6,11 +6,11 @@
 
 <p align="center">
   <strong>El centro de software y mantenimiento definitivo para cualquier distribución Linux.</strong><br>
-  Unifica Pacman, AUR, APT, DNF, Flatpak y AppImage en una interfaz moderna, rápida y elegante.
+  Unifica Pacman, AUR, APT, DNF, Portage (Gentoo), Flatpak, Snap y AppImage en una interfaz moderna, rápida y elegante.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Platform-Linux%20(Arch%20%7C%20Ubuntu%20%7C%20Debian%20%7C%20Fedora)-blue.svg" alt="Linux Support" />
+  <img src="https://img.shields.io/badge/Platform-Linux%20(Arch%20%7C%20Ubuntu%20%7C%20Debian%20%7C%20Fedora%20%7C%20Gentoo)-blue.svg" alt="Linux Support" />
   <img src="https://img.shields.io/badge/Backend-Rust%20%2B%20Tauri%20v2-orange.svg" alt="Tauri v2" />
   <img src="https://img.shields.io/badge/Frontend-React%2019%20%2B%20Tailwind-cyan.svg" alt="React 19" />
   <img src="https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg" alt="GNU GPL v3+" />
@@ -28,12 +28,18 @@
 
 ### 1. 🛍️ Tienda Universal Multi-Origen
 - **Flathub (Flatpak)**: Explora miles de aplicaciones con fotos en alta definición, reseñas y descripciones.
-- **Repositorios Nativos de tu Distribución**: Detección automática de tu sistema (`/etc/os-release`) para buscar directamente en **Pacman** (Arch/CachyOS), **APT** (Ubuntu/Debian) o **DNF** (Fedora).
+- **Snap Store (Canonical)**: Soporte completo para paquetes Snap en Ubuntu y cualquier distribución con `snapd`.
+- **Repositorios Nativos de tu Distribución**: Detección automática de tu sistema (`/etc/os-release`) para buscar e instalar directamente en:
+  - **Pacman** (Arch Linux, CachyOS, Manjaro)
+  - **APT** (Ubuntu, Debian, Linux Mint, Pop!_OS)
+  - **DNF** (Fedora, RHEL, AlmaLinux, Rocky)
+  - **Portage / Emerge** (Gentoo Linux)
 - **Arch User Repository (AUR)**: Búsqueda integrada mediante API RPC v5 y helpers (`paru` / `yay`) con recuento de votos y popularidad.
 
 ### 2. 🎛️ Selector Inteligente de Formato
 - Cuando eliges instalar una aplicación, GUL te permite elegir entre:
   - **Paquete Nativo** (máximo rendimiento y compatibilidad con el sistema).
+  - **Snap (Canonical)** (estándar de Ubuntu con confinamiento AppArmor y actualizaciones delta).
   - **Flatpak / Flathub** (aislamiento sandbox seguro).
   - **AppImage** (ejecutable independiente y portable).
 - Muestra comparativas de tamaño de descarga, aislamiento y versión antes de instalar.

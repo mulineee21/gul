@@ -3,6 +3,7 @@ pub mod flatpak;
 pub mod snap;
 pub mod apt;
 pub mod dnf;
+pub mod portage;
 pub mod appimage;
 
 use crate::models::{AppInfo, UpdateItem, SystemCleanItem};
@@ -23,6 +24,9 @@ pub fn get_active_managers() -> Vec<String> {
     }
     if dnf::is_available() {
         managers.push("dnf".to_string());
+    }
+    if portage::is_available() {
+        managers.push("portage".to_string());
     }
     managers.push("appimage".to_string());
     managers
@@ -45,6 +49,9 @@ pub fn list_all_installed() -> Vec<AppInfo> {
     }
     if dnf::is_available() {
         all.extend(dnf::list_installed());
+    }
+    if portage::is_available() {
+        all.extend(portage::list_installed());
     }
 
     // AppImages
@@ -74,6 +81,9 @@ pub fn check_all_updates() -> Vec<UpdateItem> {
     if dnf::is_available() {
         all.extend(dnf::check_updates());
     }
+    if portage::is_available() {
+        all.extend(portage::check_updates());
+    }
 
     all
 }
@@ -95,6 +105,9 @@ pub fn scan_all_cleaner_items() -> Vec<SystemCleanItem> {
     }
     if dnf::is_available() {
         all.extend(dnf::scan_cleaner_items());
+    }
+    if portage::is_available() {
+        all.extend(portage::scan_cleaner_items());
     }
 
     all

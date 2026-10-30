@@ -29,6 +29,7 @@ pub fn get_install_options(app_name: &str, canonical_name: &str, current_pkg_id:
     let native_source = match native_mgr.as_str() {
         "apt" => SourceType::Apt,
         "dnf" => SourceType::Dnf,
+        "portage" => SourceType::Portage,
         _ => SourceType::Pacman,
     };
 
@@ -88,6 +89,29 @@ pub fn get_install_options(app_name: &str, canonical_name: &str, current_pkg_id:
         badge_label: "AppImage".to_string(),
         download_url: appimage_url,
     });
+
+    // 4. SNAP (Si snapd está instalado o la distribución es Ubuntu)
+    if os_info.has_snap || crate::managers::snap::is_available() {
+        let snap_pkg = clean_name.to_lowercase().replace(' ', "-");
+        let snap_installed = installed_identities.contains(&format!("snap:{}", snap_pkg))
+            || installed_identities.contains(&snap_pkg);
+
+        options.push(InstallOption {
+            source: SourceType::Snap,
+            title: "Paquete Snap (Canonical)".to_string(),
+            subtitle: "Empaquetado confinado universal estándar en Ubuntu".to_string(),
+            version: "Canal estable".to_string(),
+            pkg_id: snap_pkg,
+            is_installed: snap_installed,
+            pros: vec![
+                "Formato nativo y preferido en Ubuntu y derivados".to_string(),
+                "Actualizaciones automáticas delta en segundo plano".to_string(),
+                "Confinamiento de seguridad AppArmor".to_string(),
+            ],
+            badge_label: "Snapcraft".to_string(),
+            download_url: None,
+        });
+    }
 
     options
 }
@@ -191,6 +215,17 @@ fn resolve_native_package(
             if let Ok(out) = Command::new("dnf").args(["info", "-q", candidate]).output() {
                 if out.status.success() {
                     return (candidate.clone(), "Repositorio DNF".to_string());
+                }
+            }
+        }
+    } else if native_mgr == "portage" {
+        for candidate in &candidates {
+            if let Ok(out) = Command::new("emerge").args(["--search", candidate]).output() {
+                if out.status.success() {
+                    let text = String::from_utf8_lossy(&out.stdout);
+                    if text.contains("*  ") {
+                        return (candidate.clone(), "Portage Ebuild".to_string());
+                    }
                 }
             }
         }
