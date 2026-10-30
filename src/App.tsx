@@ -15,6 +15,7 @@ import {
   InstallProgressModal,
   TerminalLogLine,
 } from "./components/InstallProgressModal";
+import { ConfirmModal } from "./components/ConfirmModal";
 import {
   AppImageEntry,
   AppInfo,
@@ -63,6 +64,16 @@ export function App() {
     "starting" | "running" | "success" | "error" | "cancelled"
   >("starting");
   const [terminalLogs, setTerminalLogs] = useState<TerminalLogLine[]>([]);
+
+  // Custom Confirmation Modal state (eliminates browser JavaScript / localhost popups)
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    variant?: "danger" | "warning" | "info";
+    onConfirm: () => void;
+  } | null>(null);
 
   const [loading, setLoading] = useState<boolean>(true);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
@@ -339,24 +350,57 @@ export function App() {
     }
   };
 
-  const handleUninstall = async (id: string) => {
-    try {
-      const msg = await invoke<string>("uninstall_app", { id });
-      showToast(`Desinstalado: ${msg || "Éxito"}`);
-      loadSystemData();
-    } catch (e) {
-      showToast(`Error desinstalando: ${e}`);
-    }
+  const handleUninstall = (id: string, name?: string) => {
+    const displayName = name || id.split(":").pop() || "la aplicación";
+    setConfirmDialog({
+      isOpen: true,
+      title: `¿Desinstalar ${displayName}?`,
+      message: `Esta acción desinstalará ${displayName} de tu sistema y liberará el espacio en disco asociado.`,
+      confirmLabel: "Desinstalar",
+      variant: "danger",
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        showToast(`Desinstalando ${displayName}...`);
+        try {
+          const msg = await invoke<string>("uninstall_app", { id });
+          showToast(`Desinstalado: ${msg || "Éxito"}`);
+          await loadSystemData();
+          if (selectedApp && (selectedApp.id === id || (selectedApp as any).pkg_id === id)) {
+            setSelectedApp(null);
+          }
+        } catch (e) {
+          showToast(`Error al desinstalar: ${e}`);
+        }
+      },
+    });
   };
 
-  const handleKeepRecommended = async (_recommendedId: string, otherIds: string[]) => {
-    if (confirm(`¿Conservar la versión recomendada y desinstalar las otras ${otherIds.length} versiones redundantes?`)) {
-      for (const id of otherIds) {
-        await handleUninstall(id);
-      }
-      showToast("Duplicados limpiados correctamente");
-      loadSystemData();
-    }
+  const handleKeepRecommended = (
+    _recommendedId: string,
+    otherIds: string[],
+    groupName?: string
+  ) => {
+    const titleName = groupName || "la aplicación";
+    setConfirmDialog({
+      isOpen: true,
+      title: "¿Limpiar versiones duplicadas?",
+      message: `¿Deseas conservar la versión recomendada de ${titleName} y desinstalar las otras ${otherIds.length} versiones redundantes?`,
+      confirmLabel: "Conservar recomendada",
+      variant: "warning",
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        showToast("Limpiando versiones duplicadas...");
+        for (const id of otherIds) {
+          try {
+            await invoke("uninstall_app", { id });
+          } catch (e) {
+            console.error(`Error desinstalando duplicado ${id}:`, e);
+          }
+        }
+        showToast("Duplicados limpiados correctamente");
+        await loadSystemData();
+      },
+    });
   };
 
   const handleRunUpdates = async (selectedManagers: string[]) => {
@@ -401,14 +445,25 @@ export function App() {
     }
   };
 
-  const handleDeleteAppImageFile = async (path: string) => {
-    try {
-      await invoke("uninstall_app", { id: `appimage:${path}` });
-      showToast("Archivo AppImage eliminado");
-      loadSystemData();
-    } catch (e) {
-      showToast(`Error al eliminar: ${e}`);
-    }
+  const handleDeleteAppImageFile = (path: string, name?: string) => {
+    const displayName = name || path.split("/").pop() || "el archivo";
+    setConfirmDialog({
+      isOpen: true,
+      title: "¿Eliminar archivo AppImage?",
+      message: `¿Seguro que deseas eliminar permanentemente el archivo ${displayName}? Se retirará del menú de aplicaciones.`,
+      confirmLabel: "Eliminar permanentemente",
+      variant: "danger",
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        try {
+          await invoke("uninstall_app", { id: `appimage:${path}` });
+          showToast("Archivo AppImage eliminado.");
+          await loadSystemData();
+        } catch (e) {
+          showToast(`Error al eliminar: ${e}`);
+        }
+      },
+    });
   };
 
   const handleCleanSystem = async (selectedIds: string[]) => {
@@ -611,6 +666,19 @@ export function App() {
             handleLaunchApp(installModalData.pkgId);
             setInstallModalData(null);
           }}
+        />
+      )}
+
+      {/* Modern Confirmation Dialog (Replaces browser confirm) */}
+      {confirmDialog && (
+        <ConfirmModal
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          confirmLabel={confirmDialog.confirmLabel}
+          variant={confirmDialog.variant}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(null)}
         />
       )}
     </div>

@@ -19,7 +19,7 @@ interface AppsViewProps {
   loading: boolean;
   onSelectApp: (app: AppInfo) => void;
   onLaunch: (id: string, exec?: string) => void;
-  onUninstall: (id: string) => void;
+  onUninstall: (id: string, name?: string) => void;
 }
 
 export const AppsView: React.FC<AppsViewProps> = ({
@@ -301,9 +301,7 @@ export const AppsView: React.FC<AppsViewProps> = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (confirm(`¿Desinstalar ${app.name}?`)) {
-                            onUninstall(app.id);
-                          }
+                          onUninstall(app.id, app.name);
                         }}
                         title="Desinstalar"
                         className="p-1.5 rounded-lg hover:bg-red-950/40 text-red-400 hover:text-red-300"

@@ -13,8 +13,8 @@ import { formatBytes, getSourceBadgeInfo } from "../utils";
 interface DuplicatesViewProps {
   groups: DuplicateGroup[];
   loading: boolean;
-  onUninstall: (id: string) => void;
-  onKeepRecommended: (recommendedId: string, otherIds: string[]) => void;
+  onUninstall: (id: string, name?: string) => void;
+  onKeepRecommended: (recommendedId: string, otherIds: string[], groupName?: string) => void;
 }
 
 export const DuplicatesView: React.FC<DuplicatesViewProps> = ({
@@ -186,9 +186,7 @@ export const DuplicatesView: React.FC<DuplicatesViewProps> = ({
 
                           <button
                             onClick={() => {
-                              if (confirm(`¿Desinstalar ${app.name} (${app.source})?`)) {
-                                onUninstall(app.id);
-                              }
+                              onUninstall(app.id, `${app.name} (${app.source})`);
                             }}
                             className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${
                               isRec

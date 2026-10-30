@@ -25,7 +25,7 @@ interface AppDetailModalProps {
   onLaunch?: (id: string, exec?: string) => void;
   onOpenFolder?: (canonical: string, id: string, source: string) => void;
   onClearCache?: (canonical: string, id: string, source: string) => void;
-  onUninstall?: (id: string) => void;
+  onUninstall?: (id: string, name?: string) => void;
   onInstall?: (item: CatalogItem) => void;
   onOpenInstallFormat?: (item: CatalogItem) => void;
   isInstalling?: boolean;
@@ -611,10 +611,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                 {onUninstall && (
                   <button
                     onClick={() => {
-                      if (confirm(`¿Seguro que deseas desinstalar ${app.name}?`)) {
-                        onUninstall(app.id);
-                        onClose();
-                      }
+                      onUninstall(app.id, app.name);
                     }}
                     className="px-4 py-2 rounded-xl bg-red-950/40 hover:bg-red-900/50 text-red-400 border border-red-700/30 text-xs font-semibold flex items-center gap-1.5 transition"
                   >

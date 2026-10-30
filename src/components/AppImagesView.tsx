@@ -18,7 +18,7 @@ interface AppImagesViewProps {
   onUnintegrate: (path: string) => void;
   onLaunch: (id: string, exec?: string) => void;
   onScanCustomPath: (path: string) => void;
-  onDelete: (path: string) => void;
+  onDelete: (path: string, name?: string) => void;
 }
 
 export const AppImagesView: React.FC<AppImagesViewProps> = ({
@@ -178,9 +178,7 @@ export const AppImagesView: React.FC<AppImagesViewProps> = ({
 
                   <button
                     onClick={() => {
-                      if (confirm(`¿Eliminar permanentemente el archivo ${entry.name}?`)) {
-                        onDelete(entry.path);
-                      }
+                      onDelete(entry.path, entry.name);
                     }}
                     title="Eliminar archivo"
                     className="p-2 rounded-lg bg-red-950/40 hover:bg-red-900/50 text-red-400 border border-red-800/30 transition"
