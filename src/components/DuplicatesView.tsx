@@ -38,20 +38,20 @@ export const DuplicatesView: React.FC<DuplicatesViewProps> = ({
           </div>
           <div>
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              Detector de Aplicaciones Duplicadas
+              Duplicate Application Detector
               <span className="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30 font-mono">
-                {groups.length} grupos encontrados
+                {groups.length} duplicate groups found
               </span>
             </h3>
             <p className="text-xs text-zinc-300 mt-1 max-w-xl">
-              Identifica programas instalados simultáneamente por diferentes medios (APT/Pacman, Flatpak, Snap, AppImage). GUL evalúa rendimiento, versiones y consumo de disco para recomendarte la mejor opción.
+              Identifies software installed simultaneously across multiple packaging formats (Native, Flatpak, Snap, AppImage). GUL compares performance, versions, and storage to recommend the best option.
             </p>
           </div>
         </div>
 
         {totalPotentialSavings > 0 && (
           <div className="text-right bg-zinc-950/60 px-4 py-2.5 rounded-xl border border-zinc-800">
-            <span className="text-[11px] text-zinc-400 block">Ahorro potencial de disco</span>
+            <span className="text-[11px] text-zinc-400 block">Potential Disk Savings</span>
             <span className="text-base font-mono font-bold text-emerald-400">
               +{formatBytes(totalPotentialSavings)}
             </span>
@@ -63,16 +63,16 @@ export const DuplicatesView: React.FC<DuplicatesViewProps> = ({
       {loading ? (
         <div className="flex flex-col items-center justify-center h-64 text-zinc-500 space-y-2">
           <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs font-mono">Analizando duplicados cruzados...</p>
+          <p className="text-xs font-mono">Analyzing duplicate applications...</p>
         </div>
       ) : groups.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-72 text-zinc-400 space-y-3 bg-zinc-900/30 rounded-2xl border border-zinc-800/80 p-8 text-center">
           <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
             <CheckCircle2 className="w-6 h-6" />
           </div>
-          <h4 className="text-base font-semibold text-white">¡No hay aplicaciones duplicadas!</h4>
+          <h4 className="text-base font-semibold text-white">No duplicate applications found!</h4>
           <p className="text-xs text-zinc-500 max-w-md">
-            Tu sistema está completamente limpio de paquetes redundantes entre gestores. Cada aplicación cuenta con una única fuente de instalación.
+            Your system is clean of redundant multi-manager packages. Every application has a single unified installation source.
           </p>
         </div>
       ) : (
@@ -98,7 +98,7 @@ export const DuplicatesView: React.FC<DuplicatesViewProps> = ({
                         {group.display_name}
                       </h4>
                       <p className="text-xs text-zinc-500 font-mono">
-                        Identificador común: {group.canonical_name} ({group.apps.length} versiones instaladas)
+                        Common ID: {group.canonical_name} ({group.apps.length} versions installed)
                       </p>
                     </div>
                   </div>
@@ -113,7 +113,7 @@ export const DuplicatesView: React.FC<DuplicatesViewProps> = ({
                     className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold shadow-md shadow-emerald-500/20 flex items-center gap-2 transition active:scale-95"
                   >
                     <Sparkles className="w-4 h-4" />
-                    <span>Conservar recomendada y limpiar el resto</span>
+                    <span>Keep recommended & uninstall others</span>
                   </button>
                 </div>
 
@@ -149,11 +149,11 @@ export const DuplicatesView: React.FC<DuplicatesViewProps> = ({
                             </span>
                             {isRec ? (
                               <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
-                                <CheckCircle2 className="w-3 h-3" /> RECOMENDADA
+                                <CheckCircle2 className="w-3 h-3" /> RECOMMENDED
                               </span>
                             ) : (
                               <span className="text-[10px] text-zinc-500 font-mono">
-                                Versión redundante
+                                Redundant version
                               </span>
                             )}
                           </div>
@@ -162,7 +162,7 @@ export const DuplicatesView: React.FC<DuplicatesViewProps> = ({
                             {app.name}
                           </h5>
                           <p className="text-xs text-zinc-400 font-mono mt-0.5">
-                            v{app.version || "Desconocida"}
+                            v{app.version || "Unknown"}
                           </p>
 
                           {/* Quick specs */}
@@ -173,7 +173,7 @@ export const DuplicatesView: React.FC<DuplicatesViewProps> = ({
                             </div>
                             <div className="text-zinc-400 flex items-center gap-1.5">
                               <Shield className="w-3.5 h-3.5 text-zinc-500" />
-                              <span>{app.is_sandboxed ? "Aislado (Sandbox)" : "Nativo (Host)"}</span>
+                              <span>{app.is_sandboxed ? "Sandboxed" : "Native (Host)"}</span>
                             </div>
                           </div>
                         </div>
@@ -195,7 +195,7 @@ export const DuplicatesView: React.FC<DuplicatesViewProps> = ({
                             }`}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
-                            <span>Desinstalar esta</span>
+                            <span>Uninstall this version</span>
                           </button>
                         </div>
                       </div>

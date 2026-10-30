@@ -115,10 +115,10 @@ pub fn scan_cleaner_items() -> Vec<SystemCleanItem> {
         if count > 0 {
             items.push(SystemCleanItem {
                 id: "clean:flatpak:unused".to_string(),
-                title: format!("Runtimes Flatpak obsoletos ({} elementos)", count),
+                title: format!("Obsolete Flatpak runtimes ({} items)", count),
                 category: "flatpak_unused".to_string(),
                 source: "flatpak".to_string(),
-                description: "Bibliotecas y runtimes de Flatpak huérfanos que ya no son requeridos por ninguna aplicación instalada".to_string(),
+                description: "Unused Flatpak runtimes and libraries no longer needed by any installed application".to_string(),
                 size_bytes: (count as u64) * 350 * 1024 * 1024, // Runtimes average ~350MB
                 risk_level: "safe".to_string(),
                 requires_sudo: false,
@@ -135,10 +135,10 @@ pub fn scan_cleaner_items() -> Vec<SystemCleanItem> {
             if size > 1024 * 1024 { // > 1MB
                 items.push(SystemCleanItem {
                     id: "clean:flatpak:cache".to_string(),
-                    title: "Caché de descargas de Flatpak".to_string(),
+                    title: "Flatpak download cache".to_string(),
                     category: "cache".to_string(),
                     source: "flatpak".to_string(),
-                    description: "Metadatos y paquetes temporales almacenados en ~/.cache/flatpak".to_string(),
+                    description: "Temporary metadata and files stored in ~/.cache/flatpak".to_string(),
                     size_bytes: size,
                     risk_level: "safe".to_string(),
                     requires_sudo: false,

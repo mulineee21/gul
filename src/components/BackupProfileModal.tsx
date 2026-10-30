@@ -48,17 +48,17 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
       navigator.clipboard.writeText(JSON.stringify(currentProfile, null, 2));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      showToast("¡Perfil copiado al portapapeles!");
+      showToast("Profile copied to clipboard!");
     }
   };
 
   const handleSaveFile = async () => {
     try {
-      showToast("Guardando archivo de perfil...");
+      showToast("Saving profile file...");
       const savedPath = await invoke<string>("save_profile_file", { customPath: null });
-      showToast(`Perfil guardado con éxito en: ${savedPath}`);
+      showToast(`Profile successfully saved to: ${savedPath}`);
     } catch (e) {
-      showToast(`Error al guardar: ${e}`);
+      showToast(`Error saving: ${e}`);
     }
   };
 
@@ -66,10 +66,10 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
     try {
       const p = await invoke<OmniProfile>("load_profile_file", { customPath: null });
       setLoadedProfile(p);
-      showToast(`Perfil cargado: ${p.total_apps} aplicaciones detectadas`);
+      showToast(`Profile loaded: ${p.total_apps} applications detected`);
     } catch (e) {
-      if (!String(e).includes("cancelada")) {
-        showToast(`Error al cargar perfil: ${e}`);
+      if (!String(e).includes("cancel")) {
+        showToast(`Error loading profile: ${e}`);
       }
     }
   };
@@ -85,10 +85,10 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold text-white tracking-tight">
-                Clonar y Respaldar Sistema (OmniSync)
+                Clone & Backup System (OmniSync)
               </h3>
               <p className="text-xs text-zinc-400">
-                Exporta la lista de todas tus apps para restaurarla en otro equipo o tras reinstalar.
+                Export the list of all your apps to restore them on another machine or after a clean reinstall.
               </p>
             </div>
           </div>
@@ -112,7 +112,7 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
             }`}
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Exportar Perfil Actual</span>
+            <span>Export Current Profile</span>
           </button>
 
           <button
@@ -124,7 +124,7 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
             }`}
           >
             <Upload className="w-3.5 h-3.5" />
-            <span>Importar y Restaurar</span>
+            <span>Import & Restore</span>
           </button>
         </div>
 
@@ -135,17 +135,17 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
               {loading ? (
                 <div className="py-12 flex flex-col items-center justify-center space-y-2">
                   <RefreshCw className="w-6 h-6 text-amber-400 animate-spin" />
-                  <p className="text-xs font-mono text-zinc-400">Escaneando paquetes explícitos del sistema...</p>
+                  <p className="text-xs font-mono text-zinc-400">Scanning explicit system packages...</p>
                 </div>
               ) : currentProfile ? (
                 <>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800">
-                      <div className="text-[10px] font-mono text-zinc-500 uppercase">Distribución</div>
+                      <div className="text-[10px] font-mono text-zinc-500 uppercase">Distribution</div>
                       <div className="text-sm font-bold text-white mt-0.5 truncate">{currentProfile.distro}</div>
                     </div>
                     <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800">
-                      <div className="text-[10px] font-mono text-zinc-500 uppercase">Nativos ({currentProfile.native_manager})</div>
+                      <div className="text-[10px] font-mono text-zinc-500 uppercase">Native ({currentProfile.native_manager})</div>
                       <div className="text-sm font-bold text-amber-400 mt-0.5 font-mono">
                         {currentProfile.native_packages.length}
                       </div>
@@ -166,7 +166,7 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
 
                   <div className="p-4 rounded-2xl bg-zinc-950/90 border border-zinc-800 font-mono text-[11px] text-zinc-400 max-h-48 overflow-y-auto space-y-1">
                     <div className="text-zinc-500 uppercase text-[10px] pb-1 border-b border-zinc-800 font-sans font-bold">
-                      Vista previa de paquetes a respaldar ({currentProfile.total_apps})
+                      Preview of packages to backup ({currentProfile.total_apps})
                     </div>
                     {currentProfile.native_packages.slice(0, 15).map((pkg, idx) => (
                       <div key={idx} className="text-zinc-300">
@@ -179,7 +179,7 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
                       </div>
                     ))}
                     {currentProfile.total_apps > 25 && (
-                      <div className="text-zinc-500 italic">... y {currentProfile.total_apps - 25} paquetes más.</div>
+                      <div className="text-zinc-500 italic">... and {currentProfile.total_apps - 25} more packages.</div>
                     )}
                   </div>
 
@@ -189,7 +189,7 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
                       className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95"
                     >
                       {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                      <span>{copied ? "Copiado" : "Copiar JSON"}</span>
+                      <span>{copied ? "Copied" : "Copy JSON"}</span>
                     </button>
 
                     <button
@@ -197,7 +197,7 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
                       className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-semibold shadow-md shadow-orange-500/20 flex items-center gap-2 transition active:scale-95"
                     >
                       <Download className="w-4 h-4" />
-                      <span>Guardar como gul-perfil.json</span>
+                      <span>Save as gul-profile.json</span>
                     </button>
                   </div>
                 </>
@@ -211,30 +211,30 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
                 <div className="p-8 border-2 border-dashed border-zinc-800 rounded-3xl text-center space-y-3 bg-zinc-950/40">
                   <FolderOpen className="w-10 h-10 text-zinc-500 mx-auto" />
                   <div>
-                    <h4 className="text-sm font-bold text-white">Cargar archivo de respaldo</h4>
+                    <h4 className="text-sm font-bold text-white">Load Backup File</h4>
                     <p className="text-xs text-zinc-400 mt-1 max-w-sm mx-auto">
-                      Selecciona un archivo <span className="font-mono text-amber-400">gul-perfil.json</span> exportado previamente en este u otro equipo.
+                      Select a <span className="font-mono text-amber-400">gul-profile.json</span> file previously exported from this or another system.
                     </p>
                   </div>
                   <button
                     onClick={handleOpenFile}
                     className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold transition active:scale-95 border border-zinc-700"
                   >
-                    Examinar archivo JSON...
+                    Browse JSON file...
                   </button>
                 </div>
               ) : (
                 <div className="space-y-4">
                   <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white">Perfil cargado con éxito</span>
+                      <span className="text-xs font-bold text-white">Profile loaded successfully</span>
                       <span className="text-[11px] font-mono text-zinc-400">{loadedProfile.export_date}</span>
                     </div>
                     <p className="text-xs text-zinc-300">
-                      Origen: <strong className="text-amber-400">{loadedProfile.distro}</strong> ({loadedProfile.native_manager.toUpperCase()}).
-                      Contiene <strong className="text-white">{loadedProfile.native_packages.length}</strong> paquetes nativos,{" "}
+                      Source: <strong className="text-amber-400">{loadedProfile.distro}</strong> ({loadedProfile.native_manager.toUpperCase()}).
+                      Contains <strong className="text-white">{loadedProfile.native_packages.length}</strong> native packages,{" "}
                       <strong className="text-blue-400">{loadedProfile.flatpak_apps.length}</strong> Flatpaks
-                      {loadedProfile.snap_apps && loadedProfile.snap_apps.length > 0 ? ` y ${loadedProfile.snap_apps.length} Snaps` : ""}.
+                      {loadedProfile.snap_apps && loadedProfile.snap_apps.length > 0 ? ` and ${loadedProfile.snap_apps.length} Snaps` : ""}.
                     </p>
                   </div>
 
@@ -243,7 +243,7 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
                       onClick={() => setLoadedProfile(null)}
                       className="px-3.5 py-1.5 rounded-xl bg-zinc-800 text-zinc-400 hover:text-white text-xs font-medium"
                     >
-                      Elegir otro archivo
+                      Choose another file
                     </button>
 
                     <button
@@ -254,7 +254,7 @@ export const BackupProfileModal: React.FC<BackupProfileModalProps> = ({
                       className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-500/20 flex items-center gap-2 active:scale-95 transition"
                     >
                       <Check className="w-4 h-4" />
-                      <span>Reinstalar Todo en Lote</span>
+                      <span>Reinstall All in Batch</span>
                     </button>
                   </div>
                 </div>

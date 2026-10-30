@@ -163,7 +163,7 @@ fn parse_desktop_file(path: &Path) -> Option<AppInfo> {
         id: format!("{}:{}", source.as_str(), filename),
         name: display_name,
         canonical_name: canonical,
-        version: "instalada".to_string(),
+        version: "installed".to_string(),
         source,
         description,
         size_bytes: total_size,

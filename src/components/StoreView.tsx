@@ -46,13 +46,13 @@ export const StoreView: React.FC<StoreViewProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const categories = [
-    { id: "all", label: "Destacadas" },
-    { id: "audiovideo", label: "Audio y Video" },
-    { id: "graphics", label: "Gráficos y Diseño" },
-    { id: "development", label: "Desarrollo" },
-    { id: "utility", label: "Utilidades" },
-    { id: "game", label: "Juegos" },
-    { id: "office", label: "Ofimática" },
+    { id: "all", label: "Featured" },
+    { id: "audiovideo", label: "Audio & Video" },
+    { id: "graphics", label: "Graphics & Design" },
+    { id: "development", label: "Development" },
+    { id: "utility", label: "Utilities" },
+    { id: "game", label: "Games" },
+    { id: "office", label: "Office & Productivity" },
   ];
 
   // Debounced search trigger
@@ -72,7 +72,7 @@ export const StoreView: React.FC<StoreViewProps> = ({
     });
   }, [catalogItems, selectedCategory]);
 
-  const nativeLabel = osInfo?.native_manager ? osInfo.native_manager.toUpperCase() : "Nativo";
+  const nativeLabel = osInfo?.native_manager ? osInfo.native_manager.toUpperCase() : "Native";
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-zinc-950 p-6 space-y-5 overflow-y-auto">
@@ -85,17 +85,18 @@ export const StoreView: React.FC<StoreViewProps> = ({
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-base font-bold text-white">
-                Tienda de Aplicaciones Universal
+                Universal Application Store
               </h3>
               <span className="text-xs bg-emerald-500/20 text-emerald-300 font-mono px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
                 <ShieldCheck className="w-3 h-3 text-emerald-400" />
-                SO: {osInfo?.distro_name || "Linux"} ({osInfo?.architecture})
+                OS: {osInfo?.distro_name || "Linux"} ({osInfo?.architecture})
               </span>
             </div>
             <p className="text-xs text-zinc-300 mt-1 max-w-2xl leading-relaxed">
-              Explora e instala aplicaciones verificadas desde el catálogo global de{" "}
-              <strong className="text-blue-300">Flathub</strong> y desde los{" "}
-              <strong className="text-amber-300">repositorios oficiales de tu distribución ({nativeLabel})</strong>.
+              Explore and install verified applications from{" "}
+              <strong className="text-blue-300">Flathub</strong>,{" "}
+              <strong className="text-orange-300">Snapcraft</strong>, and official{" "}
+              <strong className="text-amber-300">{nativeLabel} repositories</strong>.
             </p>
           </div>
         </div>
@@ -108,7 +109,7 @@ export const StoreView: React.FC<StoreViewProps> = ({
               <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
             </span>
             <span className="text-[11px] font-mono font-medium text-blue-300">
-              Flathub Activo
+              Flathub Active
             </span>
           </div>
 
@@ -117,18 +118,18 @@ export const StoreView: React.FC<StoreViewProps> = ({
               <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
             </span>
             <span className="text-[11px] font-mono font-medium text-amber-300">
-              Repo {nativeLabel}
+              {nativeLabel} Repo
             </span>
           </div>
 
           {onPickLocalAppImage && (
             <button
               onClick={onPickLocalAppImage}
-              title="Integrar un archivo .AppImage local en el menú"
+              title="Integrate a local .AppImage file into desktop menu"
               className="px-3 py-2 rounded-xl bg-zinc-800/80 hover:bg-zinc-700/80 text-zinc-300 border border-zinc-700/60 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95"
             >
               <FolderUp className="w-3.5 h-3.5 text-purple-400" />
-              <span>Integrar .AppImage</span>
+              <span>Integrate .AppImage</span>
             </button>
           )}
         </div>
@@ -144,7 +145,7 @@ export const StoreView: React.FC<StoreViewProps> = ({
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={`Buscar en Flathub y en repositorios ${nativeLabel} (ej. firefox, vlc, spotify, code, blender)...`}
+              placeholder={`Search Flathub, Snapcraft, and ${nativeLabel} repositories (e.g. firefox, vlc, spotify, code, blender)...`}
               className="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500/70 focus:ring-1 focus:ring-blue-500/50 transition"
             />
             {searchTerm && (
@@ -152,7 +153,7 @@ export const StoreView: React.FC<StoreViewProps> = ({
                 onClick={() => setSearchTerm("")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500 hover:text-zinc-300"
               >
-                Limpiar
+                Clear
               </button>
             )}
           </div>
@@ -167,7 +168,7 @@ export const StoreView: React.FC<StoreViewProps> = ({
                   : "bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
               }`}
             >
-              Todos los orígenes
+              All Sources
             </button>
             <button
               onClick={() => setSourceFilter("flatpak")}
@@ -189,7 +190,7 @@ export const StoreView: React.FC<StoreViewProps> = ({
               }`}
             >
               <Cpu className="w-3.5 h-3.5" />
-              <span>Repositorio {nativeLabel}</span>
+              <span>{nativeLabel} Repository</span>
             </button>
 
             {(osInfo?.has_snap || osInfo?.distro_family === "debian") && (
@@ -216,7 +217,7 @@ export const StoreView: React.FC<StoreViewProps> = ({
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5 text-fuchsia-400" />
-                <span>Comunidad AUR</span>
+                <span>AUR Community</span>
               </button>
             )}
           </div>
@@ -247,14 +248,14 @@ export const StoreView: React.FC<StoreViewProps> = ({
       {loading ? (
         <div className="flex flex-col items-center justify-center h-64 text-zinc-500 space-y-3">
           <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs font-mono">Consultando Flathub y repositorios de {nativeLabel}...</p>
+          <p className="text-xs font-mono">Querying Flathub, Snapcraft, and {nativeLabel} repositories...</p>
         </div>
       ) : filteredItems.length === 0 ? (
         <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-2">
           <AlertCircle className="w-8 h-8 text-zinc-600" />
-          <h5 className="text-sm font-semibold text-white">No se encontraron paquetes</h5>
+          <h5 className="text-sm font-semibold text-white">No packages found</h5>
           <p className="text-xs text-zinc-500 max-w-md">
-            Prueba a buscar con otro término o selecciona "Todos los orígenes" para ampliar el catálogo.
+            Try searching with another term or select "All Sources" to broaden your search.
           </p>
         </div>
       ) : (
@@ -307,7 +308,7 @@ export const StoreView: React.FC<StoreViewProps> = ({
 
                   {/* Summary / Description */}
                   <p className="text-xs text-zinc-300 line-clamp-2 mt-1 leading-relaxed">
-                    {item.summary || item.description || "Sin descripción disponible."}
+                    {item.summary || item.description || "No description available."}
                   </p>
 
                   {/* Metadata Tag */}
@@ -330,14 +331,14 @@ export const StoreView: React.FC<StoreViewProps> = ({
                     {item.is_installed ? (
                       <div className="flex items-center space-x-1.5">
                         <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/30 flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Instalada
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Installed
                         </span>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             onLaunch(item.id);
                           }}
-                          title="Ejecutar"
+                          title="Launch"
                           className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white transition"
                         >
                           <Play className="w-3.5 h-3.5" />
@@ -350,18 +351,18 @@ export const StoreView: React.FC<StoreViewProps> = ({
                           onInstall(item);
                         }}
                         disabled={isInstalling}
-                        title="Elegir formato de instalación (Nativo, Flatpak o AppImage)"
+                        title="Choose packaging format (Native, Flatpak, AppImage, Snap)"
                         className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition active:scale-95 disabled:opacity-50"
                       >
                         {isInstalling ? (
                           <>
                             <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                            <span>Instalando...</span>
+                            <span>Installing...</span>
                           </>
                         ) : (
                           <>
                             <Download className="w-3.5 h-3.5" />
-                            <span>Instalar...</span>
+                            <span>Install...</span>
                           </>
                         )}
                       </button>

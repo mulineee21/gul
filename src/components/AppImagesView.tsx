@@ -50,13 +50,13 @@ export const AppImagesView: React.FC<AppImagesViewProps> = ({
           </div>
           <div>
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              Gestor de Aplicaciones AppImage
+              AppImage Application Manager
               <span className="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-mono">
-                {entries.length} detectadas
+                {entries.length} detected
               </span>
             </h3>
             <p className="text-xs text-zinc-300 mt-1 max-w-xl">
-              Integra tus ejecutables autónomos .AppImage en el lanzador y menú de tu escritorio Linux con iconos y asociaciones XDG estándar, sin necesidad de herramientas manuales.
+              Integrate your standalone .AppImage executables into your Linux desktop menu and launcher with icons and standard XDG associations seamlessly.
             </p>
           </div>
         </div>
@@ -67,7 +67,7 @@ export const AppImagesView: React.FC<AppImagesViewProps> = ({
             type="text"
             value={customPath}
             onChange={(e) => setCustomPath(e.target.value)}
-            placeholder="Ruta personalizada (ej. ~/MisApps)"
+            placeholder="Custom path (e.g. ~/MyApps)"
             className="bg-zinc-900 border border-zinc-800 text-xs text-zinc-200 rounded-xl px-3 py-2 w-56 placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
           />
           <button
@@ -75,7 +75,7 @@ export const AppImagesView: React.FC<AppImagesViewProps> = ({
             className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Escanear</span>
+            <span>Scan</span>
           </button>
         </form>
       </div>
@@ -84,14 +84,14 @@ export const AppImagesView: React.FC<AppImagesViewProps> = ({
       {loading ? (
         <div className="flex flex-col items-center justify-center h-64 text-zinc-500 space-y-2">
           <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs font-mono">Escaneando directorios de usuario...</p>
+          <p className="text-xs font-mono">Scanning user directories...</p>
         </div>
       ) : entries.length === 0 ? (
         <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-3">
           <Box className="w-8 h-8 text-zinc-600" />
-          <h4 className="text-sm font-semibold text-white">No se encontraron archivos .AppImage</h4>
+          <h4 className="text-sm font-semibold text-white">No .AppImage files found</h4>
           <p className="text-xs text-zinc-500 max-w-md">
-            Coloca tus archivos .AppImage en <code className="text-zinc-300">~/Applications</code> o <code className="text-zinc-300">~/Downloads</code>, o añade una ruta personalizada arriba para integrarlos automáticamente.
+            Place your .AppImage files in <code className="text-zinc-300">~/Applications</code> or <code className="text-zinc-300">~/Downloads</code>, or specify a custom path above to automatically integrate them.
           </p>
         </div>
       ) : (
@@ -129,19 +129,19 @@ export const AppImagesView: React.FC<AppImagesViewProps> = ({
                     {entry.is_integrated ? (
                       <>
                         <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                        Integrada en menú
+                        Integrated in menu
                       </>
                     ) : (
                       <>
                         <XCircle className="w-3 h-3 text-zinc-500" />
-                        Sin integrar
+                        Not integrated
                       </>
                     )}
                   </span>
                 </div>
 
                 <div className="bg-zinc-950/60 rounded-xl p-2.5 border border-zinc-800/80 font-mono text-[11px] text-zinc-400 truncate mb-3">
-                  <span className="text-zinc-500">Ruta: </span>
+                  <span className="text-zinc-500">Path: </span>
                   <span className="text-zinc-300">{entry.path}</span>
                 </div>
               </div>
@@ -154,7 +154,7 @@ export const AppImagesView: React.FC<AppImagesViewProps> = ({
                       onClick={() => onUnintegrate(entry.path)}
                       className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition"
                     >
-                      Quitar del menú
+                      Remove from menu
                     </button>
                   ) : (
                     <button
@@ -162,7 +162,7 @@ export const AppImagesView: React.FC<AppImagesViewProps> = ({
                       className="px-3 py-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
-                      <span>Integrar en menú (.desktop)</span>
+                      <span>Integrate into menu (.desktop)</span>
                     </button>
                   )}
                 </div>
@@ -170,7 +170,7 @@ export const AppImagesView: React.FC<AppImagesViewProps> = ({
                 <div className="flex items-center space-x-1.5">
                   <button
                     onClick={() => onLaunch(`appimage:${entry.path}`, entry.path)}
-                    title="Ejecutar"
+                    title="Launch"
                     className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white transition"
                   >
                     <Play className="w-3.5 h-3.5" />
@@ -180,7 +180,7 @@ export const AppImagesView: React.FC<AppImagesViewProps> = ({
                     onClick={() => {
                       onDelete(entry.path, entry.name);
                     }}
-                    title="Eliminar archivo"
+                    title="Delete file"
                     className="p-2 rounded-lg bg-red-950/40 hover:bg-red-900/50 text-red-400 border border-red-800/30 transition"
                   >
                     <Trash2 className="w-3.5 h-3.5" />

@@ -35,17 +35,17 @@ pub fn get_install_options(app_name: &str, canonical_name: &str, current_pkg_id:
 
     options.push(InstallOption {
         source: native_source,
-        title: format!("Paquete Nativo del Sistema ({})", native_mgr.to_uppercase()),
-        subtitle: format!("Compilado específicamente para {}", os_info.distro_name),
-        version: if native_version.is_empty() { "Repositorio Oficial".to_string() } else { native_version },
+        title: format!("Native System Package ({})", native_mgr.to_uppercase()),
+        subtitle: format!("Compiled specifically for {}", os_info.distro_name),
+        version: if native_version.is_empty() { "Official Repository".to_string() } else { native_version },
         pkg_id: native_pkg_name,
         is_installed: native_installed,
         pros: vec![
-            "Mayor velocidad y rendimiento sin sobrecarga".to_string(),
-            "Arranque instantáneo y menor consumo de RAM".to_string(),
-            "Integración nativa con el tema y hardware de tu sistema".to_string(),
+            "Maximum performance without virtualization overhead".to_string(),
+            "Instant startup time and minimal RAM usage".to_string(),
+            "Seamless integration with system theme and desktop environment".to_string(),
         ],
-        badge_label: format!("Nativo ({})", native_mgr.to_uppercase()),
+        badge_label: format!("Native ({})", native_mgr.to_uppercase()),
         download_url: None,
     });
 
@@ -56,15 +56,15 @@ pub fn get_install_options(app_name: &str, canonical_name: &str, current_pkg_id:
 
     options.push(InstallOption {
         source: SourceType::Flatpak,
-        title: "Contenedor Flatpak (Flathub)".to_string(),
-        subtitle: "Aplicación en contenedor aislado con permisos seguros".to_string(),
-        version: "Última versión estable".to_string(),
+        title: "Flatpak Container (Flathub)".to_string(),
+        subtitle: "Sandboxed application with secure permission control".to_string(),
+        version: "Latest stable version".to_string(),
         pkg_id: flathub_id,
         is_installed: flatpak_installed,
         pros: vec![
-            "Aislamiento seguro (Sandbox): no altera librerías del sistema".to_string(),
-            "Versión siempre actualizada directamente por los desarrolladores".to_string(),
-            "Compatible con cualquier distribución de Linux".to_string(),
+            "Safe sandbox isolation: does not modify host system libraries".to_string(),
+            "Always up to date directly from upstream developers".to_string(),
+            "Universal compatibility across all Linux distributions".to_string(),
         ],
         badge_label: "Flathub".to_string(),
         download_url: None,
@@ -76,15 +76,15 @@ pub fn get_install_options(app_name: &str, canonical_name: &str, current_pkg_id:
 
     options.push(InstallOption {
         source: SourceType::AppImage,
-        title: "AppImage Portable".to_string(),
-        subtitle: "Ejecutable autocontenido que se integra automáticamente en tu menú".to_string(),
-        version: if appimage_available { "Versión Portable Oficial".to_string() } else { "Instalación desde URL o archivo".to_string() },
+        title: "Portable AppImage".to_string(),
+        subtitle: "Self-contained executable automatically integrated into desktop menu".to_string(),
+        version: if appimage_available { "Official Portable Release".to_string() } else { "Direct executable integration".to_string() },
         pkg_id: format!("appimage:{}", clean_name),
         is_installed: appimage_installed,
         pros: vec![
-            "Ejecutable autónomo: llévalo en USB o carpeta personal".to_string(),
-            "Integración automática en el menú de aplicaciones (.desktop)".to_string(),
-            "No requiere permisos de superusuario (root/sudo)".to_string(),
+            "Standalone executable: portable and self-contained".to_string(),
+            "Automatic desktop menu integration (.desktop)".to_string(),
+            "Runs completely in user space without root/sudo privileges".to_string(),
         ],
         badge_label: "AppImage".to_string(),
         download_url: appimage_url,
@@ -98,15 +98,15 @@ pub fn get_install_options(app_name: &str, canonical_name: &str, current_pkg_id:
 
         options.push(InstallOption {
             source: SourceType::Snap,
-            title: "Paquete Snap (Canonical)".to_string(),
-            subtitle: "Empaquetado confinado universal estándar en Ubuntu".to_string(),
-            version: "Canal estable".to_string(),
+            title: "Snap Package (Canonical)".to_string(),
+            subtitle: "Universal confined packaging standard on Ubuntu".to_string(),
+            version: "Stable channel".to_string(),
             pkg_id: snap_pkg,
             is_installed: snap_installed,
             pros: vec![
-                "Formato nativo y preferido en Ubuntu y derivados".to_string(),
-                "Actualizaciones automáticas delta en segundo plano".to_string(),
-                "Confinamiento de seguridad AppArmor".to_string(),
+                "Preferred native packaging format on Ubuntu and derivatives".to_string(),
+                "Automated background delta updates".to_string(),
+                "AppArmor security confinement".to_string(),
             ],
             badge_label: "Snapcraft".to_string(),
             download_url: None,
@@ -326,14 +326,14 @@ pub async fn download_and_install_appimage(
     let _ = app.emit("install-progress", InstallProgressEvent {
         id: id.clone(),
         status: "starting".to_string(),
-        message: format!("Descargando AppImage para {}...", app_name),
-        line: Some(format!("[GUL] Conectando con servidor de descarga: {}", download_url)),
+        message: format!("Downloading AppImage for {}...", app_name),
+        line: Some(format!("[GUL] Connecting to download server: {}", download_url)),
         progress_pct: Some(5.0),
-        step: Some("Iniciando descarga...".to_string()),
+        step: Some("Starting download...".to_string()),
         is_stderr: Some(false),
     });
 
-    let home = dirs::home_dir().ok_or("No se encontró el directorio de usuario")?;
+    let home = dirs::home_dir().ok_or("User home directory not found")?;
     let app_dir = home.join("Applications");
     if !app_dir.exists() {
         fs::create_dir_all(&app_dir).map_err(|e| e.to_string())?;
@@ -353,7 +353,7 @@ pub async fn download_and_install_appimage(
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .spawn()
-        .map_err(|e| format!("Fallo al iniciar comando curl: {}", e))?;
+        .map_err(|e| format!("Failed to execute curl: {}", e))?;
 
     let stdout = child.stdout.take();
     let stderr = child.stderr.take();
@@ -378,14 +378,14 @@ pub async fn download_and_install_appimage(
     let status = child.wait().await.map_err(|e| e.to_string())?;
 
     if !status.success() {
-        let err = format!("Curl finalizó con código de error {:?}", status.code());
+        let err = format!("Curl exited with error code {:?}", status.code());
         let _ = app.emit("install-progress", InstallProgressEvent {
             id: id.clone(),
             status: "error".to_string(),
             message: err.clone(),
             line: Some(format!("[GUL Error] {}", err)),
             progress_pct: None,
-            step: Some("Error al descargar".to_string()),
+            step: Some("Download error".to_string()),
             is_stderr: Some(true),
         });
         return Err(err);
@@ -395,10 +395,10 @@ pub async fn download_and_install_appimage(
     let _ = app.emit("install-progress", InstallProgressEvent {
         id: id.clone(),
         status: "installing".to_string(),
-        message: "Asignando permisos ejecutables...".to_string(),
-        line: Some("[GUL] Asignando permisos de ejecución (chmod +x)...".to_string()),
+        message: "Applying execution permissions...".to_string(),
+        line: Some("[GUL] Applying executable permissions (chmod +x)...".to_string()),
         progress_pct: Some(85.0),
-        step: Some("Configurando permisos...".to_string()),
+        step: Some("Setting permissions...".to_string()),
         is_stderr: Some(false),
     });
 
@@ -412,10 +412,10 @@ pub async fn download_and_install_appimage(
     let _ = app.emit("install-progress", InstallProgressEvent {
         id: id.clone(),
         status: "installing".to_string(),
-        message: "Integrando aplicación en el menú de escritorio...".to_string(),
-        line: Some(format!("[GUL] Generando acceso directo .desktop en ~/.local/share/applications/ para {}", app_name)),
+        message: "Integrating application into desktop menu...".to_string(),
+        line: Some(format!("[GUL] Generating .desktop launcher in ~/.local/share/applications/ for {}", app_name)),
         progress_pct: Some(95.0),
-        step: Some("Integrando en menú...".to_string()),
+        step: Some("Integrating into menu...".to_string()),
         is_stderr: Some(false),
     });
 
@@ -424,10 +424,10 @@ pub async fn download_and_install_appimage(
     let _ = app.emit("install-progress", InstallProgressEvent {
         id: id.clone(),
         status: "success".to_string(),
-        message: format!("¡AppImage de {} integrada con éxito en el lanzador!", app_name),
-        line: Some(format!("[GUL] Archivo de acceso directo creado: {}\n[GUL] ¡Completado!", desktop_file)),
+        message: format!("AppImage for {} integrated successfully into desktop launcher!", app_name),
+        line: Some(format!("[GUL] Desktop shortcut created: {}\n[GUL] Completed!", desktop_file)),
         progress_pct: Some(100.0),
-        step: Some("Instalación completada".to_string()),
+        step: Some("Installation completed".to_string()),
         is_stderr: Some(false),
     });
 
@@ -439,8 +439,8 @@ pub fn pick_and_install_local_appimage(app: AppHandle) -> Result<String, String>
     let zenity_res = Command::new("zenity")
         .args([
             "--file-selection",
-            "--title=Selecciona un archivo .AppImage para integrar",
-            "--file-filter=Archivos AppImage (*.AppImage *.appimage) | *.AppImage *.appimage",
+            "--title=Select an .AppImage file to integrate",
+            "--file-filter=AppImage files (*.AppImage *.appimage) | *.AppImage *.appimage",
         ])
         .output();
 
@@ -453,7 +453,7 @@ pub fn pick_and_install_local_appimage(app: AppHandle) -> Result<String, String>
                 .args([
                     "--getopenfilename",
                     ":",
-                    "*.AppImage *.appimage|Archivos AppImage",
+                    "*.AppImage *.appimage|AppImage files",
                 ])
                 .output();
 
@@ -461,13 +461,13 @@ pub fn pick_and_install_local_appimage(app: AppHandle) -> Result<String, String>
                 Ok(out) if out.status.success() => {
                     String::from_utf8_lossy(&out.stdout).trim().to_string()
                 }
-                _ => return Err("Operación cancelada por el usuario".to_string()),
+                _ => return Err("Operation cancelled by user".to_string()),
             }
         }
     };
 
     if path_str.is_empty() {
-        return Err("No se seleccionó ningún archivo".to_string());
+        return Err("No file was selected".to_string());
     }
 
     let desktop_path = crate::managers::appimage::integrate_appimage(&path_str)?;
@@ -475,10 +475,10 @@ pub fn pick_and_install_local_appimage(app: AppHandle) -> Result<String, String>
     let _ = app.emit("install-progress", InstallProgressEvent {
         id: format!("appimage:{}", path_str),
         status: "success".to_string(),
-        message: format!("¡AppImage integrada correctamente en el menú de aplicaciones!"),
-        line: Some(format!("[GUL] AppImage integrada con éxito: {}", desktop_path)),
+        message: format!("AppImage integrated successfully into desktop menu!"),
+        line: Some(format!("[GUL] AppImage integrated successfully: {}", desktop_path)),
         progress_pct: Some(100.0),
-        step: Some("Integración completada".to_string()),
+        step: Some("Integration completed".to_string()),
         is_stderr: Some(false),
     });
 

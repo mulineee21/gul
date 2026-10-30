@@ -143,7 +143,7 @@ pub async fn install_aur_package(
     pkg_name: String,
 ) -> Result<String, String> {
     let _helper = get_aur_helper().ok_or_else(|| {
-        "No se encontró 'paru' ni 'yay' en el sistema para compilar paquetes de AUR".to_string()
+        "Neither 'paru' nor 'yay' was found on your system to build AUR packages".to_string()
     })?;
 
     crate::catalog::run_install_package(

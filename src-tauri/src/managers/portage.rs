@@ -166,10 +166,10 @@ pub fn scan_cleaner_items() -> Vec<SystemCleanItem> {
         if size > 10 * 1024 * 1024 {
             items.push(SystemCleanItem {
                 id: "clean:portage:distfiles".to_string(),
-                title: "Caché de código fuente y tarballs (Portage Distfiles)".to_string(),
+                title: "Source tarballs cache (Portage Distfiles)".to_string(),
                 category: "cache".to_string(),
                 source: "portage".to_string(),
-                description: "Archivos fuente descargados para compilar paquetes en /var/cache/distfiles".to_string(),
+                description: "Downloaded source archives used to compile packages in /var/cache/distfiles".to_string(),
                 size_bytes: size,
                 risk_level: "safe".to_string(),
                 requires_sudo: true,
@@ -182,10 +182,10 @@ pub fn scan_cleaner_items() -> Vec<SystemCleanItem> {
     if is_available() {
         items.push(SystemCleanItem {
             id: "clean:portage:orphans".to_string(),
-            title: "Dependencias huérfanas de compilación (Portage Depclean)".to_string(),
+            title: "Orphaned build dependencies (Portage Depclean)".to_string(),
             category: "orphans".to_string(),
             source: "portage".to_string(),
-            description: "Paquetes que ya no son requeridos por ningún programa en @world".to_string(),
+            description: "Packages no longer required by any entry in @world".to_string(),
             size_bytes: 80 * 1024 * 1024,
             risk_level: "moderate".to_string(),
             requires_sudo: true,

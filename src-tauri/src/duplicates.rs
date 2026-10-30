@@ -176,13 +176,13 @@ fn evaluate_recommendation(apps: &[AppInfo]) -> (String, String, u64) {
         if native_size <= flatpak_size || (native_size as f64) < (flatpak_size as f64 * 1.5) {
             let savings = total_bytes.saturating_sub(native_size);
             let reason = format!(
-                "Recomendado Nativo ({:?}): Mayor rendimiento y arranque inmediato con integración directa del sistema. Ahorras espacio eliminando runtimes redundantes de Flatpak.",
+                "Recommended Native ({:?}): Higher performance and instant startup with direct system integration. Saves disk space by eliminating redundant Flatpak runtimes.",
                 native.source
             );
             return (native.id.clone(), reason, savings);
         } else {
             let savings = total_bytes.saturating_sub(flatpak_size);
-            let reason = "Recomendado Flatpak: Contenedor aislado con permisos seguros y dependencias autónomas actualizadas.".to_string();
+            let reason = "Recommended Flatpak: Secure sandboxed container with isolated permissions and upstream up-to-date dependencies.".to_string();
             return (flatpak.id.clone(), reason, savings);
         }
     }
@@ -192,7 +192,7 @@ fn evaluate_recommendation(apps: &[AppInfo]) -> (String, String, u64) {
         return (
             native.id.clone(),
             format!(
-                "Recomendado paquete nativo del sistema ({:?}): Se actualiza automáticamente junto al resto del sistema operativo y no requiere gestión manual del archivo .AppImage.",
+                "Recommended native package ({:?}): Updates automatically alongside the OS and requires no manual .AppImage file management.",
                 native.source
             ),
             savings,
@@ -203,7 +203,7 @@ fn evaluate_recommendation(apps: &[AppInfo]) -> (String, String, u64) {
         let savings = total_bytes.saturating_sub(flatpak.size_bytes);
         return (
             flatpak.id.clone(),
-            "Recomendado Flatpak: Mejor integración con el escritorio Linux estándar y menor tiempo de inicio que Snap.".to_string(),
+            "Recommended Flatpak: Superior integration with standard Linux desktops and faster startup time than Snap.".to_string(),
             savings,
         );
     }
@@ -213,7 +213,7 @@ fn evaluate_recommendation(apps: &[AppInfo]) -> (String, String, u64) {
     let savings = total_bytes.saturating_sub(first.size_bytes);
     (
         first.id.clone(),
-        format!("Recomendado conservar versión principal de {}", first.source.as_str()),
+        format!("Recommended to keep primary version from {}", first.source.as_str()),
         savings,
     )
 }

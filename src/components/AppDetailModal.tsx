@@ -150,7 +150,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
 
                 {isInstalled && (
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 flex items-center gap-1 font-semibold">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Instalada
+                    <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Installed
                   </span>
                 )}
               </div>
@@ -179,7 +179,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                 : "border-transparent text-zinc-400 hover:text-zinc-200"
             }`}
           >
-            Descripción General
+            Overview
           </button>
 
           <button
@@ -191,7 +191,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
             }`}
           >
             <ImageIcon className="w-3.5 h-3.5" />
-            <span>Fotos y Capturas</span>
+            <span>Screenshots</span>
             {screenshots.length > 0 && (
               <span className="text-[10px] bg-zinc-800 px-1.5 py-0.2 rounded-full font-mono">
                 {screenshots.length}
@@ -208,7 +208,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
             }`}
           >
             <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-            <span>Opiniones y Reseñas</span>
+            <span>Reviews & Ratings</span>
             {reviews.length > 0 && (
               <span className="text-[10px] bg-zinc-800 px-1.5 py-0.2 rounded-full font-mono">
                 {reviews.length}
@@ -226,7 +226,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
               }`}
             >
               <HardDrive className="w-3.5 h-3.5" />
-              <span>Espacio en Disco</span>
+              <span>Disk Storage</span>
             </button>
           )}
 
@@ -240,7 +240,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
               }`}
             >
               <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
-              <span>Permisos (Sandbox)</span>
+              <span>Sandbox Permissions</span>
             </button>
           )}
         </div>
@@ -253,7 +253,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
               {/* Rating & Stats Quick Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-3 flex flex-col justify-center">
-                  <span className="text-[11px] text-zinc-500">Puntuación</span>
+                  <span className="text-[11px] text-zinc-500">Community Rating</span>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="text-base font-bold text-white">
                       {details?.rating_score || 4.8}
@@ -270,7 +270,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                 </div>
 
                 <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-3 flex flex-col justify-center">
-                  <span className="text-[11px] text-zinc-500">Descargas Globales</span>
+                  <span className="text-[11px] text-zinc-500">Global Installs</span>
                   <span className="text-base font-bold text-white font-mono mt-0.5">
                     {details?.total_installs
                       ? details.total_installs > 1000000
@@ -281,16 +281,16 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                 </div>
 
                 <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-3 flex flex-col justify-center">
-                  <span className="text-[11px] text-zinc-500">Licencia</span>
+                  <span className="text-[11px] text-zinc-500">License</span>
                   <span className="text-xs font-bold text-zinc-200 truncate mt-0.5">
-                    {details?.license || "Código Abierto"}
+                    {details?.license || "Open Source"}
                   </span>
                 </div>
 
                 <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-3 flex flex-col justify-center">
-                  <span className="text-[11px] text-zinc-500">Seguridad / Host</span>
+                  <span className="text-[11px] text-zinc-500">Isolation / Host</span>
                   <span className="text-xs font-bold text-emerald-400 truncate mt-0.5">
-                    {app.source === "flatpak" ? "Sandbox Aislado" : "Nativo"}
+                    {app.source === "flatpak" ? "Sandboxed" : "Native"}
                   </span>
                 </div>
               </div>
@@ -298,12 +298,12 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
               {/* Summary & Description */}
               <div className="space-y-2">
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                  Acerca de la aplicación
+                  About this application
                 </h4>
                 <p className="text-xs text-zinc-200 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800 leading-relaxed whitespace-pre-line">
                   {details?.description_html
                     ? details.description_html.replace(/<[^>]*>?/gm, "").trim()
-                    : app.description || (app as any).summary || "No hay descripción detallada disponible."}
+                    : app.description || (app as any).summary || "No detailed description available."}
                 </p>
               </div>
 
@@ -312,13 +312,13 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                      Capturas de pantalla
+                      Screenshots
                     </h4>
                     <button
                       onClick={() => setActiveTab("screenshots")}
                       className="text-xs text-blue-400 hover:text-blue-300 font-medium"
                     >
-                      Ver todas ({screenshots.length})
+                      View all ({screenshots.length})
                     </button>
                   </div>
 
@@ -352,7 +352,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                     rel="noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-medium"
                   >
-                    <span>Sitio web oficial del proyecto</span>
+                    <span>Official project website</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>
@@ -366,7 +366,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
               {screenshots.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-48 text-zinc-500 space-y-2">
                   <ImageIcon className="w-8 h-8" />
-                  <p className="text-xs">No hay capturas disponibles para esta app.</p>
+                  <p className="text-xs">No screenshots available for this app.</p>
                 </div>
               ) : (
                 <>
@@ -374,7 +374,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                   <div className="relative rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-950 aspect-video flex items-center justify-center group shadow-xl">
                     <img
                       src={screenshots[activeScreenshotIdx]}
-                      alt="Captura de pantalla destacada"
+                      alt="Featured screenshot"
                       className="w-full h-full object-contain"
                     />
 
@@ -406,7 +406,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                     )}
 
                     <span className="absolute bottom-3 right-3 text-[11px] font-mono px-2 py-0.5 rounded-full bg-black/70 text-zinc-300 backdrop-blur-sm border border-zinc-700/50">
-                      {activeScreenshotIdx + 1} de {screenshots.length}
+                      {activeScreenshotIdx + 1} of {screenshots.length}
                     </span>
                   </div>
 
@@ -424,7 +424,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                       >
                         <img
                           src={src}
-                          alt="Miniatura"
+                          alt="Thumbnail"
                           className="w-full h-full object-cover"
                         />
                       </button>
@@ -442,10 +442,10 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
               <div className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800 flex items-center justify-between">
                 <div>
                   <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                    Calificación de la Comunidad Linux
+                    Linux Community Ratings
                   </h4>
                   <p className="text-xs text-zinc-400 mt-0.5">
-                    Basado en opiniones verificadas de ODRS (Open Desktop Ratings Service).
+                    Based on verified reviews from ODRS (Open Desktop Ratings Service).
                   </p>
                 </div>
 
@@ -468,9 +468,9 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
               {reviews.length === 0 ? (
                 <div className="bg-zinc-950/40 border border-zinc-800/80 rounded-xl p-8 text-center space-y-2">
                   <MessageSquare className="w-7 h-7 text-zinc-600 mx-auto" />
-                  <h5 className="text-xs font-semibold text-white">Aún no hay reseñas directas registradas</h5>
+                  <h5 className="text-xs font-semibold text-white">No reviews submitted yet</h5>
                   <p className="text-xs text-zinc-500">
-                    Sé el primero en compartir tu experiencia en el centro de software de Linux.
+                    Be the first to share your experience with the community.
                   </p>
                 </div>
               ) : (
@@ -527,29 +527,29 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
               <div>
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 mb-2">
                   <HardDrive className="w-3.5 h-3.5 text-blue-400" />
-                  Desglose de Espacio en Disco ({formatBytes(totalDisk)})
+                  Disk Storage Breakdown ({formatBytes(totalDisk)})
                 </h4>
 
                 {/* Proportion Bar */}
                 <div className="h-3 w-full bg-zinc-950 rounded-full overflow-hidden flex p-0.5 gap-0.5 border border-zinc-800">
                   <div
                     style={{ width: `${Math.max(binaryPct, 2)}%` }}
-                    title={`Binario: ${formatBytes(bd.binary_bytes)}`}
+                    title={`Binary: ${formatBytes(bd.binary_bytes)}`}
                     className="bg-blue-500 rounded-l-full h-full"
                   />
                   <div
                     style={{ width: `${Math.max(dataPct, 0)}%` }}
-                    title={`Datos: ${formatBytes(bd.data_bytes)}`}
+                    title={`Data: ${formatBytes(bd.data_bytes)}`}
                     className="bg-purple-500 h-full"
                   />
                   <div
                     style={{ width: `${Math.max(cachePct, 0)}%` }}
-                    title={`Caché: ${formatBytes(bd.cache_bytes)}`}
+                    title={`Cache: ${formatBytes(bd.cache_bytes)}`}
                     className="bg-amber-500 h-full"
                   />
                   <div
                     style={{ width: `${Math.max(configPct, 0)}%` }}
-                    title={`Configuración: ${formatBytes(bd.config_bytes)}`}
+                    title={`Config: ${formatBytes(bd.config_bytes)}`}
                     className="bg-emerald-500 rounded-r-full h-full"
                   />
                 </div>
@@ -559,7 +559,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                   <div className="bg-zinc-950/40 border border-zinc-800/80 p-2.5 rounded-xl flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                      <span className="text-xs text-zinc-300">Binario / App</span>
+                      <span className="text-xs text-zinc-300">Binary / App</span>
                     </div>
                     <span className="text-xs font-mono font-medium text-white">
                       {formatBytes(bd.binary_bytes)}
@@ -569,7 +569,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                   <div className="bg-zinc-950/40 border border-zinc-800/80 p-2.5 rounded-xl flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
-                      <span className="text-xs text-zinc-300">Datos Usuario</span>
+                      <span className="text-xs text-zinc-300">User Data</span>
                     </div>
                     <span className="text-xs font-mono font-medium text-white">
                       {formatBytes(bd.data_bytes)}
@@ -579,7 +579,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                   <div className="bg-zinc-950/40 border border-zinc-800/80 p-2.5 rounded-xl flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                      <span className="text-xs text-zinc-300">Caché acumulada</span>
+                      <span className="text-xs text-zinc-300">Cache</span>
                     </div>
                     <span className="text-xs font-mono font-medium text-white">
                       {formatBytes(bd.cache_bytes)}
@@ -589,7 +589,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                   <div className="bg-zinc-950/40 border border-zinc-800/80 p-2.5 rounded-xl flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                      <span className="text-xs text-zinc-300">Configuración</span>
+                      <span className="text-xs text-zinc-300">Configuration</span>
                     </div>
                     <span className="text-xs font-mono font-medium text-white">
                       {formatBytes(bd.config_bytes)}
@@ -610,10 +610,10 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                      Control de Aislamiento Sandbox
+                      Sandbox Isolation Controls
                     </h4>
                     <p className="text-[11px] text-zinc-400 mt-0.5">
-                      Configura qué recursos y dispositivos puede utilizar este contenedor Flatpak.
+                      Configure permissions and system resource access for this Flatpak sandbox.
                     </p>
                   </div>
                 </div>
@@ -622,7 +622,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                   onClick={handleResetPermissions}
                   className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition"
                 >
-                  Restablecer
+                  Reset
                 </button>
               </div>
 
@@ -635,8 +635,8 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                         <Wifi className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-white">Red e Internet</div>
-                        <div className="text-[10px] text-zinc-400">Conexiones web y sockets de red</div>
+                        <div className="text-xs font-bold text-white">Network & Internet</div>
+                        <div className="text-[10px] text-zinc-400">Web connections and network sockets</div>
                       </div>
                     </div>
                     <button
@@ -660,8 +660,8 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                         <Monitor className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-white">Gráficos Wayland</div>
-                        <div className="text-[10px] text-zinc-400">Ventana nativa Wayland moderna</div>
+                        <div className="text-xs font-bold text-white">Wayland Display</div>
+                        <div className="text-[10px] text-zinc-400">Native modern Wayland windowing</div>
                       </div>
                     </div>
                     <button
@@ -685,8 +685,8 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                         <Monitor className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-white">Servidor X11 / XWayland</div>
-                        <div className="text-[10px] text-zinc-400">Captura global y ventanas legacy</div>
+                        <div className="text-xs font-bold text-white">X11 / XWayland Display</div>
+                        <div className="text-[10px] text-zinc-400">Global screen capture and legacy windows</div>
                       </div>
                     </div>
                     <button
@@ -710,8 +710,8 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                         <Volume2 className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-white">Audio (PipeWire / Pulse)</div>
-                        <div className="text-[10px] text-zinc-400">Reproducción y entrada de sonido</div>
+                        <div className="text-xs font-bold text-white">Audio (PipeWire / PulseAudio)</div>
+                        <div className="text-[10px] text-zinc-400">Sound playback and recording</div>
                       </div>
                     </div>
                     <button
@@ -735,8 +735,8 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                         <FolderOpen className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-white">Carpeta Personal (~)</div>
-                        <div className="text-[10px] text-zinc-400">Acceso a Documentos, Descargas, etc.</div>
+                        <div className="text-xs font-bold text-white">User Home Folder (~)</div>
+                        <div className="text-[10px] text-zinc-400">Access to Documents, Downloads, etc.</div>
                       </div>
                     </div>
                     <button
@@ -760,8 +760,8 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                         <HardDrive className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-white">Todo el Sistema (/)</div>
-                        <div className="text-[10px] text-zinc-400">Discos montados en /media o /mnt</div>
+                        <div className="text-xs font-bold text-white">Entire Filesystem (/)</div>
+                        <div className="text-[10px] text-zinc-400">Mounted drives in /media or /mnt</div>
                       </div>
                     </div>
                     <button
@@ -785,8 +785,8 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                         <Camera className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold text-white">Cámara Web y Dispositivos</div>
-                        <div className="text-[10px] text-zinc-400">Aceleración GPU, USB y cámara</div>
+                        <div className="text-xs font-bold text-white">Webcam & Hardware Devices</div>
+                        <div className="text-[10px] text-zinc-400">GPU acceleration, USB, and webcams</div>
                       </div>
                     </div>
                     <button
@@ -805,7 +805,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                 </div>
               ) : (
                 <div className="py-8 text-center text-xs text-zinc-500 font-mono">
-                  Consultando permisos de flatpak override...
+                  Querying Flatpak override permissions...
                 </div>
               )}
             </div>
@@ -821,7 +821,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                 className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium flex items-center gap-1.5 transition"
               >
                 <FolderOpen className="w-3.5 h-3.5" />
-                <span>Abrir Datos</span>
+                <span>Open Data</span>
               </button>
             )}
 
@@ -831,7 +831,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                 className="px-3 py-1.5 rounded-lg bg-amber-950/30 hover:bg-amber-900/40 text-amber-300 border border-amber-600/30 text-xs font-medium flex items-center gap-1.5 transition"
               >
                 <Trash className="w-3.5 h-3.5" />
-                <span>Limpiar Caché</span>
+                <span>Clear Cache</span>
               </button>
             )}
           </div>
@@ -855,10 +855,10 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                       });
                     }}
                     className="px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold flex items-center gap-1.5 transition border border-zinc-700/50"
-                    title="Instalar en otro formato (Flatpak, Nativo, AppImage)"
+                    title="Install in another format (Flatpak, Native, AppImage, Snap)"
                   >
                     <Layers className="w-3.5 h-3.5 text-blue-400" />
-                    <span>Otros Formatos</span>
+                    <span>Other Formats</span>
                   </button>
                 )}
 
@@ -868,7 +868,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                     className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-sm"
                   >
                     <Play className="w-3.5 h-3.5" />
-                    <span>Ejecutar</span>
+                    <span>Launch</span>
                   </button>
                 )}
 
@@ -880,7 +880,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                     className="px-4 py-2 rounded-xl bg-red-950/40 hover:bg-red-900/50 text-red-400 border border-red-700/30 text-xs font-semibold flex items-center gap-1.5 transition"
                   >
                     <Trash className="w-3.5 h-3.5" />
-                    <span>Desinstalar</span>
+                    <span>Uninstall</span>
                   </button>
                 )}
               </>
@@ -897,7 +897,7 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                 className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold shadow-md shadow-blue-500/25 flex items-center gap-2 transition active:scale-95 disabled:opacity-50"
               >
                 <Download className="w-4 h-4" />
-                <span>{isInstalling ? "Instalando..." : "Instalar (Elegir Formato)"}</span>
+                <span>{isInstalling ? "Installing..." : "Install (Choose Format)"}</span>
               </button>
             )}
           </div>

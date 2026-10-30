@@ -25,9 +25,9 @@ pub fn start_background_update_monitor(_app: AppHandle) {
                 let updates = crate::updates::check_all_updates();
                 if !updates.is_empty() {
                     send_desktop_notification(
-                        "Actualizaciones disponibles",
+                        "Updates Available",
                         &format!(
-                            "GUL ha detectado {} paquete(s) con actualizaciones pendientes en tu sistema.",
+                            "GUL detected {} package(s) with pending updates on your system.",
                             updates.len()
                         ),
                     );

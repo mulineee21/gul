@@ -46,19 +46,19 @@ export const UpdatesView: React.FC<UpdatesViewProps> = ({
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-bold text-white tracking-tight">
-              Centro de Actualizaciones Unificado
+              Unified Update Center
             </h3>
             <span className="text-xs bg-blue-500/20 text-blue-300 font-mono px-2 py-0.5 rounded-full border border-blue-500/30">
-              {updates.length} paquetes pendientes
+              {updates.length} pending updates
             </span>
           </div>
           <p className="text-xs text-zinc-300 max-w-xl leading-relaxed">
-            Lanza la sincronización y actualización concurrente de todos tus gestores de paquetes simultáneamente (Pacman/APT/DNF, Flatpak y Snap) desde un único panel centralizado.
+            Trigger concurrent synchronization and upgrades across all active package managers (Pacman/APT/DNF/Portage, Flatpak, and Snap) from one unified dashboard.
           </p>
 
           {/* Active Managers Selector */}
           <div className="flex items-center gap-2 pt-2">
-            <span className="text-[11px] text-zinc-400">Gestores a incluir:</span>
+            <span className="text-[11px] text-zinc-400">Managers to include:</span>
             {activeManagers.map((mgr) => {
               const checked = selectedMgrs.includes(mgr);
               return (
@@ -87,7 +87,7 @@ export const UpdatesView: React.FC<UpdatesViewProps> = ({
               />
               <span className="flex items-center gap-1.5 font-medium text-cyan-300">
                 <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Crear punto de restauración (Snapshot Btrfs) antes de actualizar</span>
+                <span>Create system restore point (Btrfs Snapshot) before updating</span>
               </span>
             </label>
           </div>
@@ -99,7 +99,7 @@ export const UpdatesView: React.FC<UpdatesViewProps> = ({
           className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-sm shadow-xl shadow-blue-500/25 flex items-center justify-center gap-2.5 transition active:scale-95 disabled:opacity-50 shrink-0"
         >
           <Zap className={`w-5 h-5 ${isUpdating ? "animate-bounce" : ""}`} />
-          <span>{isUpdating ? "Actualizando gestores..." : "Actualizar Todo Ahora"}</span>
+          <span>{isUpdating ? "Updating managers..." : "Update All Now"}</span>
         </button>
       </div>
 
@@ -108,7 +108,7 @@ export const UpdatesView: React.FC<UpdatesViewProps> = ({
         <div className="space-y-3">
           <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
             <Terminal className="w-3.5 h-3.5 text-blue-400" />
-            Progreso y Salida de Ejecución
+            Execution Progress & Streaming Logs
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {Object.entries(updateEvents).map(([mgr, evt]) => {
@@ -155,20 +155,20 @@ export const UpdatesView: React.FC<UpdatesViewProps> = ({
       <div className="space-y-3">
         <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
           <Layers className="w-3.5 h-3.5 text-zinc-400" />
-          Paquetes con Nueva Versión Disponible
+          Packages with Available Updates
         </h4>
 
         {loading ? (
           <div className="flex flex-col items-center justify-center h-48 text-zinc-500 space-y-2">
             <div className="w-7 h-7 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs font-mono">Buscando actualizaciones disponibles...</p>
+            <p className="text-xs font-mono">Checking for available updates...</p>
           </div>
         ) : updates.length === 0 ? (
           <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-2">
             <CheckCircle2 className="w-8 h-8 text-emerald-400" />
-            <h5 className="text-sm font-semibold text-white">Todo tu software está al día</h5>
+            <h5 className="text-sm font-semibold text-white">All software is up to date</h5>
             <p className="text-xs text-zinc-500">
-              No hay actualizaciones pendientes en los repositorios configurados.
+              There are no pending updates across your configured package managers.
             </p>
           </div>
         ) : (

@@ -106,10 +106,10 @@ pub fn scan_cleaner_items() -> Vec<SystemCleanItem> {
         if size > 1024 * 1024 {
             items.push(SystemCleanItem {
                 id: "clean:apt:cache".to_string(),
-                title: "Caché de paquetes deb (APT)".to_string(),
+                title: "Downloaded package cache (APT)".to_string(),
                 category: "cache".to_string(),
                 source: "apt".to_string(),
-                description: "Archivos .deb guardados en /var/cache/apt/archives".to_string(),
+                description: "Cached .deb package archives stored in /var/cache/apt/archives".to_string(),
                 size_bytes: size,
                 risk_level: "safe".to_string(),
                 requires_sudo: true,
@@ -130,10 +130,10 @@ pub fn scan_cleaner_items() -> Vec<SystemCleanItem> {
             if count > 0 {
                 items.push(SystemCleanItem {
                     id: "clean:apt:orphans".to_string(),
-                    title: format!("Dependencias huérfanas ({} paquetes)", count),
+                    title: format!("Orphaned dependencies ({} packages)", count),
                     category: "orphans".to_string(),
                     source: "apt".to_string(),
-                    description: "Paquetes que se instalaron automáticamente y ya no son necesarios".to_string(),
+                    description: "Packages installed automatically that are no longer needed by any installed software".to_string(),
                     size_bytes: (count as u64) * 20 * 1024 * 1024,
                     risk_level: "safe".to_string(),
                     requires_sudo: true,

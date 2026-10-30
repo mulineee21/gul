@@ -69,7 +69,7 @@ pub fn list_snapshots() -> Vec<SnapshotEntry> {
                         snapshots.push(SnapshotEntry {
                             id: format!("snapper:{}", num),
                             num: Some(num),
-                            description: if desc.is_empty() { "Instantánea del sistema".to_string() } else { desc.to_string() },
+                            description: if desc.is_empty() { "System Snapshot".to_string() } else { desc.to_string() },
                             date: date_str.to_string(),
                             snapshot_type: stype.to_string(),
                         });
@@ -91,7 +91,7 @@ pub fn list_snapshots() -> Vec<SnapshotEntry> {
                         snapshots.push(SnapshotEntry {
                             id: format!("timeshift:{}", parts[0]),
                             num: None,
-                            description: "Instantánea Timeshift".to_string(),
+                            description: "Timeshift Snapshot".to_string(),
                             date: parts.get(1).unwrap_or(&"").to_string(),
                             snapshot_type: "timeshift".to_string(),
                         });
@@ -108,11 +108,11 @@ pub fn list_snapshots() -> Vec<SnapshotEntry> {
 pub fn create_system_snapshot(description: &str) -> Result<String, String> {
     let support = check_snapshot_support();
     if !support.supported {
-        return Err("Tu sistema no tiene soporte activo para instantáneas (Btrfs/Snapper/Timeshift)".to_string());
+        return Err("Your system does not have active snapshot support (Btrfs/Snapper/Timeshift)".to_string());
     }
 
     let clean_desc = if description.trim().is_empty() {
-        "GUL: Punto de restauración del sistema"
+        "GUL: System restore point"
     } else {
         description.trim()
     };
@@ -121,10 +121,10 @@ pub fn create_system_snapshot(description: &str) -> Result<String, String> {
         let out = Command::new("pkexec")
             .args(["snapper", "create", "-t", "single", "-d", clean_desc, "-c", "timeline"])
             .output()
-            .map_err(|e| format!("Fallo al ejecutar snapper: {}", e))?;
+            .map_err(|e| format!("Failed to execute snapper: {}", e))?;
 
         if out.status.success() {
-            Ok(format!("Punto de restauración creado con éxito: '{}'", clean_desc))
+            Ok(format!("Restore point created successfully: '{}'", clean_desc))
         } else {
             Err(String::from_utf8_lossy(&out.stderr).to_string())
         }
@@ -132,14 +132,14 @@ pub fn create_system_snapshot(description: &str) -> Result<String, String> {
         let out = Command::new("pkexec")
             .args(["timeshift", "--create", "--comments", clean_desc, "--yes"])
             .output()
-            .map_err(|e| format!("Fallo al ejecutar timeshift: {}", e))?;
+            .map_err(|e| format!("Failed to execute timeshift: {}", e))?;
 
         if out.status.success() {
-            Ok(format!("Instantánea Timeshift creada: '{}'", clean_desc))
+            Ok(format!("Timeshift snapshot created: '{}'", clean_desc))
         } else {
             Err(String::from_utf8_lossy(&out.stderr).to_string())
         }
     } else {
-        Err("Gestor de instantáneas no disponible".to_string())
+        Err("Snapshot manager not available".to_string())
     }
 }

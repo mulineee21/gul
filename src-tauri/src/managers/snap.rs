@@ -105,10 +105,10 @@ pub fn scan_cleaner_items() -> Vec<SystemCleanItem> {
         if disabled_count > 0 {
             items.push(SystemCleanItem {
                 id: "clean:snap:revisions".to_string(),
-                title: format!("Revisiones anteriores de Snaps ({} desactivadas)", disabled_count),
+                title: format!("Old disabled Snap revisions ({} disabled)", disabled_count),
                 category: "cache".to_string(),
                 source: "snap".to_string(),
-                description: "Versiones antiguas de paquetes Snap que se conservan en disco tras actualizar".to_string(),
+                description: "Old revisions of Snap packages retained on disk after updates".to_string(),
                 size_bytes: (disabled_count as u64) * 120 * 1024 * 1024,
                 risk_level: "safe".to_string(),
                 requires_sudo: true,

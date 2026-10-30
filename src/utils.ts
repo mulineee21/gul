@@ -19,7 +19,7 @@ export function getSourceBadgeInfo(source: SourceType): {
   switch (source) {
     case "pacman":
       return {
-        label: "Pacman (Nativo)",
+        label: "Pacman (Native)",
         bgColor: "bg-amber-950/40",
         textColor: "text-amber-300",
         borderColor: "border-amber-600/30",
@@ -40,14 +40,14 @@ export function getSourceBadgeInfo(source: SourceType): {
       };
     case "apt":
       return {
-        label: "APT (Debian)",
+        label: "APT (Debian/Ubuntu)",
         bgColor: "bg-purple-950/40",
         textColor: "text-purple-300",
         borderColor: "border-purple-600/30",
       };
     case "dnf":
       return {
-        label: "DNF (RPM)",
+        label: "DNF (Fedora/RPM)",
         bgColor: "bg-sky-950/40",
         textColor: "text-sky-300",
         borderColor: "border-sky-600/30",

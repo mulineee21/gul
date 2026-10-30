@@ -19,7 +19,7 @@ pub async fn run_update_manager(app: AppHandle, manager: String) -> Result<(), S
     let _ = app.emit("update-progress", UpdateProgressEvent {
         manager: manager.clone(),
         status: "starting".to_string(),
-        message: format!("Iniciando actualización de {}...", manager),
+        message: format!("Starting update for {}...", manager),
     });
 
     let (cmd, args) = match manager.as_str() {
@@ -29,7 +29,7 @@ pub async fn run_update_manager(app: AppHandle, manager: String) -> Result<(), S
         "apt" => ("pkexec", vec!["sh", "-c", "apt-get update && apt-get dist-upgrade -y"]),
         "dnf" => ("pkexec", vec!["dnf", "upgrade", "-y"]),
         "portage" => ("pkexec", vec!["emerge", "--update", "--deep", "--newuse", "@world"]),
-        _ => return Err(format!("Gestor no reconocido: {}", manager)),
+        _ => return Err(format!("Unrecognized package manager: {}", manager)),
     };
 
     let output = tokio::task::spawn_blocking(move || {
@@ -46,20 +46,20 @@ pub async fn run_update_manager(app: AppHandle, manager: String) -> Result<(), S
                 let _ = app.emit("update-progress", UpdateProgressEvent {
                     manager: manager.clone(),
                     status: "success".to_string(),
-                    message: format!("Actualizado con éxito.\n{}", stdout),
+                    message: format!("Updated successfully.\n{}", stdout),
                 });
                 Ok(())
             } else {
                 let _ = app.emit("update-progress", UpdateProgressEvent {
                     manager: manager.clone(),
                     status: "error".to_string(),
-                    message: format!("Error al actualizar {}: {}\n{}", manager, stderr, stdout),
+                    message: format!("Error updating {}: {}\n{}", manager, stderr, stdout),
                 });
                 Err(stderr.to_string())
             }
         }
         Err(e) => {
-            let msg = format!("Error al invocar el comando para {}: {}", manager, e);
+            let msg = format!("Failed to invoke command for {}: {}", manager, e);
             let _ = app.emit("update-progress", UpdateProgressEvent {
                 manager: manager.clone(),
                 status: "error".to_string(),

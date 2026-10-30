@@ -91,7 +91,7 @@ export const AppsView: React.FC<AppsViewProps> = ({
               }`}
             >
               <Monitor className="w-3.5 h-3.5" />
-              <span>Apps de Escritorio ({desktopApps.length})</span>
+              <span>Desktop Apps ({desktopApps.length})</span>
             </button>
 
             <button
@@ -106,12 +106,12 @@ export const AppsView: React.FC<AppsViewProps> = ({
               }`}
             >
               <Package className="w-3.5 h-3.5" />
-              <span>Todos los Paquetes del Sistema ({allPackages.length})</span>
+              <span>All System Packages ({allPackages.length})</span>
             </button>
           </div>
 
           <span className="text-xs text-zinc-400 font-mono">
-            {filteredApps.length} de {currentDataset.length} mostradas
+            {filteredApps.length} of {currentDataset.length} shown
           </span>
         </div>
 
@@ -125,8 +125,8 @@ export const AppsView: React.FC<AppsViewProps> = ({
               onChange={(e) => setSearch(e.target.value)}
               placeholder={
                 viewMode === "desktop"
-                  ? "Buscar por nombre de app (ej. Chrome, VS Code, OBS, Alacritty, Spotify)..."
-                  : "Buscar paquetes del sistema (ej. gcc, python, libx11)..."
+                  ? "Search desktop apps (e.g. Chrome, VS Code, OBS, Alacritty, Spotify)..."
+                  : "Search system packages (e.g. gcc, python, libx11)..."
               }
               className="w-full bg-zinc-900/90 border border-zinc-800 rounded-xl pl-10 pr-4 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500/70 focus:ring-1 focus:ring-blue-500/50 transition"
             />
@@ -135,7 +135,7 @@ export const AppsView: React.FC<AppsViewProps> = ({
                 onClick={() => setSearch("")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-500 hover:text-zinc-300"
               >
-                Limpiar
+                Clear
               </button>
             )}
           </div>
@@ -148,9 +148,9 @@ export const AppsView: React.FC<AppsViewProps> = ({
               onChange={(e) => setSortBy(e.target.value as any)}
               className="bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 rounded-lg px-2.5 py-2 focus:outline-none focus:border-blue-500"
             >
-              <option value="name">Alfabético (A - Z)</option>
-              <option value="size">Mayor tamaño en disco</option>
-              <option value="duplicates">Duplicados primero</option>
+              <option value="name">Alphabetical (A - Z)</option>
+              <option value="size">Largest Size on Disk</option>
+              <option value="duplicates">Duplicates First</option>
             </select>
           </div>
         </div>
@@ -165,7 +165,7 @@ export const AppsView: React.FC<AppsViewProps> = ({
                 : "bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
             }`}
           >
-            Todos ({currentDataset.length})
+            All ({currentDataset.length})
           </button>
           {sourcesList.map((src) => {
             const count = currentDataset.filter((a) => a.source === src).length;
@@ -194,13 +194,13 @@ export const AppsView: React.FC<AppsViewProps> = ({
         {loading ? (
           <div className="flex flex-col items-center justify-center h-64 text-zinc-500 space-y-3">
             <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs font-mono">Escaneando aplicaciones instaladas...</p>
+            <p className="text-xs font-mono">Scanning installed applications...</p>
           </div>
         ) : filteredApps.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-zinc-500 space-y-2">
             <Info className="w-8 h-8 stroke-1" />
-            <p className="text-sm font-medium">No se encontraron aplicaciones con ese filtro</p>
-            <p className="text-xs text-zinc-600">Prueba ajustando los términos de búsqueda</p>
+            <p className="text-sm font-medium">No applications found matching this filter</p>
+            <p className="text-xs text-zinc-600">Try adjusting your search terms</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
@@ -252,10 +252,10 @@ export const AppsView: React.FC<AppsViewProps> = ({
                         </span>
                         {app.is_duplicate && (
                           <span
-                            title="Esta app tiene otra versión instalada con otro gestor"
+                            title="This app has another version installed via a different manager"
                             className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-0.5"
                           >
-                            <Copy className="w-2.5 h-2.5" /> Duplicado
+                            <Copy className="w-2.5 h-2.5" /> Duplicate
                           </span>
                         )}
                       </div>
@@ -283,7 +283,7 @@ export const AppsView: React.FC<AppsViewProps> = ({
                             : "bg-zinc-800 text-zinc-400"
                         }`}
                       >
-                        {app.is_sandboxed ? "Aislado" : "Nativo"}
+                        {app.is_sandboxed ? "Sandboxed" : "Native"}
                       </span>
                     </div>
 
@@ -293,7 +293,7 @@ export const AppsView: React.FC<AppsViewProps> = ({
                           e.stopPropagation();
                           onLaunch(app.id, app.exec_path);
                         }}
-                        title="Iniciar aplicación"
+                        title="Launch application"
                         className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-300 hover:text-white"
                       >
                         <Play className="w-3.5 h-3.5" />
@@ -303,7 +303,7 @@ export const AppsView: React.FC<AppsViewProps> = ({
                           e.stopPropagation();
                           onUninstall(app.id, app.name);
                         }}
-                        title="Desinstalar"
+                        title="Uninstall"
                         className="p-1.5 rounded-lg hover:bg-red-950/40 text-red-400 hover:text-red-300"
                       >
                         <Trash2 className="w-3.5 h-3.5" />

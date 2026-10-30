@@ -625,17 +625,17 @@ pub fn parse_line_progress(line: &str) -> (Option<f32>, Option<String>) {
 
     // 3. Detect step description from keywords
     let step = if lower.contains("resolv") || lower.contains("dependenc") {
-        Some("Resolviendo dependencias...".to_string())
+        Some("Resolving dependencies...".to_string())
     } else if lower.contains("download") || lower.contains("descargando") || lower.contains("get:") {
-        Some("Descargando paquetes...".to_string())
+        Some("Downloading packages...".to_string())
     } else if lower.contains("integrity") || lower.contains("claves") || lower.contains("key") {
-        Some("Verificando integridad y firmas...".to_string())
+        Some("Verifying package signatures & integrity...".to_string())
     } else if lower.contains("install") || lower.contains("instalando") || lower.contains("unpack") {
-        Some("Instalando en el sistema...".to_string())
+        Some("Installing on system...".to_string())
     } else if lower.contains("hook") || lower.contains("configur") || lower.contains("setting up") {
-        Some("Configurando paquetes y accesos...".to_string())
+        Some("Configuring packages and desktop entries...".to_string())
     } else if lower.contains("looking for matches") {
-        Some("Buscando en Flathub...".to_string())
+        Some("Searching in Flathub...".to_string())
     } else {
         None
     };
@@ -708,7 +708,7 @@ pub async fn cancel_install(id: &str) -> Result<(), String> {
             .output();
         return Ok(());
     }
-    Err("No hay ningún proceso activo para cancelar con ese ID".to_string())
+    Err("No active process found to cancel with that ID".to_string())
 }
 
 pub async fn run_install_package(
@@ -774,7 +774,7 @@ pub async fn run_install_package(
             } else if Command::new("which").arg("yay").output().map(|o| o.status.success()).unwrap_or(false) {
                 "yay"
             } else {
-                return Err("No se encontró ningún helper de AUR (paru o yay) instalado.".to_string());
+                return Err("No AUR helper (paru or yay) found installed on the system.".to_string());
             };
             (
                 helper.to_string(),
@@ -786,7 +786,7 @@ pub async fn run_install_package(
                 ],
             )
         }
-        _ => return Err(format!("Gestor de instalación no soportado: {}", source)),
+        _ => return Err(format!("Unsupported installation source: {}", source)),
     };
 
     let _ = app.emit(
@@ -794,14 +794,14 @@ pub async fn run_install_package(
         InstallProgressEvent {
             id: id.clone(),
             status: "starting".to_string(),
-            message: format!("Iniciando comando de instalación para {}...", pkg_id),
+            message: format!("Starting installation command for {}...", pkg_id),
             line: Some(format!(
-                "[GUL] Ejecutando: {} {}\n[GUL] Si el sistema te solicita la contraseña de administrador, ingrésala en la ventana emergente.",
+                "[GUL] Executing: {} {}\n[GUL] If the system prompts for administrator password, enter it in the pop-up window.",
                 cmd,
                 args.join(" ")
             )),
             progress_pct: Some(5.0),
-            step: Some("Autenticando con el sistema...".to_string()),
+            step: Some("Authenticating with system...".to_string()),
             is_stderr: Some(false),
         },
     );
@@ -813,7 +813,7 @@ pub async fn run_install_package(
         .stderr(Stdio::piped())
         .spawn()
         .map_err(|e| {
-            let err = format!("Error al iniciar proceso de instalación: {}", e);
+            let err = format!("Error starting installation process: {}", e);
             let _ = app.emit(
                 "install-progress",
                 InstallProgressEvent {
@@ -822,7 +822,7 @@ pub async fn run_install_package(
                     message: err.clone(),
                     line: Some(format!("[GUL Error] {}", err)),
                     progress_pct: None,
-                    step: Some("Error al iniciar".to_string()),
+                    step: Some("Error starting".to_string()),
                     is_stderr: Some(true),
                 },
             );
@@ -869,20 +869,20 @@ pub async fn run_install_package(
             InstallProgressEvent {
                 id: id.clone(),
                 status: "success".to_string(),
-                message: format!("¡{} instalado correctamente!", pkg_id),
+                message: format!("{} installed successfully!", pkg_id),
                 line: Some(format!(
-                    "[GUL] ¡Instalación de {} finalizada con éxito!",
+                    "[GUL] Installation of {} completed successfully!",
                     pkg_id
                 )),
                 progress_pct: Some(100.0),
-                step: Some("Instalación completada".to_string()),
+                step: Some("Installation completed".to_string()),
                 is_stderr: Some(false),
             },
         );
-        Ok(format!("Instalación de {} completada con éxito", pkg_id))
+        Ok(format!("Installation of {} completed successfully", pkg_id))
     } else {
         let code = status.code().unwrap_or(-1);
-        let err_msg = format!("El instalador finalizó con código de error {}", code);
+        let err_msg = format!("Installer exited with error code {}", code);
         let _ = app.emit(
             "install-progress",
             InstallProgressEvent {
@@ -891,7 +891,7 @@ pub async fn run_install_package(
                 message: err_msg.clone(),
                 line: Some(format!("[GUL Error] {}", err_msg)),
                 progress_pct: None,
-                step: Some("Error en la instalación".to_string()),
+                step: Some("Installation error".to_string()),
                 is_stderr: Some(true),
             },
         );

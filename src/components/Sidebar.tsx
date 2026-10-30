@@ -33,21 +33,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const navItems = [
     {
       id: "apps",
-      label: "Aplicaciones",
+      label: "Applications",
       icon: Layers,
       count: overview?.total_apps,
       badgeColor: "bg-zinc-800 text-zinc-300",
     },
     {
       id: "store",
-      label: "Tienda GUL",
+      label: "GUL Store",
       icon: Compass,
       count: undefined,
       badgeColor: "bg-blue-500/20 text-blue-300 border border-blue-500/30 font-mono",
     },
     {
       id: "duplicates",
-      label: "Duplicados",
+      label: "Duplicates",
       icon: Copy,
       count: overview?.duplicates_count,
       badgeColor:
@@ -57,7 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: "updates",
-      label: "Actualizaciones",
+      label: "Updates",
       icon: RefreshCw,
       count: overview?.updates_available,
       badgeColor:
@@ -67,14 +67,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: "autostart",
-      label: "Inicio (Autostart)",
+      label: "Startup Apps",
       icon: Rocket,
       count: undefined,
       badgeColor: "bg-zinc-800 text-zinc-300",
     },
     {
       id: "snapshots",
-      label: "Puntos / Snapshots",
+      label: "Restore Points",
       icon: RotateCcw,
       count: undefined,
       badgeColor: "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono",
@@ -88,7 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: "cleaner",
-      label: "Limpiador",
+      label: "System Cleaner",
       icon: Trash2,
       count: overview?.reclaimable_bytes
         ? formatBytes(overview.reclaimable_bytes, 1)
@@ -115,7 +115,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 Linux
               </span>
             </h1>
-            <p className="text-xs text-zinc-400">Gestor Universal de Linux</p>
+            <p className="text-xs text-zinc-400">Universal Linux Manager</p>
           </div>
         </div>
 
@@ -163,7 +163,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center space-x-2">
                 <Sparkles className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
-                <span>Clonar mi Sistema</span>
+                <span>Clone My System</span>
               </div>
               <span className="text-[10px] bg-amber-500/20 text-amber-200 px-1.5 py-0.5 rounded font-mono">
                 Sync
@@ -207,7 +207,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {overview?.total_disk_used_bytes ? (
           <div className="mt-3 pt-2.5 border-t border-zinc-800/60 flex items-center justify-between text-xs text-zinc-400">
-            <span>Espacio apps:</span>
+            <span>Apps storage:</span>
             <span className="font-mono text-zinc-200 font-medium">
               {formatBytes(overview.total_disk_used_bytes)}
             </span>

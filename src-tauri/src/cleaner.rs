@@ -15,7 +15,7 @@ pub fn execute_clean(item_ids: &[String]) -> CleanResult {
 
     for id in item_ids {
         if let Some(item) = all_items.iter().find(|i| &i.id == id) {
-            logs.push(format!("Iniciando limpieza: {}", item.title));
+            logs.push(format!("Starting cleanup: {}", item.title));
 
             match id.as_str() {
                 "clean:pacman:cache" => {
@@ -35,7 +35,7 @@ pub fn execute_clean(item_ids: &[String]) -> CleanResult {
                             logs.push(format!("Pacman cache: {}", text));
                             total_cleaned += item.size_bytes;
                         }
-                        Err(e) => errors.push(format!("Error limpiando caché de pacman: {}", e)),
+                        Err(e) => errors.push(format!("Error cleaning pacman cache: {}", e)),
                     }
                 }
                 "clean:pacman:orphans" => {
@@ -54,7 +54,7 @@ pub fn execute_clean(item_ids: &[String]) -> CleanResult {
                                     logs.push(String::from_utf8_lossy(&o.stdout).to_string());
                                     total_cleaned += item.size_bytes;
                                 }
-                                Err(e) => errors.push(format!("Error eliminando huérfanos de pacman: {}", e)),
+                                Err(e) => errors.push(format!("Error removing pacman orphans: {}", e)),
                             }
                         }
                     }
@@ -69,7 +69,7 @@ pub fn execute_clean(item_ids: &[String]) -> CleanResult {
                             logs.push(String::from_utf8_lossy(&out.stdout).to_string());
                             total_cleaned += item.size_bytes;
                         }
-                        Err(e) => errors.push(format!("Error limpiando runtimes Flatpak: {}", e)),
+                        Err(e) => errors.push(format!("Error cleaning Flatpak runtimes: {}", e)),
                     }
                 }
                 "clean:flatpak:cache" => {
@@ -77,7 +77,7 @@ pub fn execute_clean(item_ids: &[String]) -> CleanResult {
                         let cache_path = home.join(".cache/flatpak");
                         if cache_path.exists() {
                             let _ = std::fs::remove_dir_all(&cache_path);
-                            logs.push("Caché de Flatpak eliminada".to_string());
+                            logs.push("Flatpak cache cleared".to_string());
                             total_cleaned += item.size_bytes;
                         }
                     }
@@ -135,7 +135,7 @@ pub fn execute_clean(item_ids: &[String]) -> CleanResult {
                     }
                 }
                 _ => {
-                    logs.push(format!("Limpieza personalizada para {}", id));
+                    logs.push(format!("Custom cleanup for {}", id));
                 }
             }
         }

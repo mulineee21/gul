@@ -1,40 +1,40 @@
-name: 🐛 Reporte de Error
-description: Crea un informe para ayudarnos a solucionar un problema o error en GUL.
+name: 🐛 Bug Report
+description: Create a report to help us improve and fix issues in GUL.
 title: "[Bug]: "
 labels: ["bug", "triage"]
 body:
   - type: markdown
     attributes:
       value: |
-        ¡Gracias por tomarte el tiempo de reportar este problema!
+        Thank you for taking the time to report this issue!
   - type: input
     id: distro
     attributes:
-      label: Distribución de Linux
-      description: ¿Qué distribución de Linux estás utilizando y qué gestor nativo?
-      placeholder: Ej. CachyOS (Arch) / Ubuntu 24.04 (APT) / Fedora 40 (DNF)
+      label: Linux Distribution
+      description: Which Linux distribution and package manager are you using?
+      placeholder: e.g. Arch / CachyOS (Pacman), Ubuntu 24.04 (APT), Fedora 40 (DNF), Gentoo (Portage)
     validations:
       required: true
   - type: textarea
     id: description
     attributes:
-      label: Descripción del problema
-      description: Una explicación clara y concisa de lo que ocurrió.
+      label: Problem Description
+      description: A clear and concise explanation of what happened.
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Pasos para reproducir el error
-      description: Pasos exactos para ver el problema.
+      label: Steps to Reproduce
+      description: Exact steps to reproduce the problem.
       value: |
-        1. Abrir '...'
-        2. Hacer clic en '....'
-        3. Ver el error
+        1. Open '...'
+        2. Click on '....'
+        3. See the error
     validations:
       required: true
   - type: textarea
     id: logs
     attributes:
-      label: Registros de la terminal o capturas (Opcional)
-      description: Pega aquí los mensajes de error o registros relevantes.
+      label: Terminal Logs or Screenshots (Optional)
+      description: Paste any error messages or relevant logs here.

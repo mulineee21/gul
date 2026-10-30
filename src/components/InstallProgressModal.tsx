@@ -88,8 +88,10 @@ export const InstallProgressModal: React.FC<InstallProgressModalProps> = ({
         return "Flathub (Flatpak)";
       case "appimage":
         return "AppImage";
+      case "snap":
+        return "Snap Store";
       default:
-        return `Nativo (${source.toUpperCase()})`;
+        return `Native (${source.toUpperCase()})`;
     }
   };
 
@@ -134,7 +136,7 @@ export const InstallProgressModal: React.FC<InstallProgressModalProps> = ({
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                 </span>
                 <span className="text-[11px] font-mono font-semibold text-blue-400">
-                  Instalando en vivo
+                  Installing Live
                 </span>
               </div>
             )}
@@ -142,7 +144,7 @@ export const InstallProgressModal: React.FC<InstallProgressModalProps> = ({
             {isSuccess && (
               <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Instalado</span>
+                <span>Installed</span>
               </div>
             )}
 
@@ -171,7 +173,7 @@ export const InstallProgressModal: React.FC<InstallProgressModalProps> = ({
               {isRunning && <RefreshCw className="w-3.5 h-3.5 text-blue-400 animate-spin" />}
               {isSuccess && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
               {isError && <AlertTriangle className="w-3.5 h-3.5 text-red-400" />}
-              <span>{currentStep || "Procesando instalación..."}</span>
+              <span>{currentStep || "Processing installation..."}</span>
             </span>
             <span className="font-mono font-bold text-zinc-300">
               {Math.min(100, Math.max(0, Math.round(progressPct)))}%
@@ -194,7 +196,7 @@ export const InstallProgressModal: React.FC<InstallProgressModalProps> = ({
 
           {isRunning && (
             <p className="text-[11px] text-zinc-400 italic">
-              💡 Si el sistema te solicita la contraseña de administrador (sudo/root), por favor introdúcela en la ventana emergente para continuar.
+              💡 If your system prompts for administrator password (sudo/root), please enter it to proceed with installation.
             </p>
           )}
         </div>
@@ -210,7 +212,7 @@ export const InstallProgressModal: React.FC<InstallProgressModalProps> = ({
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
                 <span className="text-[11px] font-mono text-zinc-400 ml-2 flex items-center gap-1.5">
                   <Terminal className="w-3.5 h-3.5 text-zinc-500" />
-                  consola de instalación
+                  installation terminal
                 </span>
               </div>
 
@@ -222,7 +224,7 @@ export const InstallProgressModal: React.FC<InstallProgressModalProps> = ({
                       ? "bg-blue-600/20 text-blue-300 border-blue-500/30"
                       : "bg-zinc-800 text-zinc-400 border-zinc-700"
                   }`}
-                  title="Activar/desactivar autodesplazamiento"
+                  title="Toggle auto-scroll"
                 >
                   <ArrowDownCircle className="w-3 h-3" />
                   <span>Auto-scroll: {autoScroll ? "ON" : "OFF"}</span>
@@ -231,17 +233,17 @@ export const InstallProgressModal: React.FC<InstallProgressModalProps> = ({
                 <button
                   onClick={handleCopyLogs}
                   className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition flex items-center gap-1"
-                  title="Copiar salida de terminal"
+                  title="Copy terminal output"
                 >
                   {copied ? (
                     <>
                       <Check className="w-3 h-3 text-emerald-400" />
-                      <span>Copiado</span>
+                      <span>Copied</span>
                     </>
                   ) : (
                     <>
                       <Copy className="w-3 h-3" />
-                      <span>Copiar</span>
+                      <span>Copy</span>
                     </>
                   )}
                 </button>
@@ -252,18 +254,18 @@ export const InstallProgressModal: React.FC<InstallProgressModalProps> = ({
             <div className="p-3.5 overflow-y-auto flex-1 font-mono text-[11px] leading-5 space-y-1 select-text h-64 max-h-72">
               {logs.length === 0 ? (
                 <div className="text-zinc-500 italic py-6 text-center">
-                  Iniciando comunicación con el proceso...
+                  Starting process communication...
                 </div>
               ) : (
                 logs.map((log, index) => {
                   let textColor = "text-zinc-300";
-                  if (log.isStderr || log.text.toLowerCase().includes("error") || log.text.toLowerCase().includes("fallo")) {
+                  if (log.isStderr || log.text.toLowerCase().includes("error") || log.text.toLowerCase().includes("failed")) {
                     textColor = "text-red-400 font-medium";
                   } else if (log.text.startsWith("[GUL]") || log.text.startsWith("[OmniPkg]")) {
                     textColor = "text-blue-400 font-semibold";
-                  } else if (log.text.includes("%") || log.text.toLowerCase().includes("descargando") || log.text.toLowerCase().includes("downloading")) {
+                  } else if (log.text.includes("%") || log.text.toLowerCase().includes("downloading")) {
                     textColor = "text-emerald-400";
-                  } else if (log.text.toLowerCase().includes("warning") || log.text.toLowerCase().includes("advertencia")) {
+                  } else if (log.text.toLowerCase().includes("warning")) {
                     textColor = "text-amber-400";
                   }
 
@@ -297,18 +299,18 @@ export const InstallProgressModal: React.FC<InstallProgressModalProps> = ({
                 className="px-3.5 py-1.5 rounded-xl bg-red-950/40 hover:bg-red-900/50 text-red-400 border border-red-700/30 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95"
               >
                 <Square className="w-3.5 h-3.5 fill-current" />
-                <span>Cancelar Proceso</span>
+                <span>Cancel Process</span>
               </button>
             )}
             {isError && (
               <span className="text-xs text-red-400">
-                La instalación no pudo completarse. Revisa la terminal arriba para más detalles.
+                Installation could not be completed. Check the terminal logs above for details.
               </span>
             )}
             {isSuccess && (
               <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4" />
-                ¡Aplicación instalada y lista para ejecutarse!
+                Application installed successfully and ready to launch!
               </span>
             )}
           </div>
@@ -320,7 +322,7 @@ export const InstallProgressModal: React.FC<InstallProgressModalProps> = ({
                 className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white text-xs font-bold shadow-md shadow-emerald-500/20 flex items-center gap-1.5 transition active:scale-95"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
-                <span>Ejecutar Ahora</span>
+                <span>Launch Now</span>
               </button>
             )}
 
@@ -329,7 +331,7 @@ export const InstallProgressModal: React.FC<InstallProgressModalProps> = ({
                 onClick={onClose}
                 className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-medium transition"
               >
-                Cerrar
+                Close
               </button>
             )}
           </div>

@@ -168,10 +168,10 @@ pub fn scan_cleaner_items() -> Vec<SystemCleanItem> {
         if size > 0 {
             items.push(SystemCleanItem {
                 id: "clean:pacman:cache".to_string(),
-                title: "Caché de paquetes descargados (Pacman)".to_string(),
+                title: "Downloaded package cache (Pacman)".to_string(),
                 category: "cache".to_string(),
                 source: "pacman".to_string(),
-                description: "Archivos .pkg.tar.zst antiguos descargados en /var/cache/pacman/pkg".to_string(),
+                description: "Old .pkg.tar.zst archive files stored in /var/cache/pacman/pkg".to_string(),
                 size_bytes: size,
                 risk_level: "safe".to_string(),
                 requires_sudo: true,
@@ -193,10 +193,10 @@ pub fn scan_cleaner_items() -> Vec<SystemCleanItem> {
             let count = orphans.len();
             items.push(SystemCleanItem {
                 id: "clean:pacman:orphans".to_string(),
-                title: format!("Dependencias huérfanas ({} paquetes)", count),
+                title: format!("Orphaned dependencies ({} packages)", count),
                 category: "orphans".to_string(),
                 source: "pacman".to_string(),
-                description: format!("Paquetes instalados como dependencias que ya no utiliza ninguna app: {}", orphans.join(", ")),
+                description: format!("Unused packages installed as dependencies no longer needed by any app: {}", orphans.join(", ")),
                 size_bytes: (count as u64) * 15 * 1024 * 1024, // approx 15MB each
                 risk_level: "safe".to_string(),
                 requires_sudo: true,

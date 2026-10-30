@@ -58,7 +58,7 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
         }
       })
       .catch((err) => {
-        console.error("Error obteniendo opciones de instalación:", err);
+        console.error("Error fetching installation options:", err);
       })
       .finally(() => {
         setLoadingOptions(false);
@@ -141,14 +141,14 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
                 <h3 className="text-xl font-bold text-white tracking-tight">{app.name}</h3>
                 <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700/60 flex items-center gap-1.5">
                   <Layers className="w-3 h-3 text-blue-400" />
-                  Elegir Formato
+                  Choose Format
                 </span>
               </div>
               <p className="text-xs text-zinc-400 mt-1 line-clamp-1 max-w-xl">
-                {app.summary || "¿Cómo deseas instalar esta aplicación en tu sistema?"}
+                {app.summary || "How would you like to install this application on your system?"}
               </p>
               <div className="flex items-center gap-2 mt-2 text-[11px] text-zinc-500 font-mono">
-                <span className="text-zinc-400">Distribución detectada:</span>
+                <span className="text-zinc-400">Detected distribution:</span>
                 <span className="text-zinc-200 font-medium bg-zinc-800/60 px-2 py-0.5 rounded border border-zinc-700/50">
                   {distroName} ({nativeMgrName})
                 </span>
@@ -169,10 +169,10 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
           <div className="flex items-center justify-between pb-1">
             <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-              Opciones de empaquetado disponibles
+              Available Packaging Options
             </h4>
             <span className="text-xs text-zinc-500">
-              Compara rendimiento, aislamiento y portabilidad
+              Compare performance, isolation, and portability
             </span>
           </div>
 
@@ -180,7 +180,7 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
             <div className="py-16 flex flex-col items-center justify-center space-y-3">
               <RefreshCw className="w-8 h-8 text-blue-500 animate-spin" />
               <p className="text-xs text-zinc-400 font-mono">
-                Consultando repositorios {nativeMgrName}, Flathub y fuentes AppImage...
+                Querying {nativeMgrName} repositories, Flathub, and AppImage sources...
               </p>
             </div>
           ) : (
@@ -210,10 +210,12 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
                               {option.badge_label}
                             </span>
                             <h5 className="text-sm font-bold text-white line-clamp-1">
-                              {option.source === "pacman" || option.source === "apt" || option.source === "dnf"
-                                ? `Nativo (${nativeMgrName})`
+                              {option.source === "pacman" || option.source === "apt" || option.source === "dnf" || option.source === "portage"
+                                ? `Native (${nativeMgrName})`
                                 : option.source === "flatpak"
                                 ? "Flathub Flatpak"
+                                : option.source === "snap"
+                                ? "Snap Store"
                                 : "AppImage"}
                             </h5>
                           </div>
@@ -232,14 +234,14 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
                           ID: <span className="text-zinc-200">{option.pkg_id}</span>
                         </div>
                         <div className="text-[11px] text-zinc-500 font-mono truncate mt-0.5">
-                          Versión: <span className="text-zinc-300">{option.version}</span>
+                          Version: <span className="text-zinc-300">{option.version}</span>
                         </div>
                       </div>
 
                       {/* Pros & Advantages */}
                       <div className="space-y-2 mb-4">
                         <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-500">
-                          Ventajas
+                          Advantages
                         </span>
                         {option.pros.map((pro, idx) => (
                           <div key={idx} className="flex items-start space-x-2 text-xs text-zinc-300 leading-snug">
@@ -255,7 +257,7 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
                       {option.is_installed ? (
                         <div className="w-full py-2 px-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center gap-1.5 text-emerald-400 text-xs font-semibold">
                           <CheckCircle2 className="w-4 h-4" />
-                          <span>Ya instalada</span>
+                          <span>Already installed</span>
                         </div>
                       ) : (
                         <button
@@ -269,17 +271,19 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
                           {isCurrentlyInstalling ? (
                             <>
                               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                              <span>Instalando...</span>
+                              <span>Installing...</span>
                             </>
                           ) : (
                             <>
                               <Download className="w-3.5 h-3.5" />
                               <span>
-                                Instalar vía{" "}
-                                {option.source === "pacman" || option.source === "apt" || option.source === "dnf"
+                                Install via{" "}
+                                {option.source === "pacman" || option.source === "apt" || option.source === "dnf" || option.source === "portage"
                                   ? nativeMgrName
                                   : option.source === "flatpak"
                                   ? "Flatpak"
+                                  : option.source === "snap"
+                                  ? "Snap"
                                   : "AppImage"}
                               </span>
                             </>
@@ -300,9 +304,9 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
                 <FolderUp className="w-5 h-5" />
               </div>
               <div>
-                <h5 className="text-xs font-bold text-white">¿Ya tienes un archivo .AppImage descargado?</h5>
+                <h5 className="text-xs font-bold text-white">Already downloaded an .AppImage file?</h5>
                 <p className="text-[11px] text-zinc-400 mt-0.5">
-                  Selecciona cualquier .AppImage de tu disco y GUL lo integrará automáticamente en el lanzador del sistema con su icono.
+                  Select any .AppImage from your disk and GUL will automatically integrate it into your system application menu with its icon.
                 </p>
               </div>
             </div>
@@ -313,7 +317,7 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
               className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold flex items-center gap-2 transition shrink-0 border border-zinc-700/60 active:scale-95 disabled:opacity-50"
             >
               <FolderUp className="w-3.5 h-3.5" />
-              <span>Examinar archivo local...</span>
+              <span>Browse local file...</span>
             </button>
           </div>
         </div>
@@ -323,7 +327,7 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
           <div className="flex items-center space-x-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>
-              GUL gestiona automáticamente permisos, dependencias y atajos de escritorio para cada formato.
+              GUL automatically manages permissions, dependencies, and desktop shortcuts for each format.
             </span>
           </div>
 
@@ -331,7 +335,7 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
             onClick={onClose}
             className="px-4 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition"
           >
-            Cerrar
+            Close
           </button>
         </div>
       </div>

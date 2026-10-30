@@ -99,10 +99,10 @@ pub fn scan_cleaner_items() -> Vec<SystemCleanItem> {
         if size > 1024 * 1024 {
             items.push(SystemCleanItem {
                 id: "clean:dnf:cache".to_string(),
-                title: "Caché de metadatos y RPMs (DNF)".to_string(),
+                title: "Metadata and RPM package cache (DNF)".to_string(),
                 category: "cache".to_string(),
                 source: "dnf".to_string(),
-                description: "Archivos temporales en /var/cache/dnf".to_string(),
+                description: "Temporary package and metadata cache files in /var/cache/dnf".to_string(),
                 size_bytes: size,
                 risk_level: "safe".to_string(),
                 requires_sudo: true,

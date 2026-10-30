@@ -35,7 +35,7 @@ export const SnapshotsView: React.FC<SnapshotsViewProps> = ({
     e.preventDefault();
     setIsCreating(true);
     try {
-      await onCreateSnapshot(desc.trim() || "Punto de restauración manual");
+      await onCreateSnapshot(desc.trim() || "Manual restore point");
       setShowModal(false);
       setDesc("");
     } finally {
@@ -56,13 +56,13 @@ export const SnapshotsView: React.FC<SnapshotsViewProps> = ({
           </div>
           <div>
             <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              <span>Puntos de Restauración y Snapshots</span>
+              <span>System Restore Points & Snapshots</span>
               <span className="text-xs font-mono font-medium px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">
                 {backendName}
               </span>
             </h2>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Instantáneas de seguridad del sistema operativo para proteger tus aplicaciones y datos ante cualquier cambio o actualización.
+              System-level snapshots to protect your apps and configurations before system upgrades or package changes.
             </p>
           </div>
         </div>
@@ -71,7 +71,7 @@ export const SnapshotsView: React.FC<SnapshotsViewProps> = ({
           <button
             onClick={onRefresh}
             className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition"
-            title="Recargar instantáneas"
+            title="Reload snapshots"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -81,7 +81,7 @@ export const SnapshotsView: React.FC<SnapshotsViewProps> = ({
             className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-semibold flex items-center gap-2 transition active:scale-95 shadow-md shadow-cyan-500/20"
           >
             <Plus className="w-4 h-4" />
-            <span>Crear Punto de Restauración</span>
+            <span>Create Restore Point</span>
           </button>
         </div>
       </div>
@@ -95,15 +95,15 @@ export const SnapshotsView: React.FC<SnapshotsViewProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-white">
-                Protección Activa del Sistema ({isBtrfs ? "Btrfs Subvolumes" : supportInfo?.filesystem})
+                Active System Protection ({isBtrfs ? "Btrfs Subvolumes" : supportInfo?.filesystem})
               </h3>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                Listo para Crear Instantáneas
+                Ready for Snapshots
               </span>
             </div>
             <p className="text-xs text-zinc-300 mt-1 max-w-2xl leading-relaxed">
-              Las instantáneas de Btrfs se crean en menos de un segundo gracias al diseño Copy-on-Write (CoW),
-              sin ocupar espacio adicional en disco hasta que los archivos del sistema cambian.
+              Btrfs snapshots are created in milliseconds using Copy-on-Write (CoW),
+              taking zero additional disk space until filesystem blocks change.
             </p>
           </div>
         </div>
@@ -111,7 +111,7 @@ export const SnapshotsView: React.FC<SnapshotsViewProps> = ({
         <div className="bg-zinc-950/80 border border-zinc-800 rounded-2xl p-3 px-4 flex items-center space-x-3 shrink-0">
           <HardDrive className="w-5 h-5 text-cyan-400" />
           <div>
-            <div className="text-[10px] font-mono text-zinc-400 uppercase">Sistema de Archivos</div>
+            <div className="text-[10px] font-mono text-zinc-400 uppercase">Filesystem</div>
             <div className="text-xs font-bold text-white font-mono mt-0.5">
               {supportInfo?.filesystem.toUpperCase()} ({backendName})
             </div>
@@ -124,21 +124,21 @@ export const SnapshotsView: React.FC<SnapshotsViewProps> = ({
         <div className="flex items-center justify-between px-1">
           <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
             <Layers className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Puntos de Restauración Registrados ({snapshots.length})</span>
+            <span>Recorded Restore Points ({snapshots.length})</span>
           </h4>
-          <span className="text-xs text-zinc-500">Ordenados de más reciente a más antiguo</span>
+          <span className="text-xs text-zinc-500">Sorted newest to oldest</span>
         </div>
 
         {loading ? (
           <div className="py-20 text-center text-zinc-500 font-mono text-xs">
-            Consultando instantáneas con privilegios de sistema...
+            Querying snapshots with system privileges...
           </div>
         ) : snapshots.length === 0 ? (
           <div className="py-16 text-center rounded-2xl border border-zinc-800 bg-zinc-950/40 space-y-2">
             <RotateCcw className="w-8 h-8 text-zinc-600 mx-auto" />
-            <p className="text-sm font-semibold text-zinc-300">No hay instantáneas manuales registradas</p>
+            <p className="text-sm font-semibold text-zinc-300">No snapshots recorded yet</p>
             <p className="text-xs text-zinc-500">
-              Pulsa en "Crear Punto de Restauración" para guardar el estado actual antes de instalar software.
+              Click "Create Restore Point" to take an immediate snapshot before modifying system packages.
             </p>
           </div>
         ) : (
@@ -168,7 +168,7 @@ export const SnapshotsView: React.FC<SnapshotsViewProps> = ({
                 <div className="flex items-center space-x-2 shrink-0">
                   <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Guardado</span>
+                    <span>Saved</span>
                   </span>
                 </div>
               </div>
@@ -187,8 +187,8 @@ export const SnapshotsView: React.FC<SnapshotsViewProps> = ({
                   <RotateCcw className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">Crear Punto de Restauración</h3>
-                  <p className="text-xs text-zinc-400">Instantánea rápida mediante {backendName}</p>
+                  <h3 className="text-base font-bold text-white">Create Restore Point</h3>
+                  <p className="text-xs text-zinc-400">Instant snapshot via {backendName}</p>
                 </div>
               </div>
               <button
@@ -202,11 +202,11 @@ export const SnapshotsView: React.FC<SnapshotsViewProps> = ({
             <form onSubmit={handleCreate} className="p-5 space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Descripción o Motivo del Punto de Restauración
+                  Description or Reason for Restore Point
                 </label>
                 <input
                   type="text"
-                  placeholder="Ej. Antes de actualizar paquetes del sistema"
+                  placeholder="e.g. Before system packages update"
                   value={desc}
                   onChange={(e) => setDesc(e.target.value)}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-cyan-500"
@@ -214,7 +214,7 @@ export const SnapshotsView: React.FC<SnapshotsViewProps> = ({
               </div>
 
               <p className="text-[11px] text-zinc-400">
-                🔒 El sistema puede solicitar tu contraseña de administrador para registrar la instantánea en el disco raíz.
+                🔒 Your system may request administrator password to create a root filesystem snapshot.
               </p>
 
               <div className="pt-3 border-t border-zinc-800 flex items-center justify-end space-x-2">
@@ -223,14 +223,14 @@ export const SnapshotsView: React.FC<SnapshotsViewProps> = ({
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold transition"
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isCreating}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 text-white text-xs font-semibold shadow-md transition disabled:opacity-50"
                 >
-                  {isCreating ? "Creando..." : "Crear Instantánea"}
+                  {isCreating ? "Creating..." : "Create Snapshot"}
                 </button>
               </div>
             </form>

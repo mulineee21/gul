@@ -1,12 +1,12 @@
-# GUL — Gestor Universal de Linux 🐧
+# GUL — Universal Linux Manager 🐧
 
 <p align="center">
   <img src="src-tauri/icons/128x128.png" width="96" height="96" alt="GUL Logo" />
 </p>
 
 <p align="center">
-  <strong>El centro de software y mantenimiento definitivo para cualquier distribución Linux.</strong><br>
-  Unifica Pacman, AUR, APT, DNF, Portage (Gentoo), Flatpak, Snap y AppImage en una interfaz moderna, rápida y elegante.
+  <strong>The ultimate universal software center and system maintenance toolkit for any Linux distribution.</strong><br>
+  Unifies Pacman, AUR, APT, DNF, Portage (Gentoo), Flatpak, Snap, and AppImage into a modern, blazing-fast, and elegant desktop experience.
 </p>
 
 <p align="center">
@@ -21,172 +21,176 @@
 
 ---
 
-## 🌟 ¿Qué es GUL?
+## 🌟 What is GUL?
 
-**GUL** (*Gestor Universal de Linux*) nace para resolver la fragmentación del ecosistema de software en Linux. En lugar de lidiar con múltiples comandos de terminal o diferentes tiendas de aplicaciones incompatibles, GUL proporciona una experiencia visual única y consistente para buscar, instalar, actualizar, auditar permisos y limpiar programas de cualquier origen.
+**GUL** (*Gestor Universal de Linux* / *Universal Linux Manager*) was created to solve software packaging fragmentation across the Linux ecosystem. Instead of juggling disparate CLI package managers, incompatible app stores, or manual configurations, GUL provides a unified, coherent, and intuitive interface to discover, install, update, manage sandbox permissions, and clean packages from any source.
 
 ---
 
-## 🚀 Características Principales
+## 🚀 Key Features
 
-### 1. 🛍️ Tienda Universal Multi-Origen
-- **Flathub (Flatpak)**: Explora miles de aplicaciones con fotos en alta definición, reseñas y descripciones.
-- **Snap Store (Canonical)**: Soporte completo para paquetes Snap en Ubuntu y cualquier distribución con `snapd`.
-- **Repositorios Nativos de tu Distribución**: Detección automática de tu sistema (`/etc/os-release`) para buscar e instalar directamente en:
-  - **Pacman** (Arch Linux, CachyOS, Manjaro)
+### 1. 🛍️ Universal Multi-Source Software Store
+- **Flathub (Flatpak)**: Browse thousands of verified desktop applications with high-resolution screenshots, community ratings, and rich descriptions.
+- **Snap Store (Canonical)**: Full integration for Snap packages on Ubuntu and any Linux distribution running `snapd`.
+- **Distribution Native Repositories**: Automatic detection via `/etc/os-release` to search and install directly through:
+  - **Pacman** (Arch Linux, CachyOS, Manjaro, EndeavourOS)
   - **APT** (Ubuntu, Debian, Linux Mint, Pop!_OS)
-  - **DNF** (Fedora, RHEL, AlmaLinux, Rocky)
+  - **DNF** (Fedora, RHEL, AlmaLinux, Rocky Linux)
   - **Portage / Emerge** (Gentoo Linux)
-- **Arch User Repository (AUR)**: Búsqueda integrada mediante API RPC v5 y helpers (`paru` / `yay`) con recuento de votos y popularidad.
+- **Arch User Repository (AUR)**: Integrated search using RPC API v5 and AUR helpers (`paru` / `yay`) with real-time popularity scores and votes.
 
-### 2. 🎛️ Selector Inteligente de Formato
-- Cuando eliges instalar una aplicación, GUL te permite elegir entre:
-  - **Paquete Nativo** (máximo rendimiento y compatibilidad con el sistema).
-  - **Snap (Canonical)** (estándar de Ubuntu con confinamiento AppArmor y actualizaciones delta).
-  - **Flatpak / Flathub** (aislamiento sandbox seguro).
-  - **AppImage** (ejecutable independiente y portable).
-- Muestra comparativas de tamaño de descarga, aislamiento y versión antes de instalar.
+### 2. 🎛️ Intelligent Packaging Format Selector
+- When choosing to install an application, GUL lets you compare and select:
+  - **Native Package**: Maximum performance and tightest OS integration.
+  - **Snap (Canonical)**: Ubuntu standard with AppArmor security confinement and delta updates.
+  - **Flatpak / Flathub**: Sandboxed isolation that won't touch system libraries.
+  - **AppImage**: Standalone, portable executable.
+- Compare download size, isolation level, and version before committing to an install.
 
-### 3. 💻 Terminal en Vivo y Progreso en Tiempo Real
-- Cada instalación y desinstalación cuenta con un modal interactivo con barra de progreso porcentual y un terminal en streaming con logs coloreados del proceso (`stdout`/`stderr`), permitiendo cancelar la operación en cualquier momento.
+### 3. 💻 Live Installation Terminal & Progress Bar
+- Real-time percentage progress bar paired with a streaming terminal displaying colored output (`stdout` / `stderr`).
+- One-click process cancellation at any time with graceful process tree cleanup.
 
-### 4. 🛡️ Gestor de Permisos Flatpak (Flatseal Integrado)
-- Configura los permisos de seguridad y sandbox de cualquier app Flatpak directamente desde su ficha:
-  - Red e Internet
-  - Servidores gráficos Wayland y X11
-  - Servidor de audio (PulseAudio / PipeWire)
-  - Acceso al directorio `/home` o al sistema de archivos completo
-  - Acceso a dispositivos de hardware
-  - Botón para restaurar permisos predeterminados.
+### 4. 🛡️ Flatpak Permissions Manager (Flatseal Inside)
+- Fine-tune security and sandbox permissions for any Flatpak app directly from its details view:
+  - Network & Internet socket access
+  - Wayland and X11 / XWayland display servers
+  - Audio playback & recording (PipeWire / PulseAudio)
+  - Filesystem access (`~` user home or `/` full system)
+  - Hardware devices and webcams
+  - One-click button to reset permissions to default.
 
-### 5. 🚀 Gestor de Aplicaciones de Inicio (Autostart)
-- Controla los programas y scripts que se inician con tu sesión de escritorio según el estándar XDG.
-- Activa o desactiva programas con un clic o añade comandos personalizados.
+### 5. 🚀 Startup Applications Manager (Autostart)
+- Audit and control applications and background services launched with your desktop session according to the XDG specification.
+- Toggle entries on or off with a single click, or easily add custom commands and scripts.
 
-### 6. 💾 Clonar mi Sistema (Exportar e Importar Perfil de Software)
-- Genera un archivo `gul-perfil.json` con todos los paquetes nativos y Flatpaks instalados.
-- Importa perfiles en otros equipos o tras reinstalar el sistema para restaurar todos tus programas en lote con terminal de seguimiento.
+### 6. 💾 System Cloning & Software Profiles (OmniSync)
+- Export your entire installed software stack into a portable `gul-profile.json` file.
+- Restore or migrate to a new machine or fresh OS installation with batch reinstallation and streaming terminal progress.
 
-### 7. ⏪ Puntos de Restauración / Snapshots (Btrfs)
-- Integración con sistemas de archivos Btrfs mediante `snapper` y `timeshift`.
-- Crea instantáneas manuales del sistema o activa la **protección automática previa a cada actualización**.
+### 7. ⏪ System Restore Points & Snapshots (Btrfs)
+- Seamless integration with Btrfs filesystems via `snapper` and `timeshift`.
+- Create instant copy-on-write snapshots manually or enable **automated pre-update snapshots** to ensure instant rollback if an update ever breaks something.
 
-### 8. 🔍 Detector y Optimizador de Duplicados
-- Identifica aplicaciones instaladas simultáneamente en múltiples formatos (ej. VLC nativo y VLC en Flatpak).
-- Calcula el ahorro potencial en disco y permite conservar la versión recomendada con 1 solo clic.
+### 8. 🔍 Duplicate Application Detector
+- Automatically flags software installed simultaneously across multiple packaging formats (e.g., native VLC alongside Flatpak VLC).
+- Calculates potential disk savings and lets you keep the recommended version with a single click.
 
-### 9. 🧹 Limpiador del Sistema (Cleaner)
-- Recupera gigabytes de espacio en disco analizando:
-  - Cachés de paquetes (`/var/cache/pacman/pkg`, `/var/cache/apt/archives`, `/var/cache/dnf`).
-  - Dependencias huérfanas sin uso (`pacman -Qtdq`, `apt autoremove`, `dnf autoremove`).
-  - Runtimes obsoletos de Flatpak (`flatpak uninstall --unused`).
+### 9. 🧹 System Cleaner & Maintenance
+- Reclaim gigabytes of wasted storage by clearing:
+  - Package download caches (`/var/cache/pacman/pkg`, `/var/cache/apt/archives`, `/var/cache/dnf`, `/var/cache/distfiles`).
+  - Orphaned dependencies left behind after uninstalling software (`pacman -Qtdq`, `apt autoremove`, `dnf autoremove`, `emerge --depclean`).
+  - Unused Flatpak runtimes (`flatpak uninstall --unused`).
+  - Old disabled Snap revisions.
 
-### 10. ⚡ Centro de Actualizaciones Unificado
-- Actualiza todos los gestores de paquetes simultáneamente con seguimiento paso a paso y notificaciones nativas de escritorio.
+### 10. ⚡ Unified Update Center
+- Upgrade all active package managers concurrently with live streaming logs and native desktop notifications.
 
 ---
 
-## 📦 Instalación
+## 📦 Installation
 
-### Opción 1: Archivo Universal .AppImage (Cualquier distribución Linux)
-Descarga el archivo `.AppImage` desde los **Releases** de GitHub:
+### Option 1: Universal .AppImage (Any Linux Distribution)
+Download the standalone `.AppImage` from [GitHub Releases](https://github.com/mulineee21/gul/releases/latest):
 ```bash
 chmod +x gul_0.1.0_amd64.AppImage
 ./gul_0.1.0_amd64.AppImage
 ```
 
-### Opción 2: Arch Linux / CachyOS / Manjaro (AUR)
+### Option 2: Arch Linux / CachyOS / Manjaro (AUR)
 ```bash
 paru -S gul-bin
-# o con yay:
+# or with yay:
 yay -S gul-bin
 ```
 
-### Opción 3: Ubuntu / Debian / Linux Mint (.deb)
+### Option 3: Ubuntu / Debian / Linux Mint (.deb)
 ```bash
 sudo dpkg -i gul_0.1.0_amd64.deb
 sudo apt-get install -f
 ```
 
-### Opción 4: Fedora / RHEL (.rpm)
+### Option 4: Fedora / RHEL / CentOS (.rpm)
 ```bash
 sudo dnf install ./gul-0.1.0-1.x86_64.rpm
 ```
 
 ---
 
-## 🛠️ Compilación y Desarrollo
+## 🛠️ Building from Source
 
-### Requisitos previos
-- **Node.js** (v18+) y `npm`
-- **Rust** y `cargo` (v1.75+)
-- Librerías del sistema:
-  - **Arch/CachyOS**: `sudo pacman -S webkit2gtk-4.1 base-devel openssl libayatana-appindicator`
-  - **Debian/Ubuntu**: `sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget libssl-dev libayatana-appindicator3-dev librsvg2-dev`
+### Prerequisites
+- **Node.js** (v18+) and `npm`
+- **Rust** & **Cargo** (v1.75+)
+- System libraries:
+  - **Arch / CachyOS**: `sudo pacman -S webkit2gtk-4.1 base-devel openssl libayatana-appindicator`
+  - **Debian / Ubuntu**: `sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget libssl-dev libayatana-appindicator3-dev librsvg2-dev`
   - **Fedora**: `sudo dnf install webkit2gtk4.1-devel openssl-devel libayatana-appindicator-gtk3-devel`
+  - **Gentoo**: `emerge --ask net-libs/webkit-gtk dev-libs/openssl`
 
-### Pasos para compilar
+### Build Steps
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/tu-usuario/gul.git
+# 1. Clone the repository
+git clone https://github.com/mulineee21/gul.git
 cd gul
 
-# 2. Instalar dependencias del frontend
+# 2. Install frontend dependencies
 npm install
 
-# 3. Iniciar en modo desarrollo
+# 3. Launch in development mode with hot-reloading
 npm run tauri dev
 
-# 4. Compilar binario y paquetes finales de producción
+# 4. Compile optimized production binaries & packages (.AppImage, .deb, .rpm)
 npm run tauri build
 ```
 
 ---
 
-## 📁 Estructura del Proyecto
+## 📁 Architecture & Project Structure
 
 ```text
 gul/
-├── src/                          # Frontend en React 19 + TypeScript + Tailwind
-│   ├── components/               # Vistas (Store, Apps, Duplicates, Cleaner, Snapshots, Autostart...)
-│   ├── types.ts                  # Tipos TypeScript compartidos con el backend
-│   └── App.tsx                   # Controlador principal y enrutador de vistas
-├── src-tauri/                    # Backend en Rust
+├── src/                          # Frontend in React 19 + TypeScript + Tailwind CSS
+│   ├── components/               # UI Views (Store, Apps, Duplicates, Cleaner, Snapshots, Autostart...)
+│   ├── types.ts                  # Shared TypeScript interfaces matching Rust models
+│   ├── utils.ts                  # Byte formatting, source badges, helper utilities
+│   └── App.tsx                   # Main state coordinator & view router
+├── src-tauri/                    # Backend in Rust (Tauri v2)
 │   ├── src/
-│   │   ├── managers/             # Módulos para Pacman, APT, DNF, Flatpak, Snap, AppImage
-│   │   ├── aur.rs                # Conexión con AUR RPC API y helpers paru/yay
-│   │   ├── flatpak_permissions.rs# Motor de permisos sandbox (Flatseal)
-│   │   ├── snapshots.rs          # Motor de instantáneas Btrfs (Snapper/Timeshift)
-│   │   ├── autostart.rs          # Gestor de inicio XDG
-│   │   ├── backup_profile.rs     # Exportación e importación de perfiles JSON
-│   │   ├── notifications.rs      # Notificaciones y monitor en segundo plano
-│   │   └── os_detector.rs        # Detección agnóstica de distribuciones Linux
-│   └── tauri.conf.json           # Configuración de Tauri v2
-└── .github/workflows/            # CI/CD automatizado para compilar Releases
+│   │   ├── managers/             # Drivers for Pacman, APT, DNF, Portage, Flatpak, Snap, AppImage
+│   │   ├── aur.rs                # AUR RPC API v5 integration & helper execution
+│   │   ├── flatpak_permissions.rs# Sandbox permission inspector & override engine (Flatseal)
+│   │   ├── snapshots.rs          # Btrfs snapshot engine (Snapper & Timeshift)
+│   │   ├── autostart.rs          # XDG desktop autostart specification manager
+│   │   ├── backup_profile.rs     # Software profile JSON import/export
+│   │   ├── notifications.rs      # Background update monitor & desktop notifications
+│   │   └── os_detector.rs        # Linux distribution detection engine (/etc/os-release)
+│   └── tauri.conf.json           # Tauri v2 configuration & bundle specifications
+└── .github/workflows/            # Automated CI/CD release builds
 ```
 
 ---
 
-## 🌟 Apoya el Proyecto
+## 🌟 Support the Project
 
-Si te gusta o te resulta útil **GUL**, ¡apóyalo dándole una **estrella (Star ⭐)** en la parte superior derecha de GitHub! Esto ayuda a que el proyecto gane visibilidad en la comunidad de Linux y atraiga a más desarrolladores y mantenedores.
+If you find **GUL** useful, please consider giving it a **Star ⭐** on GitHub! It helps the project gain visibility across the open-source community and attracts more contributors and maintainers.
 
-- 🐛 ¿Encontraste un fallo? Abre un [Issue](https://github.com/mulineee21/gul/issues).
-- 💬 ¿Tienes una idea o sugerencia? Participa en las [Discusiones](https://github.com/mulineee21/gul/discussions).
-- 🤝 ¿Quieres contribuir código? Lee nuestra guía de [Contribución](CONTRIBUTING.md).
+- 🐛 Found a bug? Open an [Issue](https://github.com/mulineee21/gul/issues).
+- 💬 Have an idea or question? Join the [Discussions](https://github.com/mulineee21/gul/discussions).
+- 🤝 Want to contribute code? Read our [Contributing Guide](CONTRIBUTING.md).
 
 ---
 
-## 📄 Licencia
+## 📄 License
 
-Este proyecto está bajo la Licencia **GNU General Public License v3.0 o posterior (GPL-3.0-or-later)** — consulta el archivo [LICENSE](LICENSE) para más detalles.
+This project is licensed under the **GNU General Public License v3.0 or later (GPL-3.0-or-later)** — see the [LICENSE](LICENSE) file for details.
 
 ```text
-GUL (Gestor Universal de Linux)
+GUL (Universal Linux Manager)
 Copyright (C) 2026 Joel Molina
 
-Este programa es software libre: puedes redistribuirlo y/o modificarlo
-bajo los términos de la Licencia Pública General de GNU según es publicada
-por la Free Software Foundation, bien de la versión 3 de dicha Licencia
-o (a tu elección) cualquier versión posterior.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 ```

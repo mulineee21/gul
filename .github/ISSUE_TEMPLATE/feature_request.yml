@@ -1,21 +1,21 @@
-name: 💡 Propuesta de Mejora o Nueva Funcionalidad
-description: Sugiere una idea o mejora para el Gestor Universal de Linux (GUL).
+name: 💡 Feature Request or Proposal
+description: Suggest an idea or enhancement for GUL (Universal Linux Manager).
 title: "[Feature]: "
 labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
       value: |
-        ¡Nos encanta escuchar nuevas ideas para hacer de GUL la mejor tienda de Linux!
+        We would love to hear your ideas to make GUL the best universal software center on Linux!
   - type: textarea
     id: idea
     attributes:
-      label: ¿Qué funcionalidad te gustaría ver añadida?
-      description: Describe detalladamente cómo funcionaría y qué problema resuelve.
+      label: What feature would you like to see added?
+      description: Describe in detail how it should work and what problem it solves.
     validations:
       required: true
   - type: textarea
     id: context
     attributes:
-      label: Alternativas o contexto adicional
-      description: ¿Existen otras herramientas que hagan algo similar o ideas de diseño?
+      label: Alternatives or Additional Context
+      description: Are there existing tools that do something similar, or design mockups?

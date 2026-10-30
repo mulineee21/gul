@@ -256,15 +256,15 @@ export function App() {
       iconUrl: appToInstall.icon_url,
     });
     setInstallProgressPct(4);
-    setInstallStep("Iniciando entorno de instalación...");
+    setInstallStep("Initializing installation environment...");
     setInstallStatus("starting");
     setTerminalLogs([
       {
-        text: `[GUL] Iniciando proceso para instalar ${appToInstall.name} (${source.toUpperCase()})...`,
+        text: `[GUL] Starting installation process for ${appToInstall.name} (${source.toUpperCase()})...`,
         time: new Date().toLocaleTimeString(),
       },
       {
-        text: `[GUL] Paquete objetivo: ${pkgId}`,
+        text: `[GUL] Target package: ${pkgId}`,
         time: new Date().toLocaleTimeString(),
       },
     ]);
@@ -288,12 +288,12 @@ export function App() {
       await loadSystemData();
       setInstallProgressPct(100);
       setInstallStatus("success");
-      setInstallStep("¡Instalación completada con éxito!");
-      showToast(`¡${appToInstall.name} (${source}) se ha instalado correctamente!`);
+      setInstallStep("Installation completed successfully!");
+      showToast(`${appToInstall.name} (${source}) installed successfully!`);
     } catch (e) {
       setInstallStatus("error");
-      setInstallStep("Error durante la instalación");
-      showToast(`Error instalando ${appToInstall.name}: ${e}`);
+      setInstallStep("Error during installation");
+      showToast(`Error installing ${appToInstall.name}: ${e}`);
     } finally {
       setInstallingId(null);
       setInstallingFormat(null);
@@ -305,30 +305,30 @@ export function App() {
       try {
         await invoke("cancel_install", { id: installModalData.pkgId });
         setInstallStatus("cancelled");
-        setInstallStep("Instalación cancelada por el usuario");
+        setInstallStep("Installation cancelled by user");
         setTerminalLogs((prev) => [
           ...prev,
           {
-            text: "[GUL] Instalación abortada por el usuario.",
+            text: "[GUL] Installation aborted by user.",
             isStderr: true,
             time: new Date().toLocaleTimeString(),
           },
         ]);
       } catch (e) {
-        console.error("Error al cancelar instalación:", e);
+        console.error("Error cancelling installation:", e);
       }
     }
   };
 
   const handlePickLocalAppImage = async () => {
     try {
-      showToast("Abriendo selector para archivo .AppImage local...");
+      showToast("Opening file picker for local .AppImage...");
       const desktopPath = await invoke<string>("pick_and_install_local_appimage");
       await loadSystemData();
-      showToast(`¡AppImage integrada correctamente en el menú de aplicaciones! (${desktopPath})`);
+      showToast(`AppImage successfully integrated into desktop menu! (${desktopPath})`);
       setFormatModalApp(null);
     } catch (e) {
-      if (!String(e).includes("cancelada")) {
+      if (!String(e).includes("cancelada") && !String(e).includes("cancelled")) {
         showToast(`${e}`);
       }
     }
@@ -338,9 +338,9 @@ export function App() {
   const handleLaunchApp = async (id: string, execPath?: string) => {
     try {
       await invoke("launch_app", { id, execPath: execPath || null });
-      showToast("Lanzando aplicación...");
+      showToast("Launching application...");
     } catch (e) {
-      showToast(`No se pudo ejecutar: ${e}`);
+      showToast(`Failed to launch: ${e}`);
     }
   };
 
@@ -364,10 +364,10 @@ export function App() {
         source,
       });
       if (cleared) {
-        showToast("Caché de la app limpiada exitosamente");
+        showToast("App cache cleared successfully");
         loadSystemData();
       } else {
-        showToast("No había caché acumulada para borrar");
+        showToast("No accumulated cache to clear");
       }
     } catch (e) {
       showToast(`Error: ${e}`);
@@ -375,25 +375,25 @@ export function App() {
   };
 
   const handleUninstall = (id: string, name?: string) => {
-    const displayName = name || id.split(":").pop() || "la aplicación";
+    const displayName = name || id.split(":").pop() || "the application";
     setConfirmDialog({
       isOpen: true,
-      title: `¿Desinstalar ${displayName}?`,
-      message: `Esta acción desinstalará ${displayName} de tu sistema y liberará el espacio en disco asociado.`,
-      confirmLabel: "Desinstalar",
+      title: `Uninstall ${displayName}?`,
+      message: `This action will remove ${displayName} from your system and free up associated disk space.`,
+      confirmLabel: "Uninstall",
       variant: "danger",
       onConfirm: async () => {
         setConfirmDialog(null);
-        showToast(`Desinstalando ${displayName}...`);
+        showToast(`Uninstalling ${displayName}...`);
         try {
           const msg = await invoke<string>("uninstall_app", { id });
-          showToast(`Desinstalado: ${msg || "Éxito"}`);
+          showToast(`Uninstalled: ${msg || "Success"}`);
           await loadSystemData();
           if (selectedApp && (selectedApp.id === id || (selectedApp as any).pkg_id === id)) {
             setSelectedApp(null);
           }
         } catch (e) {
-          showToast(`Error al desinstalar: ${e}`);
+          showToast(`Error uninstalling: ${e}`);
         }
       },
     });
@@ -404,24 +404,24 @@ export function App() {
     otherIds: string[],
     groupName?: string
   ) => {
-    const titleName = groupName || "la aplicación";
+    const titleName = groupName || "the application";
     setConfirmDialog({
       isOpen: true,
-      title: "¿Limpiar versiones duplicadas?",
-      message: `¿Deseas conservar la versión recomendada de ${titleName} y desinstalar las otras ${otherIds.length} versiones redundantes?`,
-      confirmLabel: "Conservar recomendada",
+      title: "Clean redundant duplicate versions?",
+      message: `Do you want to keep the recommended version of ${titleName} and remove the other ${otherIds.length} redundant versions?`,
+      confirmLabel: "Keep Recommended",
       variant: "warning",
       onConfirm: async () => {
         setConfirmDialog(null);
-        showToast("Limpiando versiones duplicadas...");
+        showToast("Cleaning duplicate versions...");
         for (const id of otherIds) {
           try {
             await invoke("uninstall_app", { id });
           } catch (e) {
-            console.error(`Error desinstalando duplicado ${id}:`, e);
+            console.error(`Error uninstalling duplicate ${id}:`, e);
           }
         }
-        showToast("Duplicados limpiados correctamente");
+        showToast("Duplicates cleaned successfully");
         await loadSystemData();
       },
     });
@@ -434,23 +434,23 @@ export function App() {
     // Create system snapshot before updates if requested
     if (createSnapshot && snapshotSupport?.supported) {
       try {
-        showToast("Creando punto de restauración (Snapshot Btrfs) de seguridad...");
+        showToast("Creating Btrfs restore point (snapshot) for safety...");
         await invoke("create_system_snapshot", {
-          description: "GUL: Antes de actualizar paquetes del sistema",
+          description: "GUL: Safety restore point before package updates",
         });
-        showToast("¡Punto de restauración creado con éxito!");
+        showToast("System restore point created successfully!");
       } catch (e) {
-        console.warn("No se pudo crear snapshot previo:", e);
+        console.warn("Could not create previous snapshot:", e);
       }
     }
 
     try {
-      showToast("Iniciando actualizaciones...");
+      showToast("Starting system updates...");
       await invoke("start_update_all", { selectedManagers });
-      showToast("Actualizaciones completadas");
+      showToast("All updates completed successfully");
       await loadSystemData();
     } catch (e) {
-      showToast(`Error durante la actualización: ${e}`);
+      showToast(`Error during update: ${e}`);
     } finally {
       setIsUpdating(false);
     }
@@ -462,9 +462,9 @@ export function App() {
       await invoke("toggle_autostart_entry", { id, enable });
       const refreshed = await invoke<AutostartEntry[]>("get_autostart_entries");
       setAutostartEntries(refreshed);
-      showToast(`Aplicación ${enable ? "activada" : "desactivada"} en el inicio.`);
+      showToast(`Application ${enable ? "enabled" : "disabled"} at startup.`);
     } catch (e) {
-      showToast(`Error al cambiar inicio: ${e}`);
+      showToast(`Error updating startup entry: ${e}`);
     }
   };
 
@@ -473,22 +473,22 @@ export function App() {
       await invoke("add_custom_autostart", { name, exec, comment });
       const refreshed = await invoke<AutostartEntry[]>("get_autostart_entries");
       setAutostartEntries(refreshed);
-      showToast(`¡${name} añadida al inicio de sesión!`);
+      showToast(`${name} added to startup applications!`);
     } catch (e) {
-      showToast(`Error al añadir al inicio: ${e}`);
+      showToast(`Error adding startup entry: ${e}`);
     }
   };
 
   // Snapshot Handlers
   const handleCreateSnapshot = async (description: string) => {
     try {
-      showToast("Creando instantánea del sistema...");
+      showToast("Creating system restore point (snapshot)...");
       const res = await invoke<string>("create_system_snapshot", { description });
       const refreshed = await invoke<SnapshotEntry[]>("get_snapshots");
       setSnapshots(refreshed);
       showToast(res);
     } catch (e) {
-      showToast(`Error creando instantánea: ${e}`);
+      showToast(`Error creating snapshot: ${e}`);
     }
   };
 
@@ -497,16 +497,16 @@ export function App() {
     if (packages.length === 0) return;
 
     setInstallModalData({
-      appName: "Restauración de Perfil en Lote",
+      appName: "Batch Profile Reinstallation",
       source: (source as SourceType) || "pacman",
-      pkgId: `${packages.length} paquetes seleccionados`,
+      pkgId: `${packages.length} selected packages`,
     });
     setInstallProgressPct(5);
-    setInstallStep(`Iniciando instalación de ${packages.length} paquetes...`);
+    setInstallStep(`Starting installation of ${packages.length} packages...`);
     setInstallStatus("running");
     setTerminalLogs([
       {
-        text: `[GUL] Iniciando restauración de perfil (${packages.length} paquetes vía ${source})...`,
+        text: `[GUL] Starting profile restore (${packages.length} packages via ${source})...`,
         time: new Date().toLocaleTimeString(),
       },
     ]);
@@ -515,7 +515,7 @@ export function App() {
       // Install all packages sequentially
       for (let i = 0; i < packages.length; i++) {
         const pkg = packages[i];
-        setInstallStep(`Instalando paquete ${i + 1}/${packages.length}: ${pkg}...`);
+        setInstallStep(`Installing package ${i + 1}/${packages.length}: ${pkg}...`);
         setInstallProgressPct(Math.round(((i + 1) / packages.length) * 100));
 
         await invoke("install_package", {
@@ -528,29 +528,29 @@ export function App() {
       await loadSystemData();
       setInstallProgressPct(100);
       setInstallStatus("success");
-      setInstallStep("¡Todos los paquetes han sido restaurados con éxito!");
-      showToast("¡Reinstalación en lote completada!");
+      setInstallStep("All packages restored successfully!");
+      showToast("Batch profile restore completed successfully!");
     } catch (e) {
       setInstallStatus("error");
-      setInstallStep("Error durante la restauración");
-      showToast(`Error en lote: ${e}`);
+      setInstallStep("Error during batch restoration");
+      showToast(`Batch install error: ${e}`);
     }
   };
 
   const handleIntegrateAppImage = async (path: string) => {
     try {
       await invoke("integrate_appimage", { path });
-      showToast("AppImage integrada en el menú de aplicaciones");
+      showToast("AppImage integrated into application menu");
       loadSystemData();
     } catch (e) {
-      showToast(`Error al integrar: ${e}`);
+      showToast(`Error integrating: ${e}`);
     }
   };
 
   const handleUnintegrateAppImage = async (path: string) => {
     try {
       await invoke("unintegrate_appimage", { path });
-      showToast("AppImage retirada del menú");
+      showToast("AppImage removed from menu");
       loadSystemData();
     } catch (e) {
       showToast(`Error: ${e}`);
@@ -560,26 +560,26 @@ export function App() {
   const handleScanCustomAppImage = (path: string) => {
     if (!customAppImagePaths.includes(path)) {
       setCustomAppImagePaths([...customAppImagePaths, path]);
-      showToast(`Escaneando ruta: ${path}`);
+      showToast(`Scanning path: ${path}`);
     }
   };
 
   const handleDeleteAppImageFile = (path: string, name?: string) => {
-    const displayName = name || path.split("/").pop() || "el archivo";
+    const displayName = name || path.split("/").pop() || "the file";
     setConfirmDialog({
       isOpen: true,
-      title: "¿Eliminar archivo AppImage?",
-      message: `¿Seguro que deseas eliminar permanentemente el archivo ${displayName}? Se retirará del menú de aplicaciones.`,
-      confirmLabel: "Eliminar permanentemente",
+      title: "Delete AppImage file?",
+      message: `Are you sure you want to permanently delete ${displayName}? It will be removed from your desktop menu.`,
+      confirmLabel: "Delete Permanently",
       variant: "danger",
       onConfirm: async () => {
         setConfirmDialog(null);
         try {
           await invoke("uninstall_app", { id: `appimage:${path}` });
-          showToast("Archivo AppImage eliminado.");
+          showToast("AppImage file deleted.");
           await loadSystemData();
         } catch (e) {
-          showToast(`Error al eliminar: ${e}`);
+          showToast(`Error deleting file: ${e}`);
         }
       },
     });
@@ -591,10 +591,10 @@ export function App() {
     try {
       const res = await invoke<CleanResult>("clean_system", { itemIds: selectedIds });
       setCleanResult(res);
-      showToast("Limpieza del sistema completada");
+      showToast("System cleanup completed successfully");
       loadSystemData();
     } catch (e) {
-      showToast(`Error al limpiar: ${e}`);
+      showToast(`Cleanup error: ${e}`);
     } finally {
       setIsCleaning(false);
     }
@@ -604,46 +604,46 @@ export function App() {
     switch (currentTab) {
       case "apps":
         return {
-          title: "Aplicaciones del Sistema",
-          subtitle: `Detectadas ${desktopApps.length} aplicaciones con interfaz gráfica y ${allPackages.length} paquetes del sistema`,
+          title: "System Applications",
+          subtitle: `Detected ${desktopApps.length} desktop applications and ${allPackages.length} system packages`,
         };
       case "store":
         return {
-          title: "Tienda GUL (Explorador de Paquetes)",
-          subtitle: `Conexión directa a Flathub, AUR y repositorios oficiales de ${osInfo?.distro_name || "tu distribución"} (${osInfo?.native_manager?.toUpperCase() || "Nativo"})`,
+          title: "GUL Store & Package Explorer",
+          subtitle: `Direct connection to Flathub, Snapcraft, AUR, and official repositories of ${osInfo?.distro_name || "your distribution"} (${osInfo?.native_manager?.toUpperCase() || "Native"})`,
         };
       case "duplicates":
         return {
-          title: "Detección de Duplicados",
-          subtitle: "Programas instalados en múltiples formatos con recomendaciones inteligentes para ahorrar espacio",
+          title: "Duplicate App Detection",
+          subtitle: "Programs installed across multiple packaging formats with intelligent storage recommendations",
         };
       case "updates":
         return {
-          title: "Actualizaciones Unificadas",
-          subtitle: "Actualiza todos tus gestores simultáneamente con registro en tiempo real",
+          title: "Unified Update Center",
+          subtitle: "Update all active package managers simultaneously with real-time streaming logs",
         };
       case "appimages":
         return {
-          title: "Gestor de AppImages",
-          subtitle: "Integra ejecutables autónomos en el menú XDG de tu escritorio y actualízalos",
+          title: "AppImage Manager",
+          subtitle: "Integrate standalone executables into your desktop XDG menu with automatic desktop entry creation",
         };
       case "cleaner":
         return {
-          title: "Mantenimiento y Limpieza",
-          subtitle: "Recupera espacio eliminando cachés de descargas y dependencias huérfanas",
+          title: "System Maintenance & Cleaner",
+          subtitle: "Reclaim disk space by clearing download caches and orphaned dependencies",
         };
       case "autostart":
         return {
-          title: "Aplicaciones de Inicio (Autostart)",
-          subtitle: "Gestiona qué programas se inician automáticamente al arrancar tu sesión de escritorio",
+          title: "Startup Applications (Autostart)",
+          subtitle: "Manage applications that automatically launch when your desktop session starts",
         };
       case "snapshots":
         return {
-          title: "Puntos de Restauración (Snapshots Btrfs)",
-          subtitle: "Crea y administra instantáneas seguras del sistema con Snapper y Timeshift",
+          title: "System Restore Points (Btrfs Snapshots)",
+          subtitle: "Create and manage safe system snapshots with Snapper and Timeshift",
         };
       default:
-        return { title: "GUL", subtitle: "Gestor Universal de Linux" };
+        return { title: "GUL", subtitle: "Universal Linux Manager" };
     }
   };
 

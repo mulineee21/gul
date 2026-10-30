@@ -74,13 +74,13 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
           </div>
           <div>
             <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              <span>Aplicaciones de Inicio</span>
+              <span>Startup Applications</span>
               <span className="text-xs font-mono font-medium px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">
-                {entries.length} programas
+                {entries.length} apps
               </span>
             </h2>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Administra qué aplicaciones y servicios se ejecutan automáticamente al iniciar la sesión de usuario.
+              Manage which applications and services launch automatically on user session login.
             </p>
           </div>
         </div>
@@ -90,7 +90,7 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
           className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold flex items-center gap-2 transition active:scale-95 shadow-md shadow-blue-500/20 shrink-0 self-start md:self-auto"
         >
           <Plus className="w-4 h-4" />
-          <span>Añadir App al Inicio</span>
+          <span>Add Startup Application</span>
         </button>
       </div>
 
@@ -101,7 +101,7 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
             <Power className="w-5 h-5 text-zinc-400" />
           </div>
           <div>
-            <div className="text-[11px] font-mono text-zinc-400 uppercase">Total Detectadas</div>
+            <div className="text-[11px] font-mono text-zinc-400 uppercase">Total Detected</div>
             <div className="text-lg font-bold text-white mt-0.5">{entries.length}</div>
           </div>
         </div>
@@ -111,7 +111,7 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-[11px] font-mono text-emerald-400/80 uppercase">Activas al Inicio</div>
+            <div className="text-[11px] font-mono text-emerald-400/80 uppercase">Active on Boot</div>
             <div className="text-lg font-bold text-emerald-300 mt-0.5">{enabledCount}</div>
           </div>
         </div>
@@ -121,7 +121,7 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
             <XCircle className="w-5 h-5 text-zinc-500" />
           </div>
           <div>
-            <div className="text-[11px] font-mono text-zinc-400 uppercase">Desactivadas</div>
+            <div className="text-[11px] font-mono text-zinc-400 uppercase">Disabled</div>
             <div className="text-lg font-bold text-zinc-400 mt-0.5">{disabledCount}</div>
           </div>
         </div>
@@ -135,7 +135,7 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar por nombre, comando ejecutable o descripción..."
+            placeholder="Search by name, executable command, or description..."
             className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-blue-500 transition"
           />
         </div>
@@ -149,7 +149,7 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
                 : "bg-zinc-900 text-zinc-400 hover:text-white"
             }`}
           >
-            Todas ({entries.length})
+            All ({entries.length})
           </button>
           <button
             onClick={() => setFilterMode("enabled")}
@@ -159,7 +159,7 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
                 : "bg-zinc-900 text-zinc-400 hover:text-white"
             }`}
           >
-            Activas ({enabledCount})
+            Enabled ({enabledCount})
           </button>
           <button
             onClick={() => setFilterMode("disabled")}
@@ -169,7 +169,7 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
                 : "bg-zinc-900 text-zinc-400 hover:text-white"
             }`}
           >
-            Desactivadas ({disabledCount})
+            Disabled ({disabledCount})
           </button>
         </div>
       </div>
@@ -177,13 +177,13 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
       {/* List */}
       {loading ? (
         <div className="py-20 text-center text-zinc-500 font-mono text-xs">
-          Cargando entradas de inicio de sesión...
+          Loading startup entries...
         </div>
       ) : filteredEntries.length === 0 ? (
         <div className="py-16 text-center rounded-2xl border border-zinc-800 bg-zinc-950/40 space-y-2">
           <Clock className="w-8 h-8 text-zinc-600 mx-auto" />
-          <p className="text-sm font-semibold text-zinc-300">No se encontraron entradas de inicio</p>
-          <p className="text-xs text-zinc-500">Prueba ajustando el término de búsqueda o el filtro.</p>
+          <p className="text-sm font-semibold text-zinc-300">No startup entries found</p>
+          <p className="text-xs text-zinc-500">Try adjusting your search query or filter.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -207,7 +207,7 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
                         {entry.name}
                       </h4>
                       <p className="text-[11px] text-zinc-400 line-clamp-1 mt-0.5">
-                        {entry.comment || "Sin descripción"}
+                        {entry.comment || "No description"}
                       </p>
                     </div>
                   </div>
@@ -215,7 +215,7 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
                   {/* Toggle Switch */}
                   <button
                     onClick={() => onToggle(entry.id, !entry.enabled)}
-                    title={entry.enabled ? "Desactivar inicio automático" : "Activar inicio automático"}
+                    title={entry.enabled ? "Disable startup" : "Enable startup"}
                     className={`w-11 h-6 rounded-full transition-colors duration-200 ease-in-out p-1 shrink-0 relative flex items-center ${
                       entry.enabled ? "bg-emerald-600" : "bg-zinc-800 border border-zinc-700"
                     }`}
@@ -247,12 +247,12 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
                         : "bg-blue-950/30 text-blue-300 border-blue-700/30"
                     }`}
                   >
-                    {entry.is_system ? "Sistema (/etc/xdg)" : "Usuario (~/.config)"}
+                    {entry.is_system ? "System (/etc/xdg)" : "User (~/.config)"}
                   </span>
                 </div>
 
                 <span className={`font-medium ${entry.enabled ? "text-emerald-400" : "text-zinc-500"}`}>
-                  {entry.enabled ? "Inicia con la sesión" : "Desactivado"}
+                  {entry.enabled ? "Launches on login" : "Disabled"}
                 </span>
               </div>
             </div>
@@ -270,8 +270,8 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
                   <Rocket className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">Añadir Aplicación al Inicio</h3>
-                  <p className="text-xs text-zinc-400">Crea un atajo en ~/.config/autostart/</p>
+                  <h3 className="text-base font-bold text-white">Add Startup Application</h3>
+                  <p className="text-xs text-zinc-400">Creates a launcher entry in ~/.config/autostart/</p>
                 </div>
               </div>
               <button
@@ -285,12 +285,12 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
             <form onSubmit={handleAddSubmit} className="p-5 space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Nombre de la Aplicación *
+                  Application Name *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ej. Discord, Spotify, Conky, Script Personal"
+                  placeholder="e.g. Discord, Spotify, Conky, Custom Script"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
@@ -299,12 +299,12 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Comando o Ruta Ejecutable *
+                  Executable Command or Path *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="Ej. /usr/bin/discord --start-minimized"
+                  placeholder="e.g. /usr/bin/discord --start-minimized"
                   value={newExec}
                   onChange={(e) => setNewExec(e.target.value)}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs font-mono text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
@@ -313,11 +313,11 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                  Descripción u Observaciones (Opcional)
+                  Description / Comments (Optional)
                 </label>
                 <input
                   type="text"
-                  placeholder="Ej. Inicia minimizado en segundo plano"
+                  placeholder="e.g. Starts minimized in background"
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
@@ -330,14 +330,14 @@ export const AutostartView: React.FC<AutostartViewProps> = ({
                   onClick={() => setShowAddModal(false)}
                   className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold transition"
                 >
-                  Cancelar
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 text-white text-xs font-semibold shadow-md transition disabled:opacity-50"
                 >
-                  {isSubmitting ? "Guardando..." : "Guardar e Iniciar con Sesión"}
+                  {isSubmitting ? "Saving..." : "Save & Enable on Startup"}
                 </button>
               </div>
             </form>

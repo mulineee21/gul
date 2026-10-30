@@ -57,17 +57,17 @@ export const CleanerView: React.FC<CleanerViewProps> = ({
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
             <span className="text-xs bg-emerald-500/20 text-emerald-300 font-mono px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-emerald-400" /> Limpieza de Mantenimiento
+              <ShieldCheck className="w-3 h-3 text-emerald-400" /> System Maintenance & Cleanup
             </span>
           </div>
 
           <h3 className="text-2xl font-black text-white tracking-tight">
             {formatBytes(totalReclaimable)}{" "}
-            <span className="text-zinc-400 font-normal text-base">recuperables en tu disco</span>
+            <span className="text-zinc-400 font-normal text-base">reclaimable on disk</span>
           </h3>
 
           <p className="text-xs text-zinc-300 max-w-lg leading-relaxed">
-            Elimina con seguridad paquetes .pkg/.deb cacheados tras instalar, dependencias huérfanas que quedaron sin uso al borrar apps y runtimes Flatpak obsoletos.
+            Safely remove cached .pkg/.deb packages after installation, orphaned dependencies left behind by uninstalled apps, and unused Flatpak runtimes.
           </p>
         </div>
 
@@ -80,13 +80,13 @@ export const CleanerView: React.FC<CleanerViewProps> = ({
             <Trash2 className={`w-5 h-5 ${isCleaning ? "animate-pulse" : ""}`} />
             <span>
               {isCleaning
-                ? "Limpiando sistema..."
-                : `Liberar ${formatBytes(selectedReclaimable)}`}
+                ? "Cleaning system..."
+                : `Reclaim ${formatBytes(selectedReclaimable)}`}
             </span>
           </button>
 
           <span className="text-[11px] text-zinc-400 font-mono">
-            {selectedIds.length} de {items.length} tareas seleccionadas
+            {selectedIds.length} of {items.length} tasks selected
           </span>
         </div>
       </div>
@@ -104,8 +104,8 @@ export const CleanerView: React.FC<CleanerViewProps> = ({
           <div className="space-y-1 overflow-hidden w-full">
             <h5 className="text-sm font-bold">
               {cleanResult.success
-                ? `¡Limpieza completada! Se recuperaron ${formatBytes(cleanResult.cleaned_bytes)} de espacio.`
-                : "Se completó la limpieza con algunas advertencias."}
+                ? `Cleanup complete! Reclaimed ${formatBytes(cleanResult.cleaned_bytes)} of disk space.`
+                : "Cleanup completed with some warnings."}
             </h5>
             {cleanResult.output_log && (
               <pre className="text-[11px] font-mono bg-zinc-950/80 p-2.5 rounded-lg border border-zinc-800 text-zinc-300 max-h-32 overflow-y-auto whitespace-pre-wrap">
@@ -121,7 +121,7 @@ export const CleanerView: React.FC<CleanerViewProps> = ({
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
             <Layers className="w-3.5 h-3.5 text-emerald-400" />
-            Elementos y Cachés Disponibles para Limpieza
+            Caches and Items Available for Cleanup
           </h4>
 
           <div className="flex items-center space-x-3 text-xs">
@@ -129,14 +129,14 @@ export const CleanerView: React.FC<CleanerViewProps> = ({
               onClick={selectAll}
               className="text-blue-400 hover:text-blue-300 font-medium"
             >
-              Seleccionar todo
+              Select all
             </button>
             <span className="text-zinc-700">|</span>
             <button
               onClick={deselectAll}
               className="text-zinc-500 hover:text-zinc-400"
             >
-              Deseleccionar
+              Deselect all
             </button>
             <span className="text-zinc-700">|</span>
             <button
@@ -144,7 +144,7 @@ export const CleanerView: React.FC<CleanerViewProps> = ({
               className="text-zinc-400 hover:text-zinc-200 flex items-center gap-1"
             >
               <Terminal className="w-3 h-3" />
-              <span>{showCommands ? "Ocultar comandos" : "Ver comandos"}</span>
+              <span>{showCommands ? "Hide commands" : "Show commands"}</span>
             </button>
           </div>
         </div>
@@ -152,14 +152,14 @@ export const CleanerView: React.FC<CleanerViewProps> = ({
         {loading ? (
           <div className="flex flex-col items-center justify-center h-48 text-zinc-500 space-y-2">
             <div className="w-7 h-7 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs font-mono">Calculando cachés y huérfanos...</p>
+            <p className="text-xs font-mono">Calculating caches and orphaned packages...</p>
           </div>
         ) : items.length === 0 ? (
           <div className="bg-zinc-900/30 border border-zinc-800/80 rounded-2xl p-8 flex flex-col items-center justify-center text-center space-y-2">
             <CheckCircle2 className="w-8 h-8 text-emerald-400" />
-            <h5 className="text-sm font-semibold text-white">Tu sistema está optimizado</h5>
+            <h5 className="text-sm font-semibold text-white">Your system is optimized</h5>
             <p className="text-xs text-zinc-500">
-              No se han encontrado cachés acumuladas ni paquetes huérfanos en este momento.
+              No leftover caches or orphaned packages found at this time.
             </p>
           </div>
         ) : (
@@ -194,7 +194,7 @@ export const CleanerView: React.FC<CleanerViewProps> = ({
                         </span>
                         {item.requires_sudo && (
                           <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                            Requiere sudo/polkit
+                            Requires sudo/polkit
                           </span>
                         )}
                       </div>
