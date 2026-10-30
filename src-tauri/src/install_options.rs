@@ -11,17 +11,20 @@ pub fn get_install_options(app_name: &str, canonical_name: &str, current_pkg_id:
     let installed_identities = crate::desktop_apps::get_installed_canonical_identities();
 
     let mut options = Vec::new();
-    let clean_name = if canonical_name.is_empty() {
-        crate::duplicates::normalize_name(app_name)
-    } else {
-        canonical_name.to_lowercase()
-    };
+    let clean_name = crate::duplicates::normalize_name(
+        if !canonical_name.is_empty() {
+            canonical_name
+        } else {
+            app_name
+        }
+    );
 
     // 1. NATIVE PACKAGE MANAGER (Pacman / APT / DNF based on detected OS)
     let native_mgr = os_info.native_manager.clone();
-    let (native_pkg_name, native_version) = resolve_native_package(&clean_name, &native_mgr);
+    let (native_pkg_name, native_version) = resolve_native_package(app_name, canonical_name, current_pkg_id, &native_mgr);
     let native_installed = installed_identities.contains(&native_pkg_name.to_lowercase())
-        || installed_identities.contains(&clean_name);
+        || installed_identities.contains(&clean_name)
+        || installed_identities.contains(&app_name.to_lowercase());
 
     let native_source = match native_mgr.as_str() {
         "apt" => SourceType::Apt,
@@ -89,25 +92,113 @@ pub fn get_install_options(app_name: &str, canonical_name: &str, current_pkg_id:
     options
 }
 
-fn resolve_native_package(canonical_name: &str, native_mgr: &str) -> (String, String) {
+fn resolve_native_package(
+    app_name: &str,
+    canonical_name: &str,
+    pkg_id: &str,
+    native_mgr: &str,
+) -> (String, String) {
+    let mut candidates = Vec::new();
+
+    // Candidate 1: Normalized app name (e.g. "darktable", "vlc", "blender")
+    let norm_app = crate::duplicates::normalize_name(app_name);
+    if !norm_app.is_empty() {
+        candidates.push(norm_app.clone());
+    }
+
+    // Candidate 2: Normalized canonical name
+    let norm_canon = crate::duplicates::normalize_name(canonical_name);
+    if !norm_canon.is_empty() && !candidates.contains(&norm_canon) {
+        candidates.push(norm_canon);
+    }
+
+    // Candidate 3: Normalized pkg_id
+    let clean_pkg_id = pkg_id.trim_start_matches("pacman:").trim_start_matches("flatpak:").trim_start_matches("apt:").trim_start_matches("dnf:");
+    let norm_pkg = crate::duplicates::normalize_name(clean_pkg_id);
+    if !norm_pkg.is_empty() && !candidates.contains(&norm_pkg) {
+        candidates.push(norm_pkg);
+    }
+
+    // Candidate 4: Last segment of reverse-DNS
+    if clean_pkg_id.contains('.') {
+        if let Some(last) = clean_pkg_id.split('.').last() {
+            let last_low = last.to_lowercase();
+            if !candidates.contains(&last_low) {
+                candidates.push(last_low);
+            }
+        }
+    }
+
+    // Candidate 5: lowercase app name directly
+    let direct_low = app_name.to_lowercase().replace(' ', "-");
+    if !candidates.contains(&direct_low) {
+        candidates.push(direct_low);
+    }
+
     if native_mgr == "pacman" {
-        // Query pacman -Ss
-        if let Ok(out) = Command::new("pacman").env("LC_ALL", "C").args(["-Ss", canonical_name]).output() {
-            let text = String::from_utf8_lossy(&out.stdout);
-            for line in text.lines() {
-                let parts: Vec<&str> = line.split_whitespace().collect();
-                if !parts.is_empty() && parts[0].contains('/') {
-                    let pkg = parts[0].split('/').nth(1).unwrap_or(parts[0]);
-                    if pkg == canonical_name || pkg.starts_with(canonical_name) {
-                        let ver = parts.get(1).unwrap_or(&"").to_string();
-                        return (pkg.to_string(), ver);
+        // Step 1: Check exact match with `pacman -Si`
+        for candidate in &candidates {
+            if let Ok(out) = Command::new("pacman").env("LC_ALL", "C").args(["-Si", candidate]).output() {
+                if out.status.success() {
+                    let text = String::from_utf8_lossy(&out.stdout);
+                    let mut version = "Repositorio Oficial".to_string();
+                    for line in text.lines() {
+                        if line.starts_with("Version") || line.starts_with("Versión") {
+                            if let Some((_, v)) = line.split_once(':') {
+                                version = v.trim().to_string();
+                                break;
+                            }
+                        }
                     }
+                    return (candidate.clone(), version);
+                }
+            }
+        }
+
+        // Step 2: Fallback query with `pacman -Ss`
+        for candidate in &candidates {
+            if let Ok(out) = Command::new("pacman").env("LC_ALL", "C").args(["-Ss", candidate]).output() {
+                let text = String::from_utf8_lossy(&out.stdout);
+                for line in text.lines() {
+                    let parts: Vec<&str> = line.split_whitespace().collect();
+                    if !parts.is_empty() && parts[0].contains('/') {
+                        let pkg = parts[0].split('/').nth(1).unwrap_or(parts[0]);
+                        if pkg == candidate || pkg == norm_app {
+                            let ver = parts.get(1).unwrap_or(&"").to_string();
+                            return (pkg.to_string(), ver);
+                        }
+                    }
+                }
+            }
+        }
+    } else if native_mgr == "apt" {
+        for candidate in &candidates {
+            if let Ok(out) = Command::new("apt-cache").args(["show", candidate]).output() {
+                if out.status.success() {
+                    let text = String::from_utf8_lossy(&out.stdout);
+                    for line in text.lines() {
+                        if line.starts_with("Version:") {
+                            let ver = line.trim_start_matches("Version:").trim().to_string();
+                            return (candidate.clone(), ver);
+                        }
+                    }
+                    return (candidate.clone(), "Repositorio APT".to_string());
+                }
+            }
+        }
+    } else if native_mgr == "dnf" {
+        for candidate in &candidates {
+            if let Ok(out) = Command::new("dnf").args(["info", "-q", candidate]).output() {
+                if out.status.success() {
+                    return (candidate.clone(), "Repositorio DNF".to_string());
                 }
             }
         }
     }
 
-    (canonical_name.to_string(), "Repositorio Oficial".to_string())
+    // Default to the cleanest candidate
+    let fallback = candidates.into_iter().next().unwrap_or_else(|| norm_app);
+    (fallback, "Repositorio Oficial".to_string())
 }
 
 fn resolve_flathub_id(canonical_name: &str, current_pkg_id: &str) -> String {
@@ -343,4 +434,23 @@ pub fn pick_and_install_local_appimage(app: AppHandle) -> Result<String, String>
     });
 
     Ok(desktop_path)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_darktable_options() {
+        let opts = get_install_options("Darktable", "org.darktable.Darktable", "org.darktable.Darktable");
+        let pacman_opt = opts.iter().find(|o| o.source == SourceType::Pacman).expect("pacman option missing");
+        assert_eq!(pacman_opt.pkg_id, "darktable");
+    }
+
+    #[test]
+    fn test_vlc_options() {
+        let opts = get_install_options("VLC media player", "vlc", "org.videolan.VLC");
+        let pacman_opt = opts.iter().find(|o| o.source == SourceType::Pacman).expect("pacman option missing");
+        assert_eq!(pacman_opt.pkg_id, "vlc");
+    }
 }

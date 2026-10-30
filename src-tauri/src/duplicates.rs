@@ -9,6 +9,23 @@ pub fn normalize_name(raw: &str) -> String {
         s = stripped.to_string();
     }
 
+    // If reverse-DNS format (e.g. "org.darktable.Darktable", "com.spotify.Client")
+    if s.contains('.') {
+        let parts: Vec<&str> = s.split('.').collect();
+        if parts.len() >= 2 {
+            let last = parts[parts.len() - 1];
+            let prev = parts[parts.len() - 2];
+            // If author and app have the same name (e.g. org.darktable.darktable, org.blender.blender)
+            if last == prev {
+                s = last.to_string();
+            } else if last == "client" || last == "desktop" || last == "app" || last == "gui" || last == "studio" {
+                s = prev.to_string();
+            } else {
+                s = last.to_string();
+            }
+        }
+    }
+
     // Strip common reverse-DNS prefixes (Flatpak, DBus names)
     let prefixes = [
         "org.mozilla.",
@@ -45,6 +62,12 @@ pub fn normalize_name(raw: &str) -> String {
 
     // Replace dots, underscores with dashes
     s = s.replace(['.', '_', ' '], "-");
+
+    // Clean up duplicated words like "darktable-darktable"
+    let parts: Vec<&str> = s.split('-').collect();
+    if parts.len() == 2 && parts[0] == parts[1] {
+        s = parts[0].to_string();
+    }
 
     // Strip common packaging suffixes
     let suffixes = [
@@ -193,4 +216,27 @@ fn evaluate_recommendation(apps: &[AppInfo]) -> (String, String, u64) {
         format!("Recomendado conservar versión principal de {}", first.source.as_str()),
         savings,
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_normalize_darktable() {
+        assert_eq!(normalize_name("org.darktable.Darktable"), "darktable");
+        assert_eq!(normalize_name("Darktable"), "darktable");
+        assert_eq!(normalize_name("darktable-darktable"), "darktable");
+    }
+
+    #[test]
+    fn test_normalize_vlc() {
+        assert_eq!(normalize_name("org.videolan.VLC"), "vlc");
+        assert_eq!(normalize_name("vlc"), "vlc");
+    }
+
+    #[test]
+    fn test_normalize_blender() {
+        assert_eq!(normalize_name("org.blender.Blender"), "blender");
+    }
 }
