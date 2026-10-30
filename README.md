@@ -1,107 +1,163 @@
-# OmniPkg — Gestor Unificado de Aplicaciones para Linux 🐧
+# GUL — Gestor Universal de Linux 🐧
 
-**OmniPkg** es un gestor gráfico unificado y moderno para el usuario final de Linux, desarrollado con **Rust + Tauri v2** y una interfaz moderna en **React + Tailwind CSS**. Centraliza y unifica la gestión de todos los ecosistemas de empaquetado del sistema en una sola herramienta visual, rápida y elegante.
+<p align="center">
+  <img src="src-tauri/icons/128x128.png" width="96" height="96" alt="GUL Logo" />
+</p>
 
----
+<p align="center">
+  <strong>El centro de software y mantenimiento definitivo para cualquier distribución Linux.</strong><br>
+  Unifica Pacman, AUR, APT, DNF, Flatpak y AppImage en una interfaz moderna, rápida y elegante.
+</p>
 
-## 🚀 Capacidades y Funcionalidades Principales
-
-1. **🌐 Tienda Universal & Conexión con Flathub (Flatpak) y Repositorios Nativos**:
-   - **Catálogo de Flathub**: Conexión con la API pública de Flathub para explorar aplicaciones populares, destacadas y buscar por palabras clave o categorías (Audio/Video, Gráficos, Desarrollo, Juegos, etc.).
-   - **Detección Automática del Sistema Operativo**: Lee e interpreta `/etc/os-release` (`ID`, `ID_LIKE`, `PRETTY_NAME`, arquitectura) para saber exactamente qué distribución estás utilizando (Arch/CachyOS/Manjaro, Ubuntu/Debian/Mint, Fedora/RHEL, openSUSE).
-   - **Repositorios Públicos de la Distribución**: Busca e instala directamente paquetes de los repositorios oficiales nativos de tu distribución (`pacman -Ss`, `apt-cache search`, `dnf search`).
-   - **Instalación en 1 clic**: Ejecuta la instalación correspondiente (`flatpak install -y flathub <app>` o mediante `pkexec` para el gestor nativo) con seguimiento de progreso en vivo.
-
-2. **📦 Vista Unificada con Buscador Global**:
-   - Lista todas las aplicaciones instaladas en el sistema independientemente del origen (**Pacman**, **APT**, **DNF**, **Flatpak**, **Snap** y **AppImage**).
-   - Filtros por origen, ordenación por tamaño o nombre, e indicador de aislamiento (**Sandbox contenedor vs Nativo en host**).
-
-3. **🔍 Detección Inteligente de Duplicados & Recomendador**:
-   - Detecta automáticamente programas instalados en múltiples formatos al mismo tiempo (ejemplo: *Firefox* en Pacman/APT y en Flatpak).
-   - Algoritmo de normalización canónica e inspección de especificaciones.
-   - Evalúa versión, consumo de disco y rendimiento para recomendar cuál conservar y cuál eliminar con 1 solo clic.
-
-4. **⚡ Botón "Actualizar Todo" Concurrente**:
-   - Sincroniza y actualiza todos los gestores activos simultáneamente.
-   - Panel de ejecución con terminal de registros (*streaming logs*) y estados en tiempo real mediante eventos reactivos de Tauri.
-
-5. **🧩 Gestor Completo de AppImages**:
-   - Escanea directorios de usuario (`~/Applications`, `~/Descargas`, `~/.local/bin`, etc.) y rutas personalizadas.
-   - **Integración XDG instantánea**: genera archivos `.desktop` estándar en `~/.local/share/applications/` y asigna permisos de ejecución (`chmod +x`).
-   - Permite lanzar, desintegrar o eliminar archivos AppImage sin salir de la app.
-
-6. **🧹 Limpieza de Mantenimiento del Sistema (Cleaner)**:
-   - Detecta y calcula el espacio ocupado por:
-     - Cachés de paquetes descargados (`/var/cache/pacman/pkg`, `/var/cache/apt/archives`, `/var/cache/dnf`).
-     - Dependencias huérfanas sin uso (`pacman -Qtdq`, `apt autoremove`).
-     - Runtimes Flatpak obsoletos (`flatpak uninstall --unused`).
-     - Revisiones antiguas desactivadas de Snap.
-   - Muestra el total de espacio recuperable (ej. **4.7 GB**) y permite limpiarlo con un solo clic con previsualización del comando exacto.
-
-7. **📊 Desglose Exhaustivo de Espacio en Disco**:
-   - Modal detallado por aplicación que desglosa:
-     - **Binario / Paquete base**
-     - **Datos de usuario** (`~/.local/share`, `~/.var/app/<id>/data`, `~/snap/<app>`)
-     - **Archivos de configuración** (`~/.config`, `~/.var/app/<id>/config`)
-     - **Caché acumulada** (`~/.cache`, `~/.var/app/<id>/cache`)
-   - Botón directo para abrir la carpeta de datos en el gestor de archivos (`xdg-open`) o limpiar la caché acumulada de la app individual.
+<p align="center">
+  <img src="https://img.shields.io/badge/Platform-Linux%20(Arch%20%7C%20Ubuntu%20%7C%20Debian%20%7C%20Fedora)-blue.svg" alt="Linux Support" />
+  <img src="https://img.shields.io/badge/Backend-Rust%20%2B%20Tauri%20v2-orange.svg" alt="Tauri v2" />
+  <img src="https://img.shields.io/badge/Frontend-React%2019%20%2B%20Tailwind-cyan.svg" alt="React 19" />
+  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License" />
+</p>
 
 ---
 
-## 🛠️ Estructura del Código
+## 🌟 ¿Qué es GUL?
+
+**GUL** (*Gestor Universal de Linux*) nace para resolver la fragmentación del ecosistema de software en Linux. En lugar de lidiar con múltiples comandos de terminal o diferentes tiendas de aplicaciones incompatibles, GUL proporciona una experiencia visual única y consistente para buscar, instalar, actualizar, auditar permisos y limpiar programas de cualquier origen.
+
+---
+
+## 🚀 Características Principales
+
+### 1. 🛍️ Tienda Universal Multi-Origen
+- **Flathub (Flatpak)**: Explora miles de aplicaciones con fotos en alta definición, reseñas y descripciones.
+- **Repositorios Nativos de tu Distribución**: Detección automática de tu sistema (`/etc/os-release`) para buscar directamente en **Pacman** (Arch/CachyOS), **APT** (Ubuntu/Debian) o **DNF** (Fedora).
+- **Arch User Repository (AUR)**: Búsqueda integrada mediante API RPC v5 y helpers (`paru` / `yay`) con recuento de votos y popularidad.
+
+### 2. 🎛️ Selector Inteligente de Formato
+- Cuando eliges instalar una aplicación, GUL te permite elegir entre:
+  - **Paquete Nativo** (máximo rendimiento y compatibilidad con el sistema).
+  - **Flatpak / Flathub** (aislamiento sandbox seguro).
+  - **AppImage** (ejecutable independiente y portable).
+- Muestra comparativas de tamaño de descarga, aislamiento y versión antes de instalar.
+
+### 3. 💻 Terminal en Vivo y Progreso en Tiempo Real
+- Cada instalación y desinstalación cuenta con un modal interactivo con barra de progreso porcentual y un terminal en streaming con logs coloreados del proceso (`stdout`/`stderr`), permitiendo cancelar la operación en cualquier momento.
+
+### 4. 🛡️ Gestor de Permisos Flatpak (Flatseal Integrado)
+- Configura los permisos de seguridad y sandbox de cualquier app Flatpak directamente desde su ficha:
+  - Red e Internet
+  - Servidores gráficos Wayland y X11
+  - Servidor de audio (PulseAudio / PipeWire)
+  - Acceso al directorio `/home` o al sistema de archivos completo
+  - Acceso a dispositivos de hardware
+  - Botón para restaurar permisos predeterminados.
+
+### 5. 🚀 Gestor de Aplicaciones de Inicio (Autostart)
+- Controla los programas y scripts que se inician con tu sesión de escritorio según el estándar XDG.
+- Activa o desactiva programas con un clic o añade comandos personalizados.
+
+### 6. 💾 Clonar mi Sistema (Exportar e Importar Perfil de Software)
+- Genera un archivo `gul-perfil.json` con todos los paquetes nativos y Flatpaks instalados.
+- Importa perfiles en otros equipos o tras reinstalar el sistema para restaurar todos tus programas en lote con terminal de seguimiento.
+
+### 7. ⏪ Puntos de Restauración / Snapshots (Btrfs)
+- Integración con sistemas de archivos Btrfs mediante `snapper` y `timeshift`.
+- Crea instantáneas manuales del sistema o activa la **protección automática previa a cada actualización**.
+
+### 8. 🔍 Detector y Optimizador de Duplicados
+- Identifica aplicaciones instaladas simultáneamente en múltiples formatos (ej. VLC nativo y VLC en Flatpak).
+- Calcula el ahorro potencial en disco y permite conservar la versión recomendada con 1 solo clic.
+
+### 9. 🧹 Limpiador del Sistema (Cleaner)
+- Recupera gigabytes de espacio en disco analizando:
+  - Cachés de paquetes (`/var/cache/pacman/pkg`, `/var/cache/apt/archives`, `/var/cache/dnf`).
+  - Dependencias huérfanas sin uso (`pacman -Qtdq`, `apt autoremove`, `dnf autoremove`).
+  - Runtimes obsoletos de Flatpak (`flatpak uninstall --unused`).
+
+### 10. ⚡ Centro de Actualizaciones Unificado
+- Actualiza todos los gestores de paquetes simultáneamente con seguimiento paso a paso y notificaciones nativas de escritorio.
+
+---
+
+## 📦 Instalación
+
+### Opción 1: Archivo Universal .AppImage (Cualquier distribución Linux)
+Descarga el archivo `.AppImage` desde los **Releases** de GitHub:
+```bash
+chmod +x gul_0.1.0_amd64.AppImage
+./gul_0.1.0_amd64.AppImage
+```
+
+### Opción 2: Arch Linux / CachyOS / Manjaro (AUR)
+```bash
+paru -S gul-bin
+# o con yay:
+yay -S gul-bin
+```
+
+### Opción 3: Ubuntu / Debian / Linux Mint (.deb)
+```bash
+sudo dpkg -i gul_0.1.0_amd64.deb
+sudo apt-get install -f
+```
+
+### Opción 4: Fedora / RHEL (.rpm)
+```bash
+sudo dnf install ./gul-0.1.0-1.x86_64.rpm
+```
+
+---
+
+## 🛠️ Compilación y Desarrollo
+
+### Requisitos previos
+- **Node.js** (v18+) y `npm`
+- **Rust** y `cargo` (v1.75+)
+- Librerías del sistema:
+  - **Arch/CachyOS**: `sudo pacman -S webkit2gtk-4.1 base-devel openssl libayatana-appindicator`
+  - **Debian/Ubuntu**: `sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget libssl-dev libayatana-appindicator3-dev librsvg2-dev`
+  - **Fedora**: `sudo dnf install webkit2gtk4.1-devel openssl-devel libayatana-appindicator-gtk3-devel`
+
+### Pasos para compilar
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/tu-usuario/gul.git
+cd gul
+
+# 2. Instalar dependencias del frontend
+npm install
+
+# 3. Iniciar en modo desarrollo
+npm run tauri dev
+
+# 4. Compilar binario y paquetes finales de producción
+npm run tauri build
+```
+
+---
+
+## 📁 Estructura del Proyecto
 
 ```text
-omnipkg/
-├── src-tauri/                 # Backend nativo en Rust
+gul/
+├── src/                          # Frontend en React 19 + TypeScript + Tailwind
+│   ├── components/               # Vistas (Store, Apps, Duplicates, Cleaner, Snapshots, Autostart...)
+│   ├── types.ts                  # Tipos TypeScript compartidos con el backend
+│   └── App.tsx                   # Controlador principal y enrutador de vistas
+├── src-tauri/                    # Backend en Rust
 │   ├── src/
-│   │   ├── lib.rs            # Registro de comandos y ciclo de vida Tauri
-│   │   ├── models.rs         # Modelos de datos (AppInfo, OsInfo, CatalogItem...)
-│   │   ├── os_detector.rs    # Detección de distribución, familia y gestores
-│   │   ├── catalog.rs        # Conexión a Flathub API y repositorios de la distro
-│   │   ├── disk_usage.rs     # Cálculo recursivo de espacio, XDG y sandbox
-│   │   ├── duplicates.rs     # Motor de normalización y recomendación
-│   │   ├── cleaner.rs        # Escaneo y ejecución de limpiezas de huérfanos/caché
-│   │   ├── updates.rs        # Coordinador concurrente de actualizaciones
-│   │   ├── commands.rs       # Invocaciones IPC expuestas al frontend
-│   │   └── managers/         # Adaptadores para cada gestor de Linux
-│   │       ├── pacman.rs     # Arch Linux / Manjaro / CachyOS / EndeavourOS
-│   │       ├── flatpak.rs    # Flatpak y Flathub
-│   │       ├── snap.rs       # Canonical Snapd
-│   │       ├── apt.rs        # Debian / Ubuntu / Linux Mint
-│   │       ├── dnf.rs        # Fedora / RHEL
-│   │       └── appimage.rs   # Detección, permisos e integración XDG .desktop
-│   └── Cargo.toml
-├── src/                       # Frontend React + TypeScript + Tailwind
-│   ├── components/
-│   │   ├── Sidebar.tsx       # Navegación y estado del SO / gestores
-│   │   ├── Header.tsx        # Cabecera con botón hero y recarga
-│   │   ├── StoreView.tsx     # Tienda Flathub + Repositorios de la distro
-│   │   ├── AppsView.tsx      # Vista unificada, buscador instantáneo y filtros
-│   │   ├── AppDetailModal.tsx# Desglose visual en barra y acciones por app
-│   │   ├── DuplicatesView.tsx# Comparativa lado a lado y 1-clic resolver
-│   │   ├── UpdatesView.tsx   # Actualizaciones concurrentes y consola en vivo
-│   │   ├── AppImagesView.tsx # Gestor e integrador de AppImages
-│   │   └── CleanerView.tsx   # Analizador y liberador de gigabytes en disco
-│   ├── types.ts
-│   ├── utils.ts
-│   └── App.tsx
-└── package.json
+│   │   ├── managers/             # Módulos para Pacman, APT, DNF, Flatpak, Snap, AppImage
+│   │   ├── aur.rs                # Conexión con AUR RPC API y helpers paru/yay
+│   │   ├── flatpak_permissions.rs# Motor de permisos sandbox (Flatseal)
+│   │   ├── snapshots.rs          # Motor de instantáneas Btrfs (Snapper/Timeshift)
+│   │   ├── autostart.rs          # Gestor de inicio XDG
+│   │   ├── backup_profile.rs     # Exportación e importación de perfiles JSON
+│   │   ├── notifications.rs      # Notificaciones y monitor en segundo plano
+│   │   └── os_detector.rs        # Detección agnóstica de distribuciones Linux
+│   └── tauri.conf.json           # Configuración de Tauri v2
+└── .github/workflows/            # CI/CD automatizado para compilar Releases
 ```
 
 ---
 
-## 🖥️ Ejecución y Desarrollo
+## 📄 Licencia
 
-### Modo Desarrollo
-```bash
-cd /home/joelmolina/.gemini/antigravity/scratch/omnipkg
-npm run tauri dev
-```
-
-### Compilar Ejecutable Binario
-```bash
-npm run tauri build
-# O en modo debug para pruebas inmediatas:
-cargo build --manifest-path src-tauri/Cargo.toml
-```
-El ejecutable binario queda generado en `src-tauri/target/debug/omnipkg` o `src-tauri/target/release/omnipkg`.
+Este proyecto está bajo la Licencia **MIT** — consulta el archivo [LICENSE](LICENSE) para más detalles.
