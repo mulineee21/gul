@@ -5,7 +5,7 @@ pkgrel=1
 pkgdesc="Gestor Universal de Linux (Pacman, AUR, APT, DNF, Flatpak y AppImage)"
 arch=('x86_64')
 url="https://github.com/tu-usuario/gul"
-license=('MIT')
+license=('GPL-3.0-or-later')
 depends=('gtk3' 'webkit2gtk-4.1' 'libayatana-appindicator' 'polkit' 'zenity')
 optdepends=(
     'pacman-contrib: Para comprobación rápida de actualizaciones sin bloquear base de datos'

@@ -1390,6 +1390,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "gul"
+version = "0.1.0"
+dependencies = [
+ "dirs",
+ "regex",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-opener",
+ "tokio",
+ "walkdir",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2324,21 +2339,6 @@ dependencies = [
  "objc2-app-kit",
  "objc2-core-foundation",
  "objc2-foundation",
-]
-
-[[package]]
-name = "omnipkg"
-version = "0.1.0"
-dependencies = [
- "dirs",
- "regex",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-opener",
- "tokio",
- "walkdir",
 ]
 
 [[package]]

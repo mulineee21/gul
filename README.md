@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/Platform-Linux%20(Arch%20%7C%20Ubuntu%20%7C%20Debian%20%7C%20Fedora)-blue.svg" alt="Linux Support" />
   <img src="https://img.shields.io/badge/Backend-Rust%20%2B%20Tauri%20v2-orange.svg" alt="Tauri v2" />
   <img src="https://img.shields.io/badge/Frontend-React%2019%20%2B%20Tailwind-cyan.svg" alt="React 19" />
-  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License" />
+  <img src="https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg" alt="GNU GPL v3+" />
 </p>
 
 ---
@@ -160,4 +160,14 @@ gul/
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia **MIT** — consulta el archivo [LICENSE](LICENSE) para más detalles.
+Este proyecto está bajo la Licencia **GNU General Public License v3.0 o posterior (GPL-3.0-or-later)** — consulta el archivo [LICENSE](LICENSE) para más detalles.
+
+```text
+GUL (Gestor Universal de Linux)
+Copyright (C) 2026 Joel Molina
+
+Este programa es software libre: puedes redistribuirlo y/o modificarlo
+bajo los términos de la Licencia Pública General de GNU según es publicada
+por la Free Software Foundation, bien de la versión 3 de dicha Licencia
+o (a tu elección) cualquier versión posterior.
+```
