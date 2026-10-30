@@ -40,7 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: "store",
-      label: "Tienda / Flathub",
+      label: "Tienda GUL",
       icon: Compass,
       count: undefined,
       badgeColor: "bg-blue-500/20 text-blue-300 border border-blue-500/30 font-mono",
@@ -110,12 +110,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           <div>
             <h1 className="text-base font-bold text-white tracking-wide flex items-center gap-1.5">
-              OmniPkg
+              GUL
               <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30 font-mono">
                 Linux
               </span>
             </h1>
-            <p className="text-xs text-zinc-400">Gestor Universal</p>
+            <p className="text-xs text-zinc-400">Gestor Universal de Linux</p>
           </div>
         </div>
 

@@ -291,7 +291,7 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
               <div>
                 <h5 className="text-xs font-bold text-white">¿Ya tienes un archivo .AppImage descargado?</h5>
                 <p className="text-[11px] text-zinc-400 mt-0.5">
-                  Selecciona cualquier .AppImage de tu disco y OmniPkg lo integrará automáticamente en el lanzador del sistema con su icono.
+                  Selecciona cualquier .AppImage de tu disco y GUL lo integrará automáticamente en el lanzador del sistema con su icono.
                 </p>
               </div>
             </div>
@@ -312,7 +312,7 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
           <div className="flex items-center space-x-2">
             <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>
-              OmniPkg gestiona automáticamente permisos, dependencias y atajos de escritorio para cada formato.
+              GUL gestiona automáticamente permisos, dependencias y atajos de escritorio para cada formato.
             </span>
           </div>
 

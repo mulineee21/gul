@@ -259,7 +259,7 @@ export const InstallProgressModal: React.FC<InstallProgressModalProps> = ({
                   let textColor = "text-zinc-300";
                   if (log.isStderr || log.text.toLowerCase().includes("error") || log.text.toLowerCase().includes("fallo")) {
                     textColor = "text-red-400 font-medium";
-                  } else if (log.text.startsWith("[OmniPkg]")) {
+                  } else if (log.text.startsWith("[GUL]") || log.text.startsWith("[OmniPkg]")) {
                     textColor = "text-blue-400 font-semibold";
                   } else if (log.text.includes("%") || log.text.toLowerCase().includes("descargando") || log.text.toLowerCase().includes("downloading")) {
                     textColor = "text-emerald-400";

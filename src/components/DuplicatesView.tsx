@@ -44,7 +44,7 @@ export const DuplicatesView: React.FC<DuplicatesViewProps> = ({
               </span>
             </h3>
             <p className="text-xs text-zinc-300 mt-1 max-w-xl">
-              Identifica programas instalados simultáneamente por diferentes medios (APT/Pacman, Flatpak, Snap, AppImage). OmniPkg evalúa rendimiento, versiones y consumo de disco para recomendarte la mejor opción.
+              Identifica programas instalados simultáneamente por diferentes medios (APT/Pacman, Flatpak, Snap, AppImage). GUL evalúa rendimiento, versiones y consumo de disco para recomendarte la mejor opción.
             </p>
           </div>
         </div>

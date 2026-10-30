@@ -6,7 +6,7 @@ use tauri::AppHandle;
 pub fn send_desktop_notification(title: &str, body: &str) {
     let _ = Command::new("notify-send")
         .args([
-            "-a", "OmniPkg",
+            "-a", "GUL",
             "-i", "system-software-update",
             title,
             body,
@@ -27,7 +27,7 @@ pub fn start_background_update_monitor(_app: AppHandle) {
                     send_desktop_notification(
                         "Actualizaciones disponibles",
                         &format!(
-                            "OmniPkg ha detectado {} paquete(s) con actualizaciones pendientes en tu sistema.",
+                            "GUL ha detectado {} paquete(s) con actualizaciones pendientes en tu sistema.",
                             updates.len()
                         ),
                     );

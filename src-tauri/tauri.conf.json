@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "OmniPkg — Gestor Unificado de Linux",
+        "title": "GUL — Gestor Universal de Linux",
         "width": 1180,
         "height": 780,
         "minWidth": 940,

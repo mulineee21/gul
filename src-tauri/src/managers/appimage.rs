@@ -165,7 +165,7 @@ pub fn integrate_appimage(appimage_path_str: &str) -> Result<String, String> {
          Icon=application-x-executable\n\
          Terminal=false\n\
          Categories=Utility;Application;\n\
-         Comment=Integrado y gestionado con OmniPkg\n\
+         Comment=Integrado y gestionado con GUL (Gestor Universal de Linux)\n\
          X-AppImage-Path={path_str}\n",
         name = name,
         path_str = path.to_string_lossy()

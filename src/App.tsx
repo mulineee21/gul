@@ -260,11 +260,11 @@ export function App() {
     setInstallStatus("starting");
     setTerminalLogs([
       {
-        text: `[OmniPkg] Iniciando proceso para instalar ${appToInstall.name} (${source.toUpperCase()})...`,
+        text: `[GUL] Iniciando proceso para instalar ${appToInstall.name} (${source.toUpperCase()})...`,
         time: new Date().toLocaleTimeString(),
       },
       {
-        text: `[OmniPkg] Paquete objetivo: ${pkgId}`,
+        text: `[GUL] Paquete objetivo: ${pkgId}`,
         time: new Date().toLocaleTimeString(),
       },
     ]);
@@ -309,7 +309,7 @@ export function App() {
         setTerminalLogs((prev) => [
           ...prev,
           {
-            text: "[OmniPkg] Instalación abortada por el usuario.",
+            text: "[GUL] Instalación abortada por el usuario.",
             isStderr: true,
             time: new Date().toLocaleTimeString(),
           },
@@ -436,7 +436,7 @@ export function App() {
       try {
         showToast("Creando punto de restauración (Snapshot Btrfs) de seguridad...");
         await invoke("create_system_snapshot", {
-          description: "OmniPkg: Antes de actualizar paquetes del sistema",
+          description: "GUL: Antes de actualizar paquetes del sistema",
         });
         showToast("¡Punto de restauración creado con éxito!");
       } catch (e) {
@@ -506,7 +506,7 @@ export function App() {
     setInstallStatus("running");
     setTerminalLogs([
       {
-        text: `[OmniPkg] Iniciando restauración de perfil (${packages.length} paquetes vía ${source})...`,
+        text: `[GUL] Iniciando restauración de perfil (${packages.length} paquetes vía ${source})...`,
         time: new Date().toLocaleTimeString(),
       },
     ]);
@@ -609,8 +609,8 @@ export function App() {
         };
       case "store":
         return {
-          title: "Tienda y Explorador de Paquetes",
-          subtitle: `Conexión directa a Flathub y a los repositorios oficiales de ${osInfo?.distro_name || "tu distribución"} (${osInfo?.native_manager?.toUpperCase() || "Nativo"})`,
+          title: "Tienda GUL (Explorador de Paquetes)",
+          subtitle: `Conexión directa a Flathub, AUR y repositorios oficiales de ${osInfo?.distro_name || "tu distribución"} (${osInfo?.native_manager?.toUpperCase() || "Nativo"})`,
         };
       case "duplicates":
         return {
@@ -643,7 +643,7 @@ export function App() {
           subtitle: "Crea y administra instantáneas seguras del sistema con Snapper y Timeshift",
         };
       default:
-        return { title: "OmniPkg", subtitle: "Linux App Manager" };
+        return { title: "GUL", subtitle: "Gestor Universal de Linux" };
     }
   };
 

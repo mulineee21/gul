@@ -112,7 +112,7 @@ pub fn create_system_snapshot(description: &str) -> Result<String, String> {
     }
 
     let clean_desc = if description.trim().is_empty() {
-        "OmniPkg: Punto de restauración del sistema"
+        "GUL: Punto de restauración del sistema"
     } else {
         description.trim()
     };

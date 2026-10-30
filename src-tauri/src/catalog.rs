@@ -648,7 +648,7 @@ pub async fn run_install_package(
             status: "starting".to_string(),
             message: format!("Iniciando comando de instalación para {}...", pkg_id),
             line: Some(format!(
-                "[OmniPkg] Ejecutando: {} {}\n[OmniPkg] Si el sistema te solicita la contraseña de administrador, ingrésala en la ventana emergente.",
+                "[GUL] Ejecutando: {} {}\n[GUL] Si el sistema te solicita la contraseña de administrador, ingrésala en la ventana emergente.",
                 cmd,
                 args.join(" ")
             )),
@@ -672,7 +672,7 @@ pub async fn run_install_package(
                     id: id.clone(),
                     status: "error".to_string(),
                     message: err.clone(),
-                    line: Some(format!("[OmniPkg Error] {}", err)),
+                    line: Some(format!("[GUL Error] {}", err)),
                     progress_pct: None,
                     step: Some("Error al iniciar".to_string()),
                     is_stderr: Some(true),
@@ -723,7 +723,7 @@ pub async fn run_install_package(
                 status: "success".to_string(),
                 message: format!("¡{} instalado correctamente!", pkg_id),
                 line: Some(format!(
-                    "[OmniPkg] ¡Instalación de {} finalizada con éxito!",
+                    "[GUL] ¡Instalación de {} finalizada con éxito!",
                     pkg_id
                 )),
                 progress_pct: Some(100.0),
@@ -741,7 +741,7 @@ pub async fn run_install_package(
                 id: id.clone(),
                 status: "error".to_string(),
                 message: err_msg.clone(),
-                line: Some(format!("[OmniPkg Error] {}", err_msg)),
+                line: Some(format!("[GUL Error] {}", err_msg)),
                 progress_pct: None,
                 step: Some("Error en la instalación".to_string()),
                 is_stderr: Some(true),
