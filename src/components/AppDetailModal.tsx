@@ -15,8 +15,13 @@ import {
   CheckCircle2,
   Image as ImageIcon,
   Layers,
+  ShieldCheck,
+  Wifi,
+  Volume2,
+  Monitor,
+  Camera,
 } from "lucide-react";
-import { AppExtendedDetails, AppInfo, CatalogItem } from "../types";
+import { AppExtendedDetails, AppInfo, CatalogItem, FlatpakPermissions } from "../types";
 import { formatBytes, getSourceBadgeInfo } from "../utils";
 
 interface AppDetailModalProps {
@@ -43,10 +48,11 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
   isInstalling,
 }) => {
   const [details, setDetails] = useState<AppExtendedDetails | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "screenshots" | "reviews" | "storage">("overview");
+  const [permissions, setPermissions] = useState<FlatpakPermissions | null>(null);
+  const [activeTab, setActiveTab] = useState<"overview" | "screenshots" | "reviews" | "storage" | "permissions">("overview");
   const [activeScreenshotIdx, setActiveScreenshotIdx] = useState<number>(0);
 
-  // Fetch extended details (screenshots, reviews, release notes, stats)
+  // Fetch extended details and flatpak permissions
   useEffect(() => {
     if (!app) return;
     setActiveScreenshotIdx(0);
@@ -59,7 +65,40 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
       .catch((err) => {
         console.error("Error fetching app extended details:", err);
       });
+
+    if (app.source === "flatpak" || app.id.startsWith("flatpak:")) {
+      invoke<FlatpakPermissions>("get_flatpak_permissions", { appId: targetId })
+        .then((perms) => setPermissions(perms))
+        .catch((e) => console.error("Error fetching permissions:", e));
+    }
   }, [app]);
+
+  const handleTogglePermission = async (key: string, currentValue: boolean) => {
+    if (!app) return;
+    const targetId = (app as any).pkg_id || app.id;
+    try {
+      await invoke("set_flatpak_permission", {
+        appId: targetId,
+        key,
+        enabled: !currentValue,
+      });
+      setPermissions((prev) => prev ? { ...prev, [key]: !currentValue } : null);
+    } catch (e) {
+      console.error("Error toggling permission:", e);
+    }
+  };
+
+  const handleResetPermissions = async () => {
+    if (!app) return;
+    const targetId = (app as any).pkg_id || app.id;
+    try {
+      await invoke("reset_flatpak_permissions", { appId: targetId });
+      const refreshed = await invoke<FlatpakPermissions>("get_flatpak_permissions", { appId: targetId });
+      setPermissions(refreshed);
+    } catch (e) {
+      console.error("Error resetting permissions:", e);
+    }
+  };
 
   if (!app) return null;
 
@@ -188,6 +227,20 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
             >
               <HardDrive className="w-3.5 h-3.5" />
               <span>Espacio en Disco</span>
+            </button>
+          )}
+
+          {(app.source === "flatpak" || app.id.startsWith("flatpak:")) && (
+            <button
+              onClick={() => setActiveTab("permissions")}
+              className={`px-3.5 py-2 font-medium border-b-2 transition flex items-center gap-1.5 ${
+                activeTab === "permissions"
+                  ? "border-blue-500 text-blue-400 font-bold"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
+              <span>Permisos (Sandbox)</span>
             </button>
           )}
         </div>
@@ -544,6 +597,217 @@ export const AppDetailModal: React.FC<AppDetailModalProps> = ({
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Tab 5: Flatpak Permissions (Flatseal Integrated) */}
+          {activeTab === "permissions" && (
+            <div className="space-y-5 animate-in fade-in duration-150">
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                      Control de Aislamiento Sandbox
+                    </h4>
+                    <p className="text-[11px] text-zinc-400 mt-0.5">
+                      Configura qué recursos y dispositivos puede utilizar este contenedor Flatpak.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleResetPermissions}
+                  className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition"
+                >
+                  Restablecer
+                </button>
+              </div>
+
+              {permissions ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                  {/* Network */}
+                  <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between gap-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-xl bg-zinc-800 text-sky-400">
+                        <Wifi className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white">Red e Internet</div>
+                        <div className="text-[10px] text-zinc-400">Conexiones web y sockets de red</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePermission("network", permissions.network)}
+                      className={`w-10 h-5 rounded-full transition p-0.5 flex items-center ${
+                        permissions.network ? "bg-sky-600" : "bg-zinc-800 border border-zinc-700"
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                          permissions.network ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Wayland */}
+                  <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between gap-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-xl bg-zinc-800 text-indigo-400">
+                        <Monitor className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white">Gráficos Wayland</div>
+                        <div className="text-[10px] text-zinc-400">Ventana nativa Wayland moderna</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePermission("wayland", permissions.wayland)}
+                      className={`w-10 h-5 rounded-full transition p-0.5 flex items-center ${
+                        permissions.wayland ? "bg-indigo-600" : "bg-zinc-800 border border-zinc-700"
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                          permissions.wayland ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* X11 */}
+                  <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between gap-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-xl bg-zinc-800 text-amber-400">
+                        <Monitor className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white">Servidor X11 / XWayland</div>
+                        <div className="text-[10px] text-zinc-400">Captura global y ventanas legacy</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePermission("x11", permissions.x11)}
+                      className={`w-10 h-5 rounded-full transition p-0.5 flex items-center ${
+                        permissions.x11 ? "bg-amber-600" : "bg-zinc-800 border border-zinc-700"
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                          permissions.x11 ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Audio */}
+                  <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between gap-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-xl bg-zinc-800 text-purple-400">
+                        <Volume2 className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white">Audio (PipeWire / Pulse)</div>
+                        <div className="text-[10px] text-zinc-400">Reproducción y entrada de sonido</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePermission("pulseaudio", permissions.pulseaudio)}
+                      className={`w-10 h-5 rounded-full transition p-0.5 flex items-center ${
+                        permissions.pulseaudio ? "bg-purple-600" : "bg-zinc-800 border border-zinc-700"
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                          permissions.pulseaudio ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Home Directory */}
+                  <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between gap-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-xl bg-zinc-800 text-emerald-400">
+                        <FolderOpen className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white">Carpeta Personal (~)</div>
+                        <div className="text-[10px] text-zinc-400">Acceso a Documentos, Descargas, etc.</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePermission("filesystem_home", permissions.filesystem_home)}
+                      className={`w-10 h-5 rounded-full transition p-0.5 flex items-center ${
+                        permissions.filesystem_home ? "bg-emerald-600" : "bg-zinc-800 border border-zinc-700"
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                          permissions.filesystem_home ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Disks / Host Filesystem */}
+                  <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between gap-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-xl bg-zinc-800 text-orange-400">
+                        <HardDrive className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white">Todo el Sistema (/)</div>
+                        <div className="text-[10px] text-zinc-400">Discos montados en /media o /mnt</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePermission("filesystem_host", permissions.filesystem_host)}
+                      className={`w-10 h-5 rounded-full transition p-0.5 flex items-center ${
+                        permissions.filesystem_host ? "bg-orange-600" : "bg-zinc-800 border border-zinc-700"
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                          permissions.filesystem_host ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Devices & Webcam */}
+                  <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 flex items-center justify-between gap-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-xl bg-zinc-800 text-pink-400">
+                        <Camera className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white">Cámara Web y Dispositivos</div>
+                        <div className="text-[10px] text-zinc-400">Aceleración GPU, USB y cámara</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePermission("devices_all", permissions.devices_all)}
+                      className={`w-10 h-5 rounded-full transition p-0.5 flex items-center ${
+                        permissions.devices_all ? "bg-pink-600" : "bg-zinc-800 border border-zinc-700"
+                      }`}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                          permissions.devices_all ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-8 text-center text-xs text-zinc-500 font-mono">
+                  Consultando permisos de flatpak override...
+                </div>
+              )}
             </div>
           )}
         </div>

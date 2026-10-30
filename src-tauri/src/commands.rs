@@ -1,8 +1,9 @@
 use std::process::Command;
 use tauri::AppHandle;
 use crate::models::{
-    AppExtendedDetails, AppImageEntry, AppInfo, CatalogItem, CleanResult, DuplicateGroup,
-    InstallOption, OsInfo, SystemCleanItem, SystemOverview, UpdateItem,
+    AppExtendedDetails, AppImageEntry, AppInfo, AurPackageItem, AutostartEntry, CatalogItem,
+    CleanResult, DuplicateGroup, FlatpakPermissions, InstallOption, OmniProfile, OsInfo,
+    SnapshotEntry, SnapshotSupportInfo, SystemCleanItem, SystemOverview, UpdateItem,
 };
 use crate::managers;
 use crate::duplicates;
@@ -13,6 +14,12 @@ use crate::catalog;
 use crate::desktop_apps;
 use crate::app_details;
 use crate::install_options;
+use crate::flatpak_permissions;
+use crate::aur;
+use crate::autostart;
+use crate::snapshots;
+use crate::backup_profile;
+use crate::notifications;
 
 #[tauri::command]
 pub fn get_system_overview() -> SystemOverview {
@@ -282,4 +289,85 @@ pub fn pick_and_install_local_appimage(app: AppHandle) -> Result<String, String>
 #[tauri::command]
 pub async fn cancel_install(id: String) -> Result<(), String> {
     catalog::cancel_install(&id).await
+}
+
+// Flatpak Permissions
+#[tauri::command]
+pub fn get_flatpak_permissions(app_id: String) -> FlatpakPermissions {
+    flatpak_permissions::get_flatpak_permissions(&app_id)
+}
+
+#[tauri::command]
+pub fn set_flatpak_permission(app_id: String, key: String, enabled: bool) -> Result<(), String> {
+    flatpak_permissions::set_flatpak_permission(&app_id, &key, enabled)
+}
+
+#[tauri::command]
+pub fn reset_flatpak_permissions(app_id: String) -> Result<(), String> {
+    flatpak_permissions::reset_flatpak_permissions(&app_id)
+}
+
+// AUR Support
+#[tauri::command]
+pub fn search_aur(query: String) -> Vec<AurPackageItem> {
+    aur::search_aur(&query)
+}
+
+#[tauri::command]
+pub async fn install_aur_package(app: AppHandle, pkg_name: String) -> Result<String, String> {
+    aur::install_aur_package(app, pkg_name).await
+}
+
+// Autostart Management
+#[tauri::command]
+pub fn get_autostart_entries() -> Vec<AutostartEntry> {
+    autostart::list_autostart_entries()
+}
+
+#[tauri::command]
+pub fn toggle_autostart_entry(id: String, enable: bool) -> Result<(), String> {
+    autostart::toggle_autostart(&id, enable)
+}
+
+#[tauri::command]
+pub fn add_custom_autostart(name: String, exec: String, comment: String) -> Result<(), String> {
+    autostart::add_custom_autostart(&name, &exec, &comment)
+}
+
+// System Snapshots (Btrfs / Snapper / Timeshift)
+#[tauri::command]
+pub fn get_snapshot_support() -> SnapshotSupportInfo {
+    snapshots::check_snapshot_support()
+}
+
+#[tauri::command]
+pub fn get_snapshots() -> Vec<SnapshotEntry> {
+    snapshots::list_snapshots()
+}
+
+#[tauri::command]
+pub fn create_system_snapshot(description: String) -> Result<String, String> {
+    snapshots::create_system_snapshot(&description)
+}
+
+// Software Profile Backup & Clone
+#[tauri::command]
+pub fn export_system_profile() -> OmniProfile {
+    backup_profile::export_profile()
+}
+
+#[tauri::command]
+pub fn save_profile_file(custom_path: Option<String>) -> Result<String, String> {
+    backup_profile::save_profile_file(custom_path)
+}
+
+#[tauri::command]
+pub fn load_profile_file(custom_path: Option<String>) -> Result<OmniProfile, String> {
+    backup_profile::load_profile_file(custom_path)
+}
+
+// Notifications
+#[tauri::command]
+pub fn send_notification(title: String, body: String) {
+    notifications::send_desktop_notification(&title, &body);
 }

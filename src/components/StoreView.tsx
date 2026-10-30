@@ -11,6 +11,7 @@ import {
   Play,
   AlertCircle,
   FolderUp,
+  Sparkles,
 } from "lucide-react";
 import { CatalogItem, OsInfo } from "../types";
 import { getSourceBadgeInfo } from "../utils";
@@ -40,7 +41,7 @@ export const StoreView: React.FC<StoreViewProps> = ({
   onPickLocalAppImage,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sourceFilter, setSourceFilter] = useState<"all" | "flatpak" | "native">("all");
+  const [sourceFilter, setSourceFilter] = useState<"all" | "flatpak" | "native" | "aur">("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const categories = [
@@ -189,6 +190,20 @@ export const StoreView: React.FC<StoreViewProps> = ({
               <Cpu className="w-3.5 h-3.5" />
               <span>Repositorio {nativeLabel}</span>
             </button>
+
+            {osInfo?.native_manager === "pacman" && (
+              <button
+                onClick={() => setSourceFilter("aur")}
+                className={`px-3 py-2 rounded-xl text-xs font-medium transition flex items-center gap-1.5 ${
+                  sourceFilter === "aur"
+                    ? "bg-fuchsia-600/30 text-fuchsia-300 border border-fuchsia-500/50 font-bold"
+                    : "bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-fuchsia-400" />
+                <span>Comunidad AUR</span>
+              </button>
+            )}
           </div>
         </div>
 

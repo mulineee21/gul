@@ -7,6 +7,9 @@ import {
   Box,
   Trash2,
   HardDrive,
+  Rocket,
+  RotateCcw,
+  Sparkles,
 } from "lucide-react";
 import { OsInfo, SystemOverview } from "../types";
 import { formatBytes } from "../utils";
@@ -17,6 +20,7 @@ interface SidebarProps {
   overview: SystemOverview | null;
   osInfo: OsInfo | null;
   loading?: boolean;
+  onOpenCloneModal?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -24,6 +28,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setCurrentTab,
   overview,
   osInfo,
+  onOpenCloneModal,
 }) => {
   const navItems = [
     {
@@ -59,6 +64,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
         overview && overview.updates_available > 0
           ? "bg-blue-500/20 text-blue-400 border border-blue-500/40 animate-pulse"
           : "bg-zinc-800 text-zinc-500",
+    },
+    {
+      id: "autostart",
+      label: "Inicio (Autostart)",
+      icon: Rocket,
+      count: undefined,
+      badgeColor: "bg-zinc-800 text-zinc-300",
+    },
+    {
+      id: "snapshots",
+      label: "Puntos / Snapshots",
+      icon: RotateCcw,
+      count: undefined,
+      badgeColor: "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-mono",
     },
     {
       id: "appimages",
@@ -134,6 +153,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
             );
           })}
         </nav>
+
+        {/* Clone System Quick Button */}
+        {onOpenCloneModal && (
+          <div className="px-3 pt-2">
+            <button
+              onClick={onOpenCloneModal}
+              className="w-full p-2.5 rounded-xl bg-gradient-to-r from-amber-600/20 to-orange-600/20 hover:from-amber-600/30 hover:to-orange-600/30 text-amber-300 border border-amber-500/30 text-xs font-semibold flex items-center justify-between transition group"
+            >
+              <div className="flex items-center space-x-2">
+                <Sparkles className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+                <span>Clonar mi Sistema</span>
+              </div>
+              <span className="text-[10px] bg-amber-500/20 text-amber-200 px-1.5 py-0.5 rounded font-mono">
+                Sync
+              </span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* System Footer info */}

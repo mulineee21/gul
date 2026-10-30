@@ -16,14 +16,20 @@ import {
   TerminalLogLine,
 } from "./components/InstallProgressModal";
 import { ConfirmModal } from "./components/ConfirmModal";
+import { AutostartView } from "./components/AutostartView";
+import { SnapshotsView } from "./components/SnapshotsView";
+import { BackupProfileModal } from "./components/BackupProfileModal";
 import {
   AppImageEntry,
   AppInfo,
+  AutostartEntry,
   CatalogItem,
   CleanResult,
   DuplicateGroup,
   InstallProgressEvent,
   OsInfo,
+  SnapshotEntry,
+  SnapshotSupportInfo,
   SourceType,
   SystemCleanItem,
   SystemOverview,
@@ -43,6 +49,12 @@ export function App() {
   const [cleanerItems, setCleanerItems] = useState<SystemCleanItem[]>([]);
   const [cleanResult, setCleanResult] = useState<CleanResult | null>(null);
   const [selectedApp, setSelectedApp] = useState<AppInfo | CatalogItem | null>(null);
+
+  // Autostart, Snapshots & Clone Profile States
+  const [autostartEntries, setAutostartEntries] = useState<AutostartEntry[]>([]);
+  const [snapshotSupport, setSnapshotSupport] = useState<SnapshotSupportInfo | null>(null);
+  const [snapshots, setSnapshots] = useState<SnapshotEntry[]>([]);
+  const [showCloneModal, setShowCloneModal] = useState<boolean>(false);
 
   // Store / Catalog State
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
@@ -124,6 +136,18 @@ export function App() {
       // 8. Pre-fetch popular Flathub catalog apps
       const popular = await invoke<CatalogItem[]>("get_catalog_popular");
       setCatalogItems(popular);
+
+      // 9. Fetch Autostart applications
+      const autoApps = await invoke<AutostartEntry[]>("get_autostart_entries");
+      setAutostartEntries(autoApps);
+
+      // 10. Fetch Snapshot support & entries
+      const snapSup = await invoke<SnapshotSupportInfo>("get_snapshot_support");
+      setSnapshotSupport(snapSup);
+      if (snapSup.supported) {
+        const snaps = await invoke<SnapshotEntry[]>("get_snapshots");
+        setSnapshots(snaps);
+      }
     } catch (err) {
       console.error("Error loading system data:", err);
       showToast(`Error al cargar datos: ${err}`);
@@ -403,9 +427,23 @@ export function App() {
     });
   };
 
-  const handleRunUpdates = async (selectedManagers: string[]) => {
+  const handleRunUpdates = async (selectedManagers: string[], createSnapshot: boolean = false) => {
     setIsUpdating(true);
     setUpdateEvents({});
+
+    // Create system snapshot before updates if requested
+    if (createSnapshot && snapshotSupport?.supported) {
+      try {
+        showToast("Creando punto de restauración (Snapshot Btrfs) de seguridad...");
+        await invoke("create_system_snapshot", {
+          description: "OmniPkg: Antes de actualizar paquetes del sistema",
+        });
+        showToast("¡Punto de restauración creado con éxito!");
+      } catch (e) {
+        console.warn("No se pudo crear snapshot previo:", e);
+      }
+    }
+
     try {
       showToast("Iniciando actualizaciones...");
       await invoke("start_update_all", { selectedManagers });
@@ -415,6 +453,87 @@ export function App() {
       showToast(`Error durante la actualización: ${e}`);
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  // Autostart Handlers
+  const handleToggleAutostart = async (id: string, enable: boolean) => {
+    try {
+      await invoke("toggle_autostart_entry", { id, enable });
+      const refreshed = await invoke<AutostartEntry[]>("get_autostart_entries");
+      setAutostartEntries(refreshed);
+      showToast(`Aplicación ${enable ? "activada" : "desactivada"} en el inicio.`);
+    } catch (e) {
+      showToast(`Error al cambiar inicio: ${e}`);
+    }
+  };
+
+  const handleAddCustomAutostart = async (name: string, exec: string, comment: string) => {
+    try {
+      await invoke("add_custom_autostart", { name, exec, comment });
+      const refreshed = await invoke<AutostartEntry[]>("get_autostart_entries");
+      setAutostartEntries(refreshed);
+      showToast(`¡${name} añadida al inicio de sesión!`);
+    } catch (e) {
+      showToast(`Error al añadir al inicio: ${e}`);
+    }
+  };
+
+  // Snapshot Handlers
+  const handleCreateSnapshot = async (description: string) => {
+    try {
+      showToast("Creando instantánea del sistema...");
+      const res = await invoke<string>("create_system_snapshot", { description });
+      const refreshed = await invoke<SnapshotEntry[]>("get_snapshots");
+      setSnapshots(refreshed);
+      showToast(res);
+    } catch (e) {
+      showToast(`Error creando instantánea: ${e}`);
+    }
+  };
+
+  // Batch Restore / Clone Handlers
+  const handleStartBatchInstall = async (packages: string[], source: string) => {
+    if (packages.length === 0) return;
+
+    setInstallModalData({
+      appName: "Restauración de Perfil en Lote",
+      source: source === "flatpak" ? "flatpak" : "pacman",
+      pkgId: `${packages.length} paquetes seleccionados`,
+    });
+    setInstallProgressPct(5);
+    setInstallStep(`Iniciando instalación de ${packages.length} paquetes...`);
+    setInstallStatus("running");
+    setTerminalLogs([
+      {
+        text: `[OmniPkg] Iniciando restauración de perfil (${packages.length} paquetes vía ${source})...`,
+        time: new Date().toLocaleTimeString(),
+      },
+    ]);
+
+    try {
+      // Install all packages sequentially
+      for (let i = 0; i < packages.length; i++) {
+        const pkg = packages[i];
+        setInstallStep(`Instalando paquete ${i + 1}/${packages.length}: ${pkg}...`);
+        setInstallProgressPct(Math.round(((i + 1) / packages.length) * 100));
+
+        await invoke("install_package", {
+          id: `${source}:${pkg}`,
+          source: source,
+          pkgId: pkg,
+        });
+      }
+
+      await loadSystemData();
+      setInstallProgressPct(100);
+      setInstallStatus("success");
+      setInstallStep("¡Todos los paquetes han sido restaurados con éxito!");
+      showToast("¡Reinstalación en lote completada!");
+    } catch (e) {
+      setInstallStatus("error");
+      setInstallStep("Error durante la restauración");
+      showToast(`Error en lote: ${e}`);
     }
   };
 
@@ -513,6 +632,16 @@ export function App() {
           title: "Mantenimiento y Limpieza",
           subtitle: "Recupera espacio eliminando cachés de descargas y dependencias huérfanas",
         };
+      case "autostart":
+        return {
+          title: "Aplicaciones de Inicio (Autostart)",
+          subtitle: "Gestiona qué programas se inician automáticamente al arrancar tu sesión de escritorio",
+        };
+      case "snapshots":
+        return {
+          title: "Puntos de Restauración (Snapshots Btrfs)",
+          subtitle: "Crea y administra instantáneas seguras del sistema con Snapper y Timeshift",
+        };
       default:
         return { title: "OmniPkg", subtitle: "Linux App Manager" };
     }
@@ -537,6 +666,7 @@ export function App() {
         overview={overview}
         osInfo={osInfo}
         loading={loading}
+        onOpenCloneModal={() => setShowCloneModal(true)}
       />
 
       {/* Main Area */}
@@ -618,6 +748,28 @@ export function App() {
               onClean={handleCleanSystem}
             />
           )}
+
+          {currentTab === "autostart" && (
+            <AutostartView
+              entries={autostartEntries}
+              loading={loading}
+              onToggle={handleToggleAutostart}
+              onAddCustom={handleAddCustomAutostart}
+            />
+          )}
+
+          {currentTab === "snapshots" && (
+            <SnapshotsView
+              supportInfo={snapshotSupport}
+              snapshots={snapshots}
+              loading={loading}
+              onCreateSnapshot={handleCreateSnapshot}
+              onRefresh={async () => {
+                const s = await invoke<SnapshotEntry[]>("get_snapshots");
+                setSnapshots(s);
+              }}
+            />
+          )}
         </main>
       </div>
 
@@ -668,6 +820,14 @@ export function App() {
           }}
         />
       )}
+
+      {/* Clone / Backup Profile Modal */}
+      <BackupProfileModal
+        isOpen={showCloneModal}
+        onClose={() => setShowCloneModal(false)}
+        onStartBatchInstall={handleStartBatchInstall}
+        showToast={showToast}
+      />
 
       {/* Modern Confirmation Dialog (Replaces browser confirm) */}
       {confirmDialog && (

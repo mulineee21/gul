@@ -9,6 +9,12 @@ pub mod catalog;
 pub mod desktop_apps;
 pub mod app_details;
 pub mod install_options;
+pub mod flatpak_permissions;
+pub mod aur;
+pub mod autostart;
+pub mod snapshots;
+pub mod backup_profile;
+pub mod notifications;
 pub mod commands;
 
 use commands::*;
@@ -17,6 +23,10 @@ use commands::*;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .setup(|app| {
+            notifications::start_background_update_monitor(app.handle().clone());
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             get_system_overview,
             get_all_apps,
@@ -41,7 +51,22 @@ pub fn run() {
             get_install_options,
             install_appimage_from_url,
             pick_and_install_local_appimage,
-            cancel_install
+            cancel_install,
+            get_flatpak_permissions,
+            set_flatpak_permission,
+            reset_flatpak_permissions,
+            search_aur,
+            install_aur_package,
+            get_autostart_entries,
+            toggle_autostart_entry,
+            add_custom_autostart,
+            get_snapshot_support,
+            get_snapshots,
+            create_system_snapshot,
+            export_system_profile,
+            save_profile_file,
+            load_profile_file,
+            send_notification
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

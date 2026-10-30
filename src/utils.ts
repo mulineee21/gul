@@ -59,6 +59,13 @@ export function getSourceBadgeInfo(source: SourceType): {
         textColor: "text-emerald-300",
         borderColor: "border-emerald-600/30",
       };
+    case "aur":
+      return {
+        label: "AUR (Arch)",
+        bgColor: "bg-fuchsia-950/40",
+        textColor: "text-fuchsia-300",
+        borderColor: "border-fuchsia-600/30",
+      };
     default:
       return {
         label: source,

@@ -9,6 +9,7 @@ pub enum SourceType {
     Flatpak,
     Snap,
     AppImage,
+    Aur,
 }
 
 impl SourceType {
@@ -20,6 +21,7 @@ impl SourceType {
             SourceType::Flatpak => "flatpak",
             SourceType::Snap => "snap",
             SourceType::AppImage => "appimage",
+            SourceType::Aur => "aur",
         }
     }
 }
@@ -208,4 +210,71 @@ pub struct AppExtendedDetails {
     pub reviews: Vec<AppReview>,
     pub releases: Vec<AppRelease>,
     pub is_installed: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct FlatpakPermissions {
+    pub app_id: String,
+    pub network: bool,
+    pub x11: bool,
+    pub wayland: bool,
+    pub pulseaudio: bool,
+    pub filesystem_home: bool,
+    pub filesystem_host: bool,
+    pub webcam: bool,
+    pub devices_all: bool,
+    pub can_edit: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AurPackageItem {
+    pub name: String,
+    pub version: String,
+    pub description: String,
+    pub num_votes: u32,
+    pub popularity: f32,
+    pub maintainer: Option<String>,
+    pub url: Option<String>,
+    pub is_installed: bool,
+    pub out_of_date: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AutostartEntry {
+    pub id: String,
+    pub name: String,
+    pub exec: String,
+    pub comment: String,
+    pub icon: Option<String>,
+    pub enabled: bool,
+    pub file_path: String,
+    pub is_system: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SnapshotSupportInfo {
+    pub supported: bool,
+    pub backend: String, // "snapper", "btrfs", "none"
+    pub filesystem: String,
+    pub snapshot_count: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SnapshotEntry {
+    pub id: String,
+    pub num: Option<u32>,
+    pub description: String,
+    pub date: String,
+    pub snapshot_type: String, // "pre", "post", "single", "manual"
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OmniProfile {
+    pub version: String,
+    pub export_date: String,
+    pub distro: String,
+    pub native_manager: String,
+    pub native_packages: Vec<String>,
+    pub flatpak_apps: Vec<String>,
+    pub total_apps: usize,
 }

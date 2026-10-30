@@ -401,6 +401,27 @@ pub fn search_all_catalog(query: &str, filter_source: Option<&str>) -> Vec<Catal
         results.extend(native_results);
     }
 
+    // 3. Search AUR if enabled/filtered and system is Arch/CachyOS
+    if (filter == "all" || filter == "aur") && !query.trim().is_empty() && os_info.native_manager == "pacman" {
+        let aur_items = crate::aur::search_aur(query);
+        for hit in aur_items {
+            results.push(CatalogItem {
+                id: format!("aur:{}", hit.name),
+                name: hit.name.clone(),
+                canonical_name: crate::duplicates::normalize_name(&hit.name),
+                summary: hit.description.clone(),
+                description: hit.description,
+                version: hit.version,
+                source: SourceType::Aur,
+                icon_url: None,
+                developer: hit.maintainer.map(|m| format!("AUR ({})", m)).or_else(|| Some("AUR (Comunidad Arch)".to_string())),
+                is_installed: hit.is_installed,
+                pkg_id: hit.name,
+                category: Some(format!("★ {} votos", hit.num_votes)),
+            });
+        }
+    }
+
     // Sort: exact matches first, then installed status, then name
     let q_lower = query.to_lowercase().trim().to_string();
     if !q_lower.is_empty() {
@@ -599,6 +620,24 @@ pub async fn run_install_package(
             "pkexec".to_string(),
             vec!["snap".to_string(), "install".to_string(), pkg_id.clone()],
         ),
+        "aur" => {
+            let helper = if Command::new("which").arg("paru").output().map(|o| o.status.success()).unwrap_or(false) {
+                "paru"
+            } else if Command::new("which").arg("yay").output().map(|o| o.status.success()).unwrap_or(false) {
+                "yay"
+            } else {
+                return Err("No se encontró ningún helper de AUR (paru o yay) instalado.".to_string());
+            };
+            (
+                helper.to_string(),
+                vec![
+                    "-S".to_string(),
+                    "--noconfirm".to_string(),
+                    "--needed".to_string(),
+                    pkg_id.clone(),
+                ],
+            )
+        }
         _ => return Err(format!("Gestor de instalación no soportado: {}", source)),
     };
 

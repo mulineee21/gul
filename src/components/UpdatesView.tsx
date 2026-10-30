@@ -6,6 +6,7 @@ import {
   AlertCircle,
   Terminal,
   Layers,
+  ShieldCheck,
 } from "lucide-react";
 import { UpdateItem, UpdateProgressEvent } from "../types";
 import { getSourceBadgeInfo } from "../utils";
@@ -16,7 +17,7 @@ interface UpdatesViewProps {
   activeManagers: string[];
   isUpdating: boolean;
   updateEvents: Record<string, UpdateProgressEvent>;
-  onRunUpdates: (selectedManagers: string[]) => void;
+  onRunUpdates: (selectedManagers: string[], createSnapshot: boolean) => void;
 }
 
 export const UpdatesView: React.FC<UpdatesViewProps> = ({
@@ -28,6 +29,7 @@ export const UpdatesView: React.FC<UpdatesViewProps> = ({
   onRunUpdates,
 }) => {
   const [selectedMgrs, setSelectedMgrs] = useState<string[]>(activeManagers);
+  const [createSnapshot, setCreateSnapshot] = useState<boolean>(true);
 
   const toggleManager = (mgr: string) => {
     if (selectedMgrs.includes(mgr)) {
@@ -74,10 +76,25 @@ export const UpdatesView: React.FC<UpdatesViewProps> = ({
               );
             })}
           </div>
+          {/* Snapshot before update toggle */}
+          <div className="pt-2">
+            <label className="flex items-center space-x-2 text-xs text-zinc-300 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={createSnapshot}
+                onChange={(e) => setCreateSnapshot(e.target.checked)}
+                className="rounded border-zinc-700 bg-zinc-950 text-cyan-500 focus:ring-0 focus:ring-offset-0"
+              />
+              <span className="flex items-center gap-1.5 font-medium text-cyan-300">
+                <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Crear punto de restauración (Snapshot Btrfs) antes de actualizar</span>
+              </span>
+            </label>
+          </div>
         </div>
 
         <button
-          onClick={() => onRunUpdates(selectedMgrs)}
+          onClick={() => onRunUpdates(selectedMgrs, createSnapshot)}
           disabled={isUpdating || selectedMgrs.length === 0}
           className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-sm shadow-xl shadow-blue-500/25 flex items-center justify-center gap-2.5 transition active:scale-95 disabled:opacity-50 shrink-0"
         >

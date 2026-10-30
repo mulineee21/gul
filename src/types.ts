@@ -1,4 +1,4 @@
-export type SourceType = "pacman" | "apt" | "dnf" | "flatpak" | "snap" | "appimage";
+export type SourceType = "pacman" | "apt" | "dnf" | "flatpak" | "snap" | "appimage" | "aur";
 
 export interface SizeBreakdown {
   binary_bytes: number;
@@ -171,4 +171,65 @@ export interface AppExtendedDetails {
   reviews: AppReview[];
   releases: AppRelease[];
   is_installed: boolean;
+}
+
+export interface FlatpakPermissions {
+  app_id: string;
+  network: boolean;
+  x11: boolean;
+  wayland: boolean;
+  pulseaudio: boolean;
+  filesystem_home: boolean;
+  filesystem_host: boolean;
+  webcam: boolean;
+  devices_all: boolean;
+  can_edit: boolean;
+}
+
+export interface AurPackageItem {
+  name: string;
+  version: string;
+  description: string;
+  num_votes: number;
+  popularity: number;
+  maintainer?: string;
+  url?: string;
+  is_installed: boolean;
+  out_of_date: boolean;
+}
+
+export interface AutostartEntry {
+  id: string;
+  name: string;
+  exec: string;
+  comment: string;
+  icon?: string;
+  enabled: boolean;
+  file_path: string;
+  is_system: boolean;
+}
+
+export interface SnapshotSupportInfo {
+  supported: boolean;
+  backend: string; // "snapper", "timeshift", "btrfs", "none"
+  filesystem: string;
+  snapshot_count: number;
+}
+
+export interface SnapshotEntry {
+  id: string;
+  num?: number;
+  description: string;
+  date: string;
+  snapshot_type: string; // "pre", "post", "single", "manual"
+}
+
+export interface OmniProfile {
+  version: string;
+  export_date: string;
+  distro: string;
+  native_manager: string;
+  native_packages: string[];
+  flatpak_apps: string[];
+  total_apps: number;
 }
