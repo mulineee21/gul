@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "omnipkg",
+  "productName": "gul",
   "version": "0.1.0",
-  "identifier": "com.omnipkg.app",
+  "identifier": "org.gul.app",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -33,6 +33,9 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "shortDescription": "Gestor Universal de Linux",
+    "longDescription": "Gestor de paquetes unificado para Linux (Pacman, AUR, APT, DNF, Flatpak y AppImage).",
+    "category": "Utility"
   }
 }

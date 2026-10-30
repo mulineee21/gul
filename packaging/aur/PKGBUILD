@@ -1,0 +1,42 @@
+# Maintainer: Joel Molina
+pkgname=gul-bin
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Gestor Universal de Linux (Pacman, AUR, APT, DNF, Flatpak y AppImage)"
+arch=('x86_64')
+url="https://github.com/tu-usuario/gul"
+license=('MIT')
+depends=('gtk3' 'webkit2gtk-4.1' 'libayatana-appindicator' 'polkit' 'zenity')
+optdepends=(
+    'pacman-contrib: Para comprobación rápida de actualizaciones sin bloquear base de datos'
+    'paru: Helper para soporte de paquetes AUR'
+    'yay: Alternativa de helper para soporte de paquetes AUR'
+    'flatpak: Soporte para aplicaciones Flathub y sandbox'
+    'btrfs-progs: Soporte para instantáneas de disco Btrfs'
+    'snapper: Soporte para puntos de restauración'
+    'libnotify: Notificaciones de escritorio nativas'
+)
+provides=('gul')
+conflicts=('gul')
+
+# Descarga el AppImage generado en GitHub Releases
+source=("https://github.com/tu-usuario/gul/releases/download/v${pkgver}/gul_${pkgver}_amd64.AppImage")
+sha256sums=('SKIP')
+
+prepare() {
+    chmod +x "gul_${pkgver}_amd64.AppImage"
+    ./"gul_${pkgver}_amd64.AppImage" --appimage-extract
+}
+
+package() {
+    install -Dm755 "squashfs-root/usr/bin/gul" "${pkgdir}/usr/bin/gul"
+    install -Dm644 "squashfs-root/usr/share/applications/gul.desktop" "${pkgdir}/usr/share/applications/gul.desktop"
+    
+    # Instalar iconos
+    for size in 32x32 128x128 256x256; do
+        if [ -f "squashfs-root/usr/share/icons/hicolor/${size}/apps/gul.png" ]; then
+            install -Dm644 "squashfs-root/usr/share/icons/hicolor/${size}/apps/gul.png" \
+                "${pkgdir}/usr/share/icons/hicolor/${size}/apps/gul.png"
+        fi
+    done
+}
