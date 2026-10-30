@@ -10,10 +10,13 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/mulineee21/gul/releases/latest"><img src="https://img.shields.io/github/v/release/mulineee21/gul?color=blue&label=version" alt="Latest Release" /></a>
+  <a href="https://github.com/mulineee21/gul/stargazers"><img src="https://img.shields.io/github/stars/mulineee21/gul?style=flat&color=yellow" alt="GitHub Stars" /></a>
   <img src="https://img.shields.io/badge/Platform-Linux%20(Arch%20%7C%20Ubuntu%20%7C%20Debian%20%7C%20Fedora%20%7C%20Gentoo)-blue.svg" alt="Linux Support" />
   <img src="https://img.shields.io/badge/Backend-Rust%20%2B%20Tauri%20v2-orange.svg" alt="Tauri v2" />
   <img src="https://img.shields.io/badge/Frontend-React%2019%20%2B%20Tailwind-cyan.svg" alt="React 19" />
   <img src="https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg" alt="GNU GPL v3+" />
+  <a href="https://github.com/mulineee21/gul/issues"><img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat" alt="Contributions Welcome" /></a>
 </p>
 
 ---
@@ -161,6 +164,16 @@ gul/
 │   └── tauri.conf.json           # Configuración de Tauri v2
 └── .github/workflows/            # CI/CD automatizado para compilar Releases
 ```
+
+---
+
+## 🌟 Apoya el Proyecto
+
+Si te gusta o te resulta útil **GUL**, ¡apóyalo dándole una **estrella (Star ⭐)** en la parte superior derecha de GitHub! Esto ayuda a que el proyecto gane visibilidad en la comunidad de Linux y atraiga a más desarrolladores y mantenedores.
+
+- 🐛 ¿Encontraste un fallo? Abre un [Issue](https://github.com/mulineee21/gul/issues).
+- 💬 ¿Tienes una idea o sugerencia? Participa en las [Discusiones](https://github.com/mulineee21/gul/discussions).
+- 🤝 ¿Quieres contribuir código? Lee nuestra guía de [Contribución](CONTRIBUTING.md).
 
 ---
 

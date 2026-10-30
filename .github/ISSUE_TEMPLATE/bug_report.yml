@@ -1,0 +1,40 @@
+name: 🐛 Reporte de Error
+description: Crea un informe para ayudarnos a solucionar un problema o error en GUL.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¡Gracias por tomarte el tiempo de reportar este problema!
+  - type: input
+    id: distro
+    attributes:
+      label: Distribución de Linux
+      description: ¿Qué distribución de Linux estás utilizando y qué gestor nativo?
+      placeholder: Ej. CachyOS (Arch) / Ubuntu 24.04 (APT) / Fedora 40 (DNF)
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripción del problema
+      description: Una explicación clara y concisa de lo que ocurrió.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducir el error
+      description: Pasos exactos para ver el problema.
+      value: |
+        1. Abrir '...'
+        2. Hacer clic en '....'
+        3. Ver el error
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Registros de la terminal o capturas (Opcional)
+      description: Pega aquí los mensajes de error o registros relevantes.

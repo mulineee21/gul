@@ -1,0 +1,21 @@
+name: 💡 Propuesta de Mejora o Nueva Funcionalidad
+description: Sugiere una idea o mejora para el Gestor Universal de Linux (GUL).
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ¡Nos encanta escuchar nuevas ideas para hacer de GUL la mejor tienda de Linux!
+  - type: textarea
+    id: idea
+    attributes:
+      label: ¿Qué funcionalidad te gustaría ver añadida?
+      description: Describe detalladamente cómo funcionaría y qué problema resuelve.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Alternativas o contexto adicional
+      description: ¿Existen otras herramientas que hagan algo similar o ideas de diseño?
