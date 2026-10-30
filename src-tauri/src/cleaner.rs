@@ -96,6 +96,20 @@ pub fn execute_clean(item_ids: &[String]) -> CleanResult {
                         total_cleaned += item.size_bytes;
                     }
                 }
+                "clean:dnf:cache" => {
+                    let res = Command::new("pkexec").args(["dnf", "clean", "all"]).output();
+                    if let Ok(o) = res {
+                        logs.push(String::from_utf8_lossy(&o.stdout).to_string());
+                        total_cleaned += item.size_bytes;
+                    }
+                }
+                "clean:dnf:orphans" => {
+                    let res = Command::new("pkexec").args(["dnf", "autoremove", "-y"]).output();
+                    if let Ok(o) = res {
+                        logs.push(String::from_utf8_lossy(&o.stdout).to_string());
+                        total_cleaned += item.size_bytes;
+                    }
+                }
                 _ => {
                     logs.push(format!("Limpieza personalizada para {}", id));
                 }

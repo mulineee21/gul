@@ -121,7 +121,7 @@ fn parse_desktop_file(path: &Path) -> Option<AppInfo> {
         (SourceType::Flatpak, true)
     } else if path_str.contains("snap") {
         (SourceType::Snap, true)
-    } else if path_str.contains("omnipkg_") {
+    } else if path_str.contains("gul_") || path_str.contains("omnipkg_") {
         (SourceType::AppImage, true)
     } else {
         // Native (Pacman, APT, DNF based on active OS)

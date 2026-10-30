@@ -202,8 +202,22 @@ fn resolve_native_package(
 }
 
 fn resolve_flathub_id(canonical_name: &str, current_pkg_id: &str) -> String {
-    if current_pkg_id.contains('.') && !current_pkg_id.starts_with("pacman:") && !current_pkg_id.starts_with("appimage:") {
-        return current_pkg_id.trim_start_matches("flatpak:").to_string();
+    let clean = current_pkg_id
+        .trim_start_matches("flatpak:")
+        .trim_start_matches("pacman:")
+        .trim_start_matches("apt:")
+        .trim_start_matches("dnf:")
+        .trim_start_matches("aur:")
+        .trim_start_matches("appimage:");
+
+    if clean.contains('.')
+        && (clean.starts_with("org.")
+            || clean.starts_with("com.")
+            || clean.starts_with("io.")
+            || clean.starts_with("net.")
+            || clean.starts_with("fr."))
+    {
+        return clean.to_string();
     }
 
     let map: HashMap<&str, &str> = HashMap::from([

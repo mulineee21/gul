@@ -217,6 +217,24 @@ pub fn uninstall_app(id: String) -> Result<String, String> {
         return Ok(String::from_utf8_lossy(&out.stdout).to_string());
     }
 
+    if id.starts_with("dnf:") {
+        let pkg_name = id.trim_start_matches("dnf:");
+        let out = Command::new("pkexec")
+            .args(["dnf", "remove", "-y", pkg_name])
+            .output()
+            .map_err(|e| e.to_string())?;
+        return Ok(String::from_utf8_lossy(&out.stdout).to_string());
+    }
+
+    if id.starts_with("aur:") {
+        let pkg_name = id.trim_start_matches("aur:");
+        let out = Command::new("pkexec")
+            .args(["pacman", "-Rns", "--noconfirm", pkg_name])
+            .output()
+            .map_err(|e| e.to_string())?;
+        return Ok(String::from_utf8_lossy(&out.stdout).to_string());
+    }
+
     if id.starts_with("appimage:") {
         let path_str = id.trim_start_matches("appimage:");
         let _ = managers::appimage::unintegrate_appimage(path_str);
