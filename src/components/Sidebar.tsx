@@ -10,6 +10,7 @@ import {
   Rocket,
   RotateCcw,
   Sparkles,
+  Download,
 } from "lucide-react";
 import { OsInfo, SystemOverview } from "../types";
 import { formatBytes } from "../utils";
@@ -21,6 +22,7 @@ interface SidebarProps {
   osInfo: OsInfo | null;
   loading?: boolean;
   onOpenCloneModal?: () => void;
+  onSetupFlatpak?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -29,6 +31,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   overview,
   osInfo,
   onOpenCloneModal,
+  onSetupFlatpak,
 }) => {
   const navItems = [
     {
@@ -193,11 +196,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {osInfo.native_manager}
             </span>
           )}
-          {osInfo?.has_flathub && (
+          {osInfo?.has_flathub ? (
             <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-300 border border-blue-500/30">
               Flathub
             </span>
-          )}
+          ) : osInfo && onSetupFlatpak ? (
+            <button
+              onClick={onSetupFlatpak}
+              title="Install Flatpak and configure official Flathub repository"
+              className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-blue-600/20 hover:bg-blue-600/40 text-blue-300 border border-blue-500/40 flex items-center gap-1 transition"
+            >
+              <Download className="w-2.5 h-2.5" />
+              <span>Install Flatpak</span>
+            </button>
+          ) : null}
           {osInfo?.has_snap && (
             <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-300 border border-orange-500/30">
               Snap

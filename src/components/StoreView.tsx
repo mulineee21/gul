@@ -28,6 +28,7 @@ interface StoreViewProps {
   onSelectCatalogItem: (item: CatalogItem) => void;
   onUninstall?: (id: string) => void;
   onPickLocalAppImage?: () => void;
+  onSetupFlatpak?: () => void;
 }
 
 export const StoreView: React.FC<StoreViewProps> = ({
@@ -40,6 +41,7 @@ export const StoreView: React.FC<StoreViewProps> = ({
   onLaunch,
   onSelectCatalogItem,
   onPickLocalAppImage,
+  onSetupFlatpak,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sourceFilter, setSourceFilter] = useState<"all" | "flatpak" | "native" | "aur" | "snap">("all");
@@ -55,11 +57,18 @@ export const StoreView: React.FC<StoreViewProps> = ({
     { id: "office", label: "Office & Productivity" },
   ];
 
-  // Debounced search trigger
+  // Debounced search trigger (skip initial mount if empty & "all", since App.tsx already pre-fetches popular)
+  const isFirstRender = React.useRef(true);
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      if (searchTerm === "" && sourceFilter === "all" && catalogItems.length > 0) {
+        return;
+      }
+    }
     const timer = setTimeout(() => {
       onSearch(searchTerm, sourceFilter);
-    }, 300);
+    }, 220);
     return () => clearTimeout(timer);
   }, [searchTerm, sourceFilter, onSearch]);
 
@@ -103,15 +112,26 @@ export const StoreView: React.FC<StoreViewProps> = ({
 
         {/* Repositories status chips & AppImage button */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="bg-zinc-900/90 border border-zinc-800 rounded-xl px-3 py-2 flex items-center gap-2">
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-            </span>
-            <span className="text-[11px] font-mono font-medium text-blue-300">
-              Flathub Active
-            </span>
-          </div>
+          {osInfo?.has_flatpak && osInfo?.has_flathub ? (
+            <div className="bg-zinc-900/90 border border-zinc-800 rounded-xl px-3 py-2 flex items-center gap-2">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+              </span>
+              <span className="text-[11px] font-mono font-medium text-blue-300">
+                Flathub Active
+              </span>
+            </div>
+          ) : (
+            <button
+              onClick={onSetupFlatpak}
+              title="Install Flatpak package manager and enable official Flathub repository"
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white text-xs font-semibold shadow-md shadow-blue-500/20 flex items-center gap-1.5 transition active:scale-95"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>{osInfo?.has_flatpak ? "Enable Flathub" : "Install Flatpak"}</span>
+            </button>
+          )}
 
           <div className="bg-zinc-900/90 border border-zinc-800 rounded-xl px-3 py-2 flex items-center gap-2">
             <span className="flex h-2 w-2 relative">

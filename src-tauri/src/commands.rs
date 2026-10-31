@@ -22,56 +22,82 @@ use crate::backup_profile;
 use crate::notifications;
 
 #[tauri::command]
-pub fn get_system_overview() -> SystemOverview {
-    let managers_list = managers::get_active_managers();
-    let raw_apps = managers::list_all_installed();
-    let (apps, dup_groups) = duplicates::analyze_duplicates(raw_apps);
-    let updates_list = updates::check_all_updates();
-    let clean_items = cleaner::scan_items();
+pub async fn get_system_overview() -> SystemOverview {
+    tokio::task::spawn_blocking(|| {
+        let managers_list = managers::get_active_managers();
+        let raw_apps = managers::list_all_installed();
+        let (apps, dup_groups) = duplicates::analyze_duplicates(raw_apps);
+        let updates_list = updates::check_all_updates();
+        let clean_items = cleaner::scan_items();
 
-    let total_disk: u64 = apps.iter().map(|a| a.size_bytes).sum();
-    let reclaimable: u64 = clean_items.iter().map(|i| i.size_bytes).sum();
+        let total_disk: u64 = apps.iter().map(|a| a.size_bytes).sum();
+        let reclaimable: u64 = clean_items.iter().map(|i| i.size_bytes).sum();
 
-    // Distro name from /etc/os-release
-    let distro = std::fs::read_to_string("/etc/os-release")
-        .ok()
-        .and_then(|content| {
-            for line in content.lines() {
-                if line.starts_with("PRETTY_NAME=") {
-                    return Some(line.trim_start_matches("PRETTY_NAME=").trim_matches('"').to_string());
+        // Distro name from /etc/os-release
+        let distro = std::fs::read_to_string("/etc/os-release")
+            .ok()
+            .and_then(|content| {
+                for line in content.lines() {
+                    if line.starts_with("PRETTY_NAME=") {
+                        return Some(
+                            line.trim_start_matches("PRETTY_NAME=")
+                                .trim_matches('"')
+                                .to_string(),
+                        );
+                    }
                 }
-            }
-            None
-        })
-        .unwrap_or_else(|| "Linux".to_string());
+                None
+            })
+            .unwrap_or_else(|| "Linux".to_string());
 
-    SystemOverview {
-        distro_name: distro,
-        active_managers: managers_list,
-        total_apps: apps.len(),
-        duplicates_count: dup_groups.len(),
-        updates_available: updates_list.len(),
-        total_disk_used_bytes: total_disk,
-        reclaimable_bytes: reclaimable,
-    }
+        SystemOverview {
+            distro_name: distro,
+            active_managers: managers_list,
+            total_apps: apps.len(),
+            duplicates_count: dup_groups.len(),
+            updates_available: updates_list.len(),
+            total_disk_used_bytes: total_disk,
+            reclaimable_bytes: reclaimable,
+        }
+    })
+    .await
+    .unwrap_or_else(|_| SystemOverview {
+        distro_name: "Linux".to_string(),
+        active_managers: Vec::new(),
+        total_apps: 0,
+        duplicates_count: 0,
+        updates_available: 0,
+        total_disk_used_bytes: 0,
+        reclaimable_bytes: 0,
+    })
 }
 
 #[tauri::command]
-pub fn get_all_apps() -> (Vec<AppInfo>, Vec<DuplicateGroup>) {
-    let raw_apps = managers::list_all_installed();
-    duplicates::analyze_duplicates(raw_apps)
+pub async fn get_all_apps() -> (Vec<AppInfo>, Vec<DuplicateGroup>) {
+    tokio::task::spawn_blocking(|| {
+        let raw_apps = managers::list_all_installed();
+        duplicates::analyze_duplicates(raw_apps)
+    })
+    .await
+    .unwrap_or_default()
 }
 
 #[tauri::command]
-pub fn get_duplicates() -> Vec<DuplicateGroup> {
-    let raw_apps = managers::list_all_installed();
-    let (_, groups) = duplicates::analyze_duplicates(raw_apps);
-    groups
+pub async fn get_duplicates() -> Vec<DuplicateGroup> {
+    tokio::task::spawn_blocking(|| {
+        let raw_apps = managers::list_all_installed();
+        let (_, groups) = duplicates::analyze_duplicates(raw_apps);
+        groups
+    })
+    .await
+    .unwrap_or_default()
 }
 
 #[tauri::command]
-pub fn get_available_updates() -> Vec<UpdateItem> {
-    updates::check_all_updates()
+pub async fn get_available_updates() -> Vec<UpdateItem> {
+    tokio::task::spawn_blocking(|| updates::check_all_updates())
+        .await
+        .unwrap_or_default()
 }
 
 #[tauri::command]
@@ -83,8 +109,10 @@ pub async fn start_update_all(app: AppHandle, selected_managers: Vec<String>) ->
 }
 
 #[tauri::command]
-pub fn scan_cleaner() -> Vec<SystemCleanItem> {
-    cleaner::scan_items()
+pub async fn scan_cleaner() -> Vec<SystemCleanItem> {
+    tokio::task::spawn_blocking(|| cleaner::scan_items())
+        .await
+        .unwrap_or_default()
 }
 
 #[tauri::command]
@@ -260,13 +288,17 @@ pub fn get_os_info() -> OsInfo {
 }
 
 #[tauri::command]
-pub fn get_catalog_popular() -> Vec<CatalogItem> {
-    catalog::get_flathub_popular()
+pub async fn get_catalog_popular() -> Vec<CatalogItem> {
+    tokio::task::spawn_blocking(|| catalog::get_flathub_popular())
+        .await
+        .unwrap_or_default()
 }
 
 #[tauri::command]
-pub fn search_catalog(query: String, filter_source: Option<String>) -> Vec<CatalogItem> {
-    catalog::search_all_catalog(&query, filter_source.as_deref())
+pub async fn search_catalog(query: String, filter_source: Option<String>) -> Vec<CatalogItem> {
+    tokio::task::spawn_blocking(move || catalog::search_all_catalog(&query, filter_source.as_deref()))
+        .await
+        .unwrap_or_default()
 }
 
 #[tauri::command]
@@ -280,23 +312,33 @@ pub async fn install_package(
 }
 
 #[tauri::command]
-pub fn get_desktop_apps() -> (Vec<AppInfo>, Vec<DuplicateGroup>) {
-    let desktop = desktop_apps::list_desktop_apps();
-    duplicates::analyze_duplicates(desktop)
+pub async fn get_desktop_apps() -> (Vec<AppInfo>, Vec<DuplicateGroup>) {
+    tokio::task::spawn_blocking(|| {
+        let desktop = desktop_apps::list_desktop_apps();
+        duplicates::analyze_duplicates(desktop)
+    })
+    .await
+    .unwrap_or_default()
 }
 
 #[tauri::command]
-pub fn get_app_details(app_id: String) -> AppExtendedDetails {
-    app_details::get_app_extended_details(&app_id)
+pub async fn get_app_details(app_id: String) -> AppExtendedDetails {
+    tokio::task::spawn_blocking(move || app_details::get_app_extended_details(&app_id))
+        .await
+        .unwrap_or_else(|_| app_details::get_app_extended_details(""))
 }
 
 #[tauri::command]
-pub fn get_install_options(
+pub async fn get_install_options(
     app_name: String,
     canonical_name: String,
     current_pkg_id: String,
 ) -> Vec<InstallOption> {
-    install_options::get_install_options(&app_name, &canonical_name, &current_pkg_id)
+    tokio::task::spawn_blocking(move || {
+        install_options::get_install_options(&app_name, &canonical_name, &current_pkg_id)
+    })
+    .await
+    .unwrap_or_default()
 }
 
 #[tauri::command]
@@ -318,7 +360,12 @@ pub async fn cancel_install(id: String) -> Result<(), String> {
     catalog::cancel_install(&id).await
 }
 
-// Flatpak Permissions
+// Flatpak Permissions & Engine Setup
+#[tauri::command]
+pub async fn setup_flatpak(app: AppHandle) -> Result<String, String> {
+    managers::flatpak::setup_flatpak_engine(app).await
+}
+
 #[tauri::command]
 pub fn get_flatpak_permissions(app_id: String) -> FlatpakPermissions {
     flatpak_permissions::get_flatpak_permissions(&app_id)

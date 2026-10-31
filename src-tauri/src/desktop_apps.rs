@@ -1,8 +1,13 @@
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::sync::LazyLock;
+use std::time::{Duration, Instant};
 use crate::models::{AppInfo, SourceType};
 use crate::disk_usage::get_app_data_breakdown;
+
+static INSTALLED_IDENTITIES_CACHE: LazyLock<std::sync::Mutex<Option<(Instant, HashSet<String>)>>> =
+    LazyLock::new(|| std::sync::Mutex::new(None));
 
 pub fn list_desktop_apps() -> Vec<AppInfo> {
     let mut desktop_files = Vec::new();
@@ -255,44 +260,94 @@ fn to_base64(data: &[u8]) -> String {
 }
 
 pub fn get_installed_canonical_identities() -> HashSet<String> {
+    if let Ok(guard) = INSTALLED_IDENTITIES_CACHE.lock() {
+        if let Some((ts, cached)) = &*guard {
+            if ts.elapsed() < Duration::from_secs(30) {
+                return cached.clone();
+            }
+        }
+    }
+
     let mut set = HashSet::new();
 
-    // Add all desktop apps
-    for app in list_desktop_apps() {
-        set.insert(app.canonical_name.to_lowercase());
-        set.insert(app.name.to_lowercase());
-        let id_part = app.id.split(':').nth(1).unwrap_or("").to_lowercase();
-        if !id_part.is_empty() {
-            set.insert(id_part);
-        }
-    }
+    // 1. Fast scan of .desktop filenames (without base64 icons or WalkDir disk breakdown)
+    let sys_dirs = [
+        "/usr/share/applications",
+        "/usr/local/share/applications",
+        "/var/lib/flatpak/exports/share/applications",
+        "/var/lib/snapd/desktop/applications",
+    ];
 
-    // Add flatpak IDs
-    let flatpak_out = std::process::Command::new("flatpak")
-        .args(["list", "--app", "--columns=application"])
-        .output();
-    if let Ok(out) = flatpak_out {
-        for line in String::from_utf8_lossy(&out.stdout).lines() {
-            let l = line.trim().to_lowercase();
-            if !l.is_empty() {
-                set.insert(l.clone());
-                set.insert(crate::duplicates::normalize_name(&l));
+    for d in sys_dirs {
+        let p = Path::new(d);
+        if let Ok(entries) = fs::read_dir(p) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.extension().and_then(|s| s.to_str()) == Some("desktop") {
+                    if let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
+                        let low = stem.to_lowercase();
+                        set.insert(low.clone());
+                        set.insert(crate::duplicates::normalize_name(&low));
+                    }
+                }
             }
         }
     }
 
-    // Add explicitly installed pacman packages
-    let pacman_out = std::process::Command::new("pacman")
-        .args(["-Qqe"])
-        .output();
-    if let Ok(out) = pacman_out {
-        for line in String::from_utf8_lossy(&out.stdout).lines() {
-            let l = line.trim().to_lowercase();
-            if !l.is_empty() {
-                set.insert(l.clone());
-                set.insert(crate::duplicates::normalize_name(&l));
+    if let Some(home) = dirs::home_dir() {
+        for d in [
+            home.join(".local/share/applications"),
+            home.join(".local/share/flatpak/exports/share/applications"),
+        ] {
+            if let Ok(entries) = fs::read_dir(&d) {
+                for entry in entries.flatten() {
+                    let path = entry.path();
+                    if path.extension().and_then(|s| s.to_str()) == Some("desktop") {
+                        if let Some(stem) = path.file_stem().and_then(|s| s.to_str()) {
+                            let low = stem.to_lowercase();
+                            set.insert(low.clone());
+                            set.insert(crate::duplicates::normalize_name(&low));
+                        }
+                    }
+                }
             }
         }
+    }
+
+    // 2. Add flatpak IDs if flatpak is installed
+    if crate::os_detector::command_exists("flatpak") {
+        let flatpak_out = std::process::Command::new("flatpak")
+            .args(["list", "--app", "--columns=application"])
+            .output();
+        if let Ok(out) = flatpak_out {
+            for line in String::from_utf8_lossy(&out.stdout).lines() {
+                let l = line.trim().to_lowercase();
+                if !l.is_empty() {
+                    set.insert(l.clone());
+                    set.insert(crate::duplicates::normalize_name(&l));
+                }
+            }
+        }
+    }
+
+    // 3. Add explicitly installed pacman packages
+    if crate::os_detector::command_exists("pacman") {
+        let pacman_out = std::process::Command::new("pacman")
+            .args(["-Qqe"])
+            .output();
+        if let Ok(out) = pacman_out {
+            for line in String::from_utf8_lossy(&out.stdout).lines() {
+                let l = line.trim().to_lowercase();
+                if !l.is_empty() {
+                    set.insert(l.clone());
+                    set.insert(crate::duplicates::normalize_name(&l));
+                }
+            }
+        }
+    }
+
+    if let Ok(mut guard) = INSTALLED_IDENTITIES_CACHE.lock() {
+        *guard = Some((Instant::now(), set.clone()));
     }
 
     set

@@ -160,34 +160,43 @@ fn resolve_native_package(
     }
 
     if native_mgr == "pacman" {
-        // Step 1: Check exact match with `pacman -Si`
-        for candidate in &candidates {
-            if let Ok(out) = Command::new("pacman").env("LC_ALL", "C").args(["-Si", candidate]).output() {
-                if out.status.success() {
-                    let text = String::from_utf8_lossy(&out.stdout);
-                    let mut version = "Repositorio Oficial".to_string();
-                    for line in text.lines() {
-                        if line.starts_with("Version") || line.starts_with("Versión") {
-                            if let Some((_, v)) = line.split_once(':') {
-                                version = v.trim().to_string();
-                                break;
-                            }
+        // Step 1: Check all candidates in a single fast `pacman -Si` invocation
+        if !candidates.is_empty() {
+            if let Ok(out) = Command::new("pacman")
+                .env("LC_ALL", "C")
+                .arg("-Si")
+                .args(&candidates)
+                .output()
+            {
+                let text = String::from_utf8_lossy(&out.stdout);
+                let mut current_name = String::new();
+                for line in text.lines() {
+                    if let Some((k, v)) = line.split_once(':') {
+                        let key = k.trim();
+                        let val = v.trim();
+                        if key == "Name" {
+                            current_name = val.to_string();
+                        } else if key == "Version" && !current_name.is_empty() {
+                            return (current_name, val.to_string());
                         }
                     }
-                    return (candidate.clone(), version);
                 }
             }
         }
 
-        // Step 2: Fallback query with `pacman -Ss`
-        for candidate in &candidates {
-            if let Ok(out) = Command::new("pacman").env("LC_ALL", "C").args(["-Ss", candidate]).output() {
+        // Step 2: Single fallback query with `pacman -Ss` on primary candidate
+        if let Some(first_cand) = candidates.first() {
+            if let Ok(out) = Command::new("pacman")
+                .env("LC_ALL", "C")
+                .args(["-Ss", first_cand])
+                .output()
+            {
                 let text = String::from_utf8_lossy(&out.stdout);
                 for line in text.lines() {
                     let parts: Vec<&str> = line.split_whitespace().collect();
                     if !parts.is_empty() && parts[0].contains('/') {
                         let pkg = parts[0].split('/').nth(1).unwrap_or(parts[0]);
-                        if pkg == candidate || pkg == norm_app {
+                        if pkg == first_cand || pkg == norm_app {
                             let ver = parts.get(1).unwrap_or(&"").to_string();
                             return (pkg.to_string(), ver);
                         }

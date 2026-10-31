@@ -1,14 +1,13 @@
-use std::process::Command;
-use crate::models::{AppInfo, SourceType, UpdateItem, SystemCleanItem};
+use std::process::{Command, Stdio};
+use tauri::{AppHandle, Emitter};
+use tokio::process::Command as TokioCommand;
+use crate::models::{AppInfo, InstallProgressEvent, SourceType, UpdateItem, SystemCleanItem};
 use crate::disk_usage::get_app_data_breakdown;
 use crate::managers::pacman::parse_size_to_bytes;
+use crate::os_detector::detect_os;
 
 pub fn is_available() -> bool {
-    Command::new("which")
-        .arg("flatpak")
-        .output()
-        .map(|o| o.status.success())
-        .unwrap_or(false)
+    crate::os_detector::command_exists("flatpak")
 }
 
 pub fn list_installed() -> Vec<AppInfo> {
@@ -150,3 +149,162 @@ pub fn scan_cleaner_items() -> Vec<SystemCleanItem> {
 
     items
 }
+
+pub async fn setup_flatpak_engine(app: AppHandle) -> Result<String, String> {
+    let os = detect_os();
+    let id = "system:setup-flatpak".to_string();
+
+    // 1. Install flatpak binary if not installed
+    if !os.has_flatpak {
+        let (cmd, args): (&str, Vec<&str>) = match os.native_manager.as_str() {
+            "pacman" => ("pkexec", vec!["pacman", "-S", "--noconfirm", "--needed", "flatpak"]),
+            "apt" => ("pkexec", vec!["apt-get", "install", "-y", "flatpak"]),
+            "dnf" => ("pkexec", vec!["dnf", "install", "-y", "flatpak"]),
+            "zypper" => ("pkexec", vec!["zypper", "--non-interactive", "install", "flatpak"]),
+            "portage" => ("pkexec", vec!["emerge", "--autounmask-continue", "sys-apps/flatpak"]),
+            _ => return Err(format!("Unsupported native package manager for automatic Flatpak installation: {}", os.native_manager)),
+        };
+
+        let _ = app.emit(
+            "install-progress",
+            InstallProgressEvent {
+                id: id.clone(),
+                status: "starting".to_string(),
+                message: format!("Installing Flatpak engine via {}...", os.native_manager.to_uppercase()),
+                line: Some(format!(
+                    "[GUL] Installing Flatpak package manager: {} {}\n[GUL] Please enter your administrator password if prompted.",
+                    cmd,
+                    args.join(" ")
+                )),
+                progress_pct: Some(15.0),
+                step: Some("Installing Flatpak package...".to_string()),
+                is_stderr: Some(false),
+            },
+        );
+
+        let mut child = TokioCommand::new(cmd)
+            .args(&args)
+            .env("LC_ALL", "C.UTF-8")
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .map_err(|e| format!("Failed to start Flatpak installer: {}", e))?;
+
+        let stdout = child.stdout.take();
+        let stderr = child.stderr.take();
+
+        let app_out = app.clone();
+        let id_out = id.clone();
+        let stdout_handle = tokio::spawn(async move {
+            if let Some(out) = stdout {
+                crate::catalog::stream_process_output(out, app_out, id_out, false).await;
+            }
+        });
+
+        let app_err = app.clone();
+        let id_err = id.clone();
+        let stderr_handle = tokio::spawn(async move {
+            if let Some(err) = stderr {
+                crate::catalog::stream_process_output(err, app_err, id_err, true).await;
+            }
+        });
+
+        let _ = tokio::join!(stdout_handle, stderr_handle);
+        let status = child.wait().await.map_err(|e| e.to_string())?;
+
+        if !status.success() {
+            let err_msg = format!("Failed to install Flatpak package (exit code {:?})", status.code());
+            let _ = app.emit(
+                "install-progress",
+                InstallProgressEvent {
+                    id: id.clone(),
+                    status: "error".to_string(),
+                    message: err_msg.clone(),
+                    line: Some(format!("[GUL Error] {}", err_msg)),
+                    progress_pct: None,
+                    step: Some("Error installing Flatpak".to_string()),
+                    is_stderr: Some(true),
+                },
+            );
+            return Err(err_msg);
+        }
+    }
+
+    // 2. Add Flathub official repository
+    let _ = app.emit(
+        "install-progress",
+        InstallProgressEvent {
+            id: id.clone(),
+            status: "running".to_string(),
+            message: "Configuring official Flathub repository...".to_string(),
+            line: Some("[GUL] Adding Flathub remote: flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo".to_string()),
+            progress_pct: Some(75.0),
+            step: Some("Adding Flathub repository...".to_string()),
+            is_stderr: Some(false),
+        },
+    );
+
+    let remote_out = TokioCommand::new("flatpak")
+        .args([
+            "remote-add",
+            "--if-not-exists",
+            "flathub",
+            "https://dl.flathub.org/repo/flathub.flatpakrepo",
+        ])
+        .output()
+        .await;
+
+    let remote_ok = match remote_out {
+        Ok(o) if o.status.success() => true,
+        _ => {
+            // Fallback to user-level remote if system-wide remote requires polkit/root and failed
+            TokioCommand::new("flatpak")
+                .args([
+                    "remote-add",
+                    "--user",
+                    "--if-not-exists",
+                    "flathub",
+                    "https://dl.flathub.org/repo/flathub.flatpakrepo",
+                ])
+                .output()
+                .await
+                .map(|o| o.status.success())
+                .unwrap_or(false)
+        }
+    };
+
+    if !remote_ok {
+        let err_msg = "Failed to add Flathub repository.".to_string();
+        let _ = app.emit(
+            "install-progress",
+            InstallProgressEvent {
+                id: id.clone(),
+                status: "error".to_string(),
+                message: err_msg.clone(),
+                line: Some(format!("[GUL Error] {}", err_msg)),
+                progress_pct: None,
+                step: Some("Error configuring Flathub".to_string()),
+                is_stderr: Some(true),
+            },
+        );
+        return Err(err_msg);
+    }
+
+    crate::os_detector::invalidate_os_cache();
+
+    let _ = app.emit(
+        "install-progress",
+        InstallProgressEvent {
+            id,
+            status: "success".to_string(),
+            message: "Flatpak & Flathub installed and configured successfully!".to_string(),
+            line: Some("[GUL] Flatpak & Flathub are now ready! You can now install any Flatpak application.".to_string()),
+            progress_pct: Some(100.0),
+            step: Some("Flatpak setup completed".to_string()),
+            is_stderr: Some(false),
+        },
+    );
+
+    Ok("Flatpak and Flathub configured successfully".to_string())
+}
+

@@ -15,14 +15,17 @@ pub fn get_app_extended_details(app_id_or_name: &str) -> AppExtendedDetails {
 
     let resolved_app_id = resolve_to_appstream_id(clean_id);
 
-    // 1. Fetch Flathub AppStream metadata
-    let appstream = fetch_flathub_appstream(&resolved_app_id);
-
-    // 2. Fetch ODRS Reviews
-    let (rating_score, reviews) = fetch_odrs_reviews(&resolved_app_id);
-
-    // 3. Fetch Flathub Install Stats
-    let total_installs = fetch_flathub_stats(&resolved_app_id);
+    // 1..3. Fetch Flathub AppStream metadata, ODRS Reviews, and Flathub Install Stats in parallel
+    let (appstream, (rating_score, reviews), total_installs) = std::thread::scope(|s| {
+        let h1 = s.spawn(|| fetch_flathub_appstream(&resolved_app_id));
+        let h2 = s.spawn(|| fetch_odrs_reviews(&resolved_app_id));
+        let h3 = s.spawn(|| fetch_flathub_stats(&resolved_app_id));
+        (
+            h1.join().unwrap_or_default(),
+            h2.join().unwrap_or_else(|_| (4.8, Vec::new())),
+            h3.join().unwrap_or(None),
+        )
+    });
 
     // 4. Check if installed
     let installed_set = crate::desktop_apps::get_installed_canonical_identities();

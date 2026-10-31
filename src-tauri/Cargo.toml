@@ -1,6 +1,6 @@
 [package]
 name = "gul"
-version = "0.1.0"
+version = "0.1.1"
 description = "GUL - Gestor Universal de Linux"
 authors = ["Joel Molina"]
 edition = "2024"

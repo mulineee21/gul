@@ -3,11 +3,7 @@ use crate::models::{AppInfo, SourceType, UpdateItem, SystemCleanItem};
 use crate::disk_usage::get_app_data_breakdown;
 
 pub fn is_available() -> bool {
-    Command::new("which")
-        .arg("pacman")
-        .output()
-        .map(|o| o.status.success())
-        .unwrap_or(false)
+    crate::os_detector::command_exists("pacman")
 }
 
 pub fn parse_size_to_bytes(size_str: &str) -> u64 {

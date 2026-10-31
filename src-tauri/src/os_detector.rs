@@ -2,9 +2,28 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
+use std::sync::LazyLock;
+use std::time::{Duration, Instant};
 use crate::models::OsInfo;
 
+static OS_INFO_CACHE: LazyLock<std::sync::Mutex<Option<(Instant, OsInfo)>>> =
+    LazyLock::new(|| std::sync::Mutex::new(None));
+
+pub fn invalidate_os_cache() {
+    if let Ok(mut guard) = OS_INFO_CACHE.lock() {
+        *guard = None;
+    }
+}
+
 pub fn detect_os() -> OsInfo {
+    if let Ok(guard) = OS_INFO_CACHE.lock() {
+        if let Some((ts, info)) = &*guard {
+            if ts.elapsed() < Duration::from_secs(30) {
+                return info.clone();
+            }
+        }
+    }
+
     let os_data = read_os_release();
 
     let id = os_data.get("ID").cloned().unwrap_or_else(|| "linux".to_string()).to_lowercase();
@@ -97,7 +116,7 @@ pub fn detect_os() -> OsInfo {
     let has_snap = command_exists("snap");
     let architecture = std::env::consts::ARCH.to_string();
 
-    OsInfo {
+    let info = OsInfo {
         distro_name: pretty_name,
         distro_id: id,
         distro_family: family,
@@ -106,15 +125,33 @@ pub fn detect_os() -> OsInfo {
         has_flathub,
         has_snap,
         architecture,
+    };
+
+    if let Ok(mut guard) = OS_INFO_CACHE.lock() {
+        *guard = Some((Instant::now(), info.clone()));
     }
+
+    info
 }
 
-fn command_exists(cmd: &str) -> bool {
-    Command::new("which")
-        .arg(cmd)
-        .output()
-        .map(|o| o.status.success())
-        .unwrap_or(false)
+pub fn command_exists(cmd: &str) -> bool {
+    if let Ok(path_var) = std::env::var("PATH") {
+        for dir in path_var.split(':') {
+            if dir.is_empty() || dir.contains("/.mount_") {
+                continue;
+            }
+            let full = Path::new(dir).join(cmd);
+            if full.is_file() {
+                return true;
+            }
+        }
+    }
+    for std_dir in ["/usr/bin", "/bin", "/usr/local/bin", "/sbin", "/usr/sbin"] {
+        if Path::new(std_dir).join(cmd).is_file() {
+            return true;
+        }
+    }
+    false
 }
 
 fn check_flathub_remote() -> bool {

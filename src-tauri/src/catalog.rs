@@ -38,7 +38,18 @@ struct FlathubHit {
     runtime: Option<String>,
 }
 
+static POPULAR_CACHE: LazyLock<std::sync::Mutex<Option<Vec<CatalogItem>>>> =
+    LazyLock::new(|| std::sync::Mutex::new(None));
+
 pub fn get_flathub_popular() -> Vec<CatalogItem> {
+    if let Ok(guard) = POPULAR_CACHE.lock() {
+        if let Some(cached) = &*guard {
+            if !cached.is_empty() {
+                return cached.clone();
+            }
+        }
+    }
+
     let installed_identities = crate::desktop_apps::get_installed_canonical_identities();
 
     // 1. Try querying Flathub popular collection via curl
@@ -46,9 +57,9 @@ pub fn get_flathub_popular() -> Vec<CatalogItem> {
         .args([
             "-s",
             "--connect-timeout",
-            "4",
+            "3",
             "-m",
-            "8",
+            "5",
             "https://flathub.org/api/v2/collection/popular",
         ])
         .output();
@@ -57,11 +68,15 @@ pub fn get_flathub_popular() -> Vec<CatalogItem> {
         if out.status.success() {
             if let Ok(resp) = serde_json::from_slice::<FlathubResponse>(&out.stdout) {
                 if !resp.hits.is_empty() {
-                    return resp
+                    let items: Vec<CatalogItem> = resp
                         .hits
                         .into_iter()
                         .filter_map(|hit| convert_flathub_hit(hit, &installed_identities))
                         .collect();
+                    if let Ok(mut guard) = POPULAR_CACHE.lock() {
+                        *guard = Some(items.clone());
+                    }
+                    return items;
                 }
             }
         }
@@ -211,9 +226,62 @@ fn search_flathub_cli(query: &str) -> Vec<CatalogItem> {
     items
 }
 
+pub fn get_popular_native_packages(native_manager: &str) -> Vec<CatalogItem> {
+    if native_manager != "pacman" {
+        return Vec::new();
+    }
+
+    let featured = [
+        ("firefox", "Fast, Private & Safe Web Browser"),
+        ("vlc", "Multi-platform MPEG, VCD/DVD, and DivX player"),
+        ("gimp", "GNU Image Manipulation Program"),
+        ("obs-studio", "Free, open source software for live streaming and recording"),
+        ("blender", "A fully integrated 3D graphics creation suite"),
+        ("telegram-desktop", "Official Telegram Desktop client"),
+        ("discord", "All-in-one voice and text chat for gamers"),
+        ("inkscape", "Professional vector graphics editor"),
+        ("kdenlive", "A non-linear video editor for Linux using the MLT video framework"),
+        ("krita", "Edit and paint images"),
+        ("audacity", "A program that lets you manipulate digital audio waveforms"),
+        ("libreoffice-fresh", "LibreOffice branch which contains new features and program enhancements"),
+        ("thunderbird", "Standalone mail and news reader from mozilla.org"),
+        ("steam", "Valve's digital software delivery system"),
+        ("alacritty", "A cross-platform, GPU-accelerated terminal emulator"),
+        ("btop", "A monitor of system resources, bpytop ported to C++"),
+        ("neovim", "Fork of Vim aiming to improve user experience, plugins, and GUIs"),
+        ("fastfetch", "Like neofetch, but much faster because written in C"),
+    ];
+
+    let installed_identities = crate::desktop_apps::get_installed_canonical_identities();
+    let mut items = Vec::new();
+
+    for (pkg_name, desc) in featured {
+        let canonical = crate::duplicates::normalize_name(pkg_name);
+        let is_installed = installed_identities.contains(&pkg_name.to_lowercase())
+            || installed_identities.contains(&canonical.to_lowercase());
+
+        items.push(CatalogItem {
+            id: format!("pacman:{}", pkg_name),
+            name: pkg_name.to_string(),
+            canonical_name: canonical,
+            summary: desc.to_string(),
+            description: desc.to_string(),
+            version: "oficial".to_string(),
+            source: SourceType::Pacman,
+            icon_url: None,
+            developer: Some("Repositorio Oficial Pacman".to_string()),
+            is_installed,
+            pkg_id: pkg_name.to_string(),
+            category: Some("Paquete Nativo Destacado".to_string()),
+        });
+    }
+
+    items
+}
+
 pub fn search_native_repo(query: &str, native_manager: &str) -> Vec<CatalogItem> {
     if query.trim().is_empty() {
-        return Vec::new();
+        return get_popular_native_packages(native_manager);
     }
 
     match native_manager {
@@ -518,49 +586,84 @@ fn search_portage_repo(query: &str) -> Vec<CatalogItem> {
 pub fn search_all_catalog(query: &str, filter_source: Option<&str>) -> Vec<CatalogItem> {
     let os_info = detect_os();
     let filter = filter_source.unwrap_or("all");
+    let q = query.trim().to_string();
 
-    let mut results = Vec::new();
+    // Run all selected repository queries in parallel using std::thread::scope
+    let (flathub_res, native_res, aur_res, snap_res) = std::thread::scope(|s| {
+        let fh_handle = s.spawn(|| {
+            if filter == "all" || filter == "flatpak" {
+                if q.is_empty() {
+                    get_flathub_popular()
+                } else {
+                    search_flathub(&q)
+                }
+            } else {
+                Vec::new()
+            }
+        });
 
-    // 1. Search Flathub if enabled/filtered
-    if filter == "all" || filter == "flatpak" {
-        if query.trim().is_empty() {
-            results.extend(get_flathub_popular());
-        } else {
-            results.extend(search_flathub(query));
-        }
-    }
+        let nat_handle = s.spawn(|| {
+            if (filter == "all" || filter == "native") && (!q.is_empty() || filter == "native") {
+                search_native_repo(&q, &os_info.native_manager)
+            } else {
+                Vec::new()
+            }
+        });
 
-    // 2. Search native distribution repository if enabled/filtered
-    if (filter == "all" || filter == "native") && !query.trim().is_empty() {
-        let native_results = search_native_repo(query, &os_info.native_manager);
-        results.extend(native_results);
-    }
+        let aur_handle = s.spawn(|| {
+            if (filter == "all" || filter == "aur") && !q.is_empty() && os_info.native_manager == "pacman" {
+                let aur_items = crate::aur::search_aur(&q);
+                aur_items
+                    .into_iter()
+                    .map(|hit| CatalogItem {
+                        id: format!("aur:{}", hit.name),
+                        name: hit.name.clone(),
+                        canonical_name: crate::duplicates::normalize_name(&hit.name),
+                        summary: hit.description.clone(),
+                        description: hit.description,
+                        version: hit.version,
+                        source: SourceType::Aur,
+                        icon_url: None,
+                        developer: hit
+                            .maintainer
+                            .map(|m| format!("AUR ({})", m))
+                            .or_else(|| Some("AUR (Comunidad Arch)".to_string())),
+                        is_installed: hit.is_installed,
+                        pkg_id: hit.name,
+                        category: Some(format!("★ {} votos", hit.num_votes)),
+                    })
+                    .collect::<Vec<CatalogItem>>()
+            } else {
+                Vec::new()
+            }
+        });
 
-    // 3. Search AUR if enabled/filtered and system is Arch/CachyOS
-    if (filter == "all" || filter == "aur") && !query.trim().is_empty() && os_info.native_manager == "pacman" {
-        let aur_items = crate::aur::search_aur(query);
-        for hit in aur_items {
-            results.push(CatalogItem {
-                id: format!("aur:{}", hit.name),
-                name: hit.name.clone(),
-                canonical_name: crate::duplicates::normalize_name(&hit.name),
-                summary: hit.description.clone(),
-                description: hit.description,
-                version: hit.version,
-                source: SourceType::Aur,
-                icon_url: None,
-                developer: hit.maintainer.map(|m| format!("AUR ({})", m)).or_else(|| Some("AUR (Comunidad Arch)".to_string())),
-                is_installed: hit.is_installed,
-                pkg_id: hit.name,
-                category: Some(format!("★ {} votos", hit.num_votes)),
-            });
-        }
-    }
+        let snap_handle = s.spawn(|| {
+            if (filter == "all" || filter == "snap")
+                && !q.is_empty()
+                && (os_info.has_snap || crate::managers::snap::is_available())
+            {
+                search_snap_repo(&q)
+            } else {
+                Vec::new()
+            }
+        });
 
-    // 4. Search Snap Store if enabled/filtered and system has snap
-    if (filter == "all" || filter == "snap") && !query.trim().is_empty() && (os_info.has_snap || crate::managers::snap::is_available()) {
-        results.extend(search_snap_repo(query));
-    }
+        (
+            fh_handle.join().unwrap_or_default(),
+            nat_handle.join().unwrap_or_default(),
+            aur_handle.join().unwrap_or_default(),
+            snap_handle.join().unwrap_or_default(),
+        )
+    });
+
+    let mut results = Vec::with_capacity(
+        flathub_res.len() + native_res.len() + aur_res.len() + snap_res.len(),
+    );
+    results.extend(flathub_res);
+    results.extend(native_res);
+    results.extend(aur_res);
+    results.extend(snap_res);
 
     // Sort: exact matches first, then installed status, then name
     let q_lower = query.to_lowercase().trim().to_string();
@@ -717,6 +820,13 @@ pub async fn run_install_package(
     source: String,
     pkg_id: String,
 ) -> Result<String, String> {
+    if source == "flatpak" {
+        let os = detect_os();
+        if !os.has_flatpak || !os.has_flathub {
+            crate::managers::flatpak::setup_flatpak_engine(app.clone()).await?;
+        }
+    }
+
     let (cmd, args): (String, Vec<String>) = match source.as_str() {
         "flatpak" => (
             "flatpak".to_string(),
@@ -769,9 +879,9 @@ pub async fn run_install_package(
             ],
         ),
         "aur" => {
-            let helper = if Command::new("which").arg("paru").output().map(|o| o.status.success()).unwrap_or(false) {
+            let helper = if crate::os_detector::command_exists("paru") {
                 "paru"
-            } else if Command::new("which").arg("yay").output().map(|o| o.status.success()).unwrap_or(false) {
+            } else if crate::os_detector::command_exists("yay") {
                 "yay"
             } else {
                 return Err("No AUR helper (paru or yay) found installed on the system.".to_string());

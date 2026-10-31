@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { Sidebar } from "./components/Sidebar";
@@ -103,55 +103,47 @@ export function App() {
   const loadSystemData = useCallback(async () => {
     setLoading(true);
     try {
-      // 1. Fetch OS Info
-      const os = await invoke<OsInfo>("get_os_info");
+      // Phase 1: Critical UI data in parallel (instant startup)
+      const [os, [dApps, _dDups], popular] = await Promise.all([
+        invoke<OsInfo>("get_os_info"),
+        invoke<[AppInfo[], DuplicateGroup[]]>("get_desktop_apps"),
+        invoke<CatalogItem[]>("get_catalog_popular"),
+      ]);
       setOsInfo(os);
-
-      // 2. Fetch desktop GUI applications (with real icons & names)
-      const [dApps, _dDups] = await invoke<[AppInfo[], DuplicateGroup[]]>("get_desktop_apps");
       setDesktopApps(dApps);
-
-      // 3. Fetch all system packages
-      const [allPkgs, dupGroups] = await invoke<[AppInfo[], DuplicateGroup[]]>("get_all_apps");
-      setAllPackages(allPkgs);
-      setDuplicates(dupGroups);
-
-      // 4. Fetch overview and update count
-      const ov = await invoke<SystemOverview>("get_system_overview");
-      ov.total_apps = dApps.length > 0 ? dApps.length : allPkgs.length;
-      setOverview(ov);
-
-      // 5. Fetch updates
-      const upds = await invoke<UpdateItem[]>("get_available_updates");
-      setUpdates(upds);
-
-      // 6. Fetch AppImages
-      const ais = await invoke<AppImageEntry[]>("scan_appimages", { customPaths: customAppImagePaths });
-      setAppimages(ais);
-
-      // 7. Fetch cleaner items
-      const cItems = await invoke<SystemCleanItem[]>("scan_cleaner");
-      setCleanerItems(cItems);
-
-      // 8. Pre-fetch popular Flathub catalog apps
-      const popular = await invoke<CatalogItem[]>("get_catalog_popular");
       setCatalogItems(popular);
+      setLoading(false);
 
-      // 9. Fetch Autostart applications
-      const autoApps = await invoke<AutostartEntry[]>("get_autostart_entries");
-      setAutostartEntries(autoApps);
-
-      // 10. Fetch Snapshot support & entries
-      const snapSup = await invoke<SnapshotSupportInfo>("get_snapshot_support");
-      setSnapshotSupport(snapSup);
-      if (snapSup.supported) {
-        const snaps = await invoke<SnapshotEntry[]>("get_snapshots");
-        setSnapshots(snaps);
-      }
+      // Phase 2: Secondary background data in parallel (non-blocking)
+      Promise.all([
+        invoke<[AppInfo[], DuplicateGroup[]]>("get_all_apps"),
+        invoke<SystemOverview>("get_system_overview"),
+        invoke<UpdateItem[]>("get_available_updates"),
+        invoke<AppImageEntry[]>("scan_appimages", { customPaths: customAppImagePaths }),
+        invoke<SystemCleanItem[]>("scan_cleaner"),
+        invoke<AutostartEntry[]>("get_autostart_entries"),
+        invoke<SnapshotSupportInfo>("get_snapshot_support"),
+      ])
+        .then(async ([allRes, ov, upds, ais, cItems, autoApps, snapSup]) => {
+          const [allPkgs, dupGroups] = allRes;
+          setAllPackages(allPkgs);
+          setDuplicates(dupGroups);
+          ov.total_apps = dApps.length > 0 ? dApps.length : allPkgs.length;
+          setOverview(ov);
+          setUpdates(upds);
+          setAppimages(ais);
+          setCleanerItems(cItems);
+          setAutostartEntries(autoApps);
+          setSnapshotSupport(snapSup);
+          if (snapSup.supported) {
+            const snaps = await invoke<SnapshotEntry[]>("get_snapshots");
+            setSnapshots(snaps);
+          }
+        })
+        .catch((err) => console.warn("Background system scan warning:", err));
     } catch (err) {
       console.error("Error loading system data:", err);
       showToast(`Error al cargar datos: ${err}`);
-    } finally {
       setLoading(false);
     }
   }, [customAppImagePaths]);
@@ -216,19 +208,25 @@ export function App() {
     };
   }, [loadSystemData]);
 
-  // Search catalog function
+  // Search catalog function (ignores stale responses when typing fast)
+  const searchReqIdRef = useRef<number>(0);
   const handleSearchCatalog = useCallback(async (query: string, sourceFilter: string) => {
+    const reqId = ++searchReqIdRef.current;
     setStoreLoading(true);
     try {
       const results = await invoke<CatalogItem[]>("search_catalog", {
         query,
         filterSource: sourceFilter,
       });
-      setCatalogItems(results);
+      if (reqId === searchReqIdRef.current) {
+        setCatalogItems(results);
+      }
     } catch (e) {
       console.error("Error buscando en catálogo:", e);
     } finally {
-      setStoreLoading(false);
+      if (reqId === searchReqIdRef.current) {
+        setStoreLoading(false);
+      }
     }
   }, []);
 
@@ -331,6 +329,36 @@ export function App() {
       if (!String(e).includes("cancelada") && !String(e).includes("cancelled")) {
         showToast(`${e}`);
       }
+    }
+  };
+
+  const handleSetupFlatpak = async () => {
+    setInstallModalData({
+      appName: "Flatpak & Flathub Engine",
+      source: "flatpak",
+      pkgId: "flatpak",
+    });
+    setInstallProgressPct(5);
+    setInstallStep("Preparing Flatpak installation...");
+    setInstallStatus("starting");
+    setTerminalLogs([
+      {
+        text: "[GUL] Starting Flatpak engine and Flathub repository setup...",
+        time: new Date().toLocaleTimeString(),
+      },
+    ]);
+
+    try {
+      await invoke("setup_flatpak");
+      await loadSystemData();
+      setInstallProgressPct(100);
+      setInstallStatus("success");
+      setInstallStep("Flatpak & Flathub configured successfully!");
+      showToast("Flatpak and Flathub installed and enabled!");
+    } catch (e) {
+      setInstallStatus("error");
+      setInstallStep("Error installing Flatpak");
+      showToast(`Error installing Flatpak: ${e}`);
     }
   };
 
@@ -667,6 +695,7 @@ export function App() {
         osInfo={osInfo}
         loading={loading}
         onOpenCloneModal={() => setShowCloneModal(true)}
+        onSetupFlatpak={handleSetupFlatpak}
       />
 
       {/* Main Area */}
@@ -704,6 +733,7 @@ export function App() {
               onSelectCatalogItem={(item) => setSelectedApp(item)}
               onUninstall={handleUninstall}
               onPickLocalAppImage={handlePickLocalAppImage}
+              onSetupFlatpak={handleSetupFlatpak}
             />
           )}
 
@@ -796,6 +826,7 @@ export function App() {
           onClose={() => setFormatModalApp(null)}
           onInstallFormat={handleExecuteInstallFormat}
           onPickLocalAppImage={handlePickLocalAppImage}
+          onSetupFlatpak={handleSetupFlatpak}
           isInstalling={installingId !== null}
           installingFormat={installingFormat}
         />

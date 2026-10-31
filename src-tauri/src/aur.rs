@@ -73,9 +73,9 @@ pub fn search_aur(query: &str) -> Vec<AurPackageItem> {
     }
 
     // Fallback to paru/yay CLI if curl failed
-    let helper = if Command::new("which").arg("paru").output().map(|o| o.status.success()).unwrap_or(false) {
+    let helper = if crate::os_detector::command_exists("paru") {
         "paru"
-    } else if Command::new("which").arg("yay").output().map(|o| o.status.success()).unwrap_or(false) {
+    } else if crate::os_detector::command_exists("yay") {
         "yay"
     } else {
         return Vec::new();
@@ -129,9 +129,9 @@ pub fn search_aur(query: &str) -> Vec<AurPackageItem> {
 }
 
 pub fn get_aur_helper() -> Option<&'static str> {
-    if Command::new("which").arg("paru").output().map(|o| o.status.success()).unwrap_or(false) {
+    if crate::os_detector::command_exists("paru") {
         Some("paru")
-    } else if Command::new("which").arg("yay").output().map(|o| o.status.success()).unwrap_or(false) {
+    } else if crate::os_detector::command_exists("yay") {
         Some("yay")
     } else {
         None

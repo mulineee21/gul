@@ -19,8 +19,55 @@ pub mod commands;
 
 use commands::*;
 
+fn sanitize_appimage_env() {
+    // When running inside an AppImage on non-Ubuntu distros (like Arch/CachyOS),
+    // linuxdeploy's AppRun exports LD_LIBRARY_PATH, GIO_EXTRA_MODULES, etc. pointing
+    // to Ubuntu 22.04 libraries bundled inside /tmp/.mount_gulXXXX.
+    // Any host binary spawned by GUL (curl, pacman, flatpak, pkexec, paru) will crash
+    // with ABI/symbol errors unless we strip the AppImage mount path from these vars.
+    if std::env::var_os("APPIMAGE").is_some() || std::env::var_os("APPDIR").is_some() {
+        let vars_to_clean = [
+            "LD_LIBRARY_PATH",
+            "LD_PRELOAD",
+            "GIO_EXTRA_MODULES",
+            "GIO_MODULE_DIR",
+            "GSETTINGS_SCHEMA_DIR",
+            "GTK_PATH",
+            "GTK_EXE_PREFIX",
+            "GTK_DATA_PREFIX",
+            "GDK_PIXBUF_MODULE_FILE",
+            "GDK_PIXBUF_MODULEDIR",
+            "QT_PLUGIN_PATH",
+            "PERL5LIB",
+            "PYTHONHOME",
+            "PYTHONPATH",
+            "XDG_DATA_DIRS",
+        ];
+
+        let appdir = std::env::var("APPDIR").unwrap_or_else(|_| "/tmp/.mount_".to_string());
+
+        for var in vars_to_clean {
+            if let Ok(val) = std::env::var(var) {
+                let filtered: Vec<&str> = val
+                    .split(':')
+                    .filter(|p| !p.is_empty() && !p.starts_with(&appdir) && !p.contains("/.mount_"))
+                    .collect();
+                unsafe {
+                    if filtered.is_empty() {
+                        std::env::remove_var(var);
+                    } else {
+                        std::env::set_var(var, filtered.join(":"));
+                    }
+                }
+            }
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    sanitize_appimage_env();
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
@@ -52,6 +99,7 @@ pub fn run() {
             install_appimage_from_url,
             pick_and_install_local_appimage,
             cancel_install,
+            setup_flatpak,
             get_flatpak_permissions,
             set_flatpak_permission,
             reset_flatpak_permissions,

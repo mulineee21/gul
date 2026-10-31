@@ -23,6 +23,7 @@ interface InstallFormatModalProps {
   onClose: () => void;
   onInstallFormat: (source: SourceType, pkgId: string, downloadUrl?: string) => Promise<void>;
   onPickLocalAppImage: () => Promise<void>;
+  onSetupFlatpak?: () => void;
   isInstalling: boolean;
   installingFormat: string | null;
 }
@@ -33,6 +34,7 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
   onClose,
   onInstallFormat,
   onPickLocalAppImage,
+  onSetupFlatpak,
   isInstalling,
   installingFormat,
 }) => {
@@ -175,6 +177,35 @@ export const InstallFormatModal: React.FC<InstallFormatModalProps> = ({
               Compare performance, isolation, and portability
             </span>
           </div>
+
+          {osInfo && (!osInfo.has_flatpak || !osInfo.has_flathub) && (
+            <div className="p-3.5 rounded-2xl bg-sky-950/30 border border-sky-500/30 flex items-center justify-between gap-4">
+              <div className="flex items-center space-x-3">
+                <Globe className="w-5 h-5 text-sky-400 shrink-0" />
+                <div className="text-xs">
+                  <span className="font-semibold text-white">
+                    {!osInfo.has_flatpak
+                      ? "Flatpak is not installed on your system yet."
+                      : "Flathub repository is not configured yet."}
+                  </span>{" "}
+                  <span className="text-zinc-300">
+                    Selecting Flatpak will automatically install and configure it, or you can set it up right now.
+                  </span>
+                </div>
+              </div>
+              {onSetupFlatpak && (
+                <button
+                  onClick={() => {
+                    onClose();
+                    onSetupFlatpak();
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold shrink-0 transition"
+                >
+                  {!osInfo.has_flatpak ? "Install Flatpak Now" : "Enable Flathub"}
+                </button>
+              )}
+            </div>
+          )}
 
           {loadingOptions ? (
             <div className="py-16 flex flex-col items-center justify-center space-y-3">

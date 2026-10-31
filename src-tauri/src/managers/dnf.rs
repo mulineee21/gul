@@ -3,11 +3,7 @@ use crate::models::{AppInfo, SourceType, UpdateItem, SystemCleanItem};
 use crate::disk_usage::get_app_data_breakdown;
 
 pub fn is_available() -> bool {
-    Command::new("which")
-        .arg("dnf")
-        .output()
-        .map(|o| o.status.success())
-        .unwrap_or(false)
+    crate::os_detector::command_exists("dnf")
 }
 
 pub fn list_installed() -> Vec<AppInfo> {
