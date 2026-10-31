@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GUL — Gestor Universal de Linux | El centro de software definitivo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #05060a;
+      --glass-bg: rgba(17, 20, 32, 0.48);
+      --glass-bg-hover: rgba(24, 29, 46, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-border-highlight: rgba(56, 189, 248, 0.35);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-indigo: #6366f1;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-fuchsia: #d946ef;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-deep);
+      color: var(--text-primary);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+      selection-background-color: rgba(56, 189, 248, 0.3);
+    }
+
+    code, pre, .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Ambient Glowing Orbs & Grid Background */
+    .ambient-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      overflow: hidden;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.14) 0%, transparent 42%),
+        radial-gradient(circle at 85% 22%, rgba(99, 102, 241, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(217, 70, 239, 0.09) 0%, transparent 50%),
+        var(--bg-deep);
+    }
+
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-image: 
+        linear-gradient(to right, rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 56px 56px;
+      mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, #000 40%, transparent 100%);
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(110px);
+      opacity: 0.45;
+      animation: floatOrb 18s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 520px; height: 520px; background: #0284c7; top: -140px; left: -100px; }
+    .orb-2 { width: 460px; height: 460px; background: #4f46e5; top: 240px; right: -120px; animation-delay: -6s; }
+    .orb-3 { width: 400px; height: 400px; background: #059669; bottom: 10%; left: 20%; opacity: 0.25; animation-delay: -11s; }
+
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, -35px) scale(1.08); }
+    }
+
+    /* Glassmorphism Utilities */
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(22px) saturate(160%);
+      -webkit-backdrop-filter: blur(22px) saturate(160%);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-card {
+      background: linear-gradient(145deg, rgba(25, 30, 48, 0.52) 0%, rgba(12, 15, 26, 0.42) 100%);
+      backdrop-filter: blur(24px) saturate(170%);
+      -webkit-backdrop-filter: blur(24px) saturate(170%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card:hover {
+      border-color: rgba(56, 189, 248, 0.32);
+      transform: translateY(-4px);
+      box-shadow: 0 24px 60px -12px rgba(14, 165, 233, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Floating Glass Navbar */
+    .navbar-wrapper {
+      position: fixed;
+      top: 20px;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      padding: 0 20px;
+    }
+
+    .navbar {
+      width: 100%;
+      max-width: 1120px;
+      padding: 12px 22px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(10, 13, 22, 0.62);
+      backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #06b6d4, #3b82f6, #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 24px rgba(59, 130, 246, 0.5);
+    }
+
+    .brand-badge {
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #7dd3fc;
+      font-weight: 600;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: #fff;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+    }
+
+    .btn-glass:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.24);
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 50%, #6366f1 100%);
+      color: #fff;
+      box-shadow: 0 8px 25px -4px rgba(59, 130, 246, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 32px -4px rgba(56, 189, 248, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding-top: 155px;
+      padding-bottom: 80px;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(14, 165, 233, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      color: #bae6fd;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-bottom: 26px;
+      backdrop-filter: blur(12px);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 12px #38bdf8;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.35); opacity: 0.6; }
+    }
+
+    .hero h1 {
+      font-size: clamp(2.6rem, 5.5vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+      max-width: 940px;
+      margin: 0 auto 24px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #ffffff 0%, #7dd3fc 45%, #818cf8 85%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: clamp(1.05rem, 1.8vw, 1.22rem);
+      color: var(--text-secondary);
+      max-width: 720px;
+      margin: 0 auto 38px;
+    }
+
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 42px;
+    }
+
+    .btn-lg {
+      padding: 14px 28px;
+      font-size: 0.96rem;
+    }
+
+    /* Distro Ecosystem Strip */
+    .ecosystem-strip {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 56px;
+    }
+
+    .eco-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+      backdrop-filter: blur(12px);
+    }
+
+    .eco-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+    /* Interactive Live App Mockup Window */
+    .mockup-container {
+      max-width: 1120px;
+      margin: 0 auto;
+      border-radius: 24px;
+      background: rgba(11, 14, 23, 0.65);
+      backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow:
+        0 35px 90px -15px rgba(0, 0, 0, 0.8),
+        0 0 60px -10px rgba(56, 189, 248, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+      overflow: hidden;
+      text-align: left;
+    }
+
+    .mockup-titlebar {
+      padding: 14px 20px;
+      background: rgba(6, 8, 15, 0.7);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .window-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .window-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
+
+    .mockup-body {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      min-height: 510px;
+    }
+
+    .mockup-sidebar {
+      background: rgba(7, 9, 16, 0.55);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .mock-nav-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 11px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #94a3b8;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.18s;
+      margin-bottom: 4px;
+      text-align: left;
+    }
+
+    .mock-nav-btn:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: #e2e8f0;
+    }
+
+    .mock-nav-btn.active {
+      background: rgba(59, 130, 246, 0.16);
+      border-color: rgba(59, 130, 246, 0.35);
+      color: #60a5fa;
+    }
+
+    .mock-content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.06), transparent 60%);
+    }
+
+    .mock-banner {
+      padding: 16px 20px;
+      border-radius: 16px;
+      background: linear-gradient(90deg, rgba(30, 58, 138, 0.35), rgba(49, 46, 129, 0.25), rgba(15, 23, 42, 0.4));
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .mock-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .mock-app-card {
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(18, 22, 36, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .mock-app-card:hover {
+      border-color: rgba(56, 189, 248, 0.35);
+      transform: translateY(-2px);
+    }
+
+    /* Section Headers */
+    .section {
+      padding: 95px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto 60px;
+    }
+
+    .section-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent-cyan);
+      margin-bottom: 12px;
+    }
+
+    .section-header h2 {
+      font-size: clamp(2rem, 3.6vw, 2.85rem);
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      margin-bottom: 14px;
+    }
+
+    .section-header p {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+    }
+
+    /* Bento Grid Features */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 20px;
+    }
+
+    .bento-item {
+      padding: 30px;
+      border-radius: 24px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .col-7 { grid-column: span 7; }
+    .col-5 { grid-column: span 5; }
+    .col-4 { grid-column: span 4; }
+    .col-6 { grid-column: span 6; }
+
+    .feature-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .bento-item h3 {
+      font-size: 1.32rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+
+    .bento-item p {
+      color: var(--text-secondary);
+      font-size: 0.94rem;
+    }
+
+    .mini-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .mini-badge {
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      color: #cbd5e1;
+    }
+
+    /* Download & Install Section */
+    .install-tabs {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .install-tab {
+      padding: 10px 20px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .install-tab.active {
+      background: rgba(56, 189, 248, 0.16);
+      border-color: rgba(56, 189, 248, 0.45);
+      color: #fff;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
+    }
+
+    .terminal-box {
+      max-width: 780px;
+      margin: 0 auto;
+      border-radius: 20px;
+      padding: 24px;
+      background: rgba(6, 8, 14, 0.78);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      position: relative;
+    }
+
+    .terminal-code {
+      color: #e2e8f0;
+      font-size: 0.88rem;
+      line-height: 1.75;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #cbd5e1;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: rgba(56, 189, 248, 0.2);
+      color: #fff;
+    }
+
+    footer {
+      padding: 50px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.86rem;
+      background: rgba(4, 5, 9, 0.6);
+      backdrop-filter: blur(16px);
+    }
+
+    @media (max-width: 960px) {
+      .mockup-body { grid-template-columns: 1fr; }
+      .mockup-sidebar { display: none; }
+      .col-7, .col-5, .col-4, .col-6 { grid-column: span 12; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glass Background -->
+  <div class="ambient-canvas">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+  <div class="grid-overlay"></div>
+
+  <!-- Floating Glass Navbar -->
+  <header class="navbar-wrapper">
+    <nav class="navbar">
+      <a href="#" class="brand">
+        <div class="brand-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+        </div>
+        <span>GUL</span>
+        <span class="brand-badge mono">v0.1.1</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#preview">Interfaz en Vivo</a></li>
+        <li><a href="#features">Características</a></li>
+        <li><a href="#ecosistema">Ecosistema</a></li>
+        <li><a href="#descargar">Instalación</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="https://github.com/mulineee21/gul" target="_blank" class="btn btn-glass">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.2.5-2.3 1.3-3.1-.2-.4-.6-1.6 0-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8 0 3.2.9.8 1.3 1.9 1.3 3.2 0 4.6-2.8 5.6-5.5 5.9.5.4.9 1 .9 2.2v3.3c0 .3.1.7.8.6A12 12 0 0 0 12 .3"/></svg>
+          <span>GitHub</span>
+        </a>
+        <a href="https://github.com/mulineee21/gul/releases/latest" target="_blank" class="btn btn-primary">
+          <span>Descargar .AppImage</span>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero container">
+    <div class="hero-pill">
+      <span class="pulse-dot"></span>
+      <span>Nuevo GUL v0.1.1 — Auto-instalador de Flatpak & Búsqueda Multihilo Instantánea</span>
+    </div>
+
+    <h1>
+      Todo el software de Linux,<br />
+      <span class="gradient-text">unificado en cristal líquido.</span>
+    </h1>
+
+    <p>
+      Olvídate de saltar entre terminales y tiendas incompatibles. <strong>GUL (Gestor Universal de Linux)</strong> une Pacman, AUR, APT, DNF, Portage, Flathub, Snap y AppImage en una experiencia de escritorio ultrarrápida construida con Rust y Tauri v2.
+    </p>
+
+    <div class="hero-cta">
+      <a href="https://github.com/mulineee21/gul/releases/download/v0.1.1/gul_0.1.1_amd64.AppImage" class="btn btn-primary btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Descargar GUL v0.1.1 (.AppImage)</span>
+      </a>
+      <a href="#descargar" class="btn btn-glass btn-lg">
+        <span>Instalar con 1 comando</span>
+      </a>
+    </div>
+
+    <!-- Supported Package Managers Strip -->
+    <div class="ecosystem-strip" id="ecosistema">
+      <div class="eco-chip"><span class="eco-dot" style="background:#f59e0b"></span>Pacman (Arch / CachyOS)</div>
+      <div class="eco-chip"><span class="eco-dot" style="background:#d946ef"></span>AUR Community (paru / yay)</div>
+      <div class="eco-chip"><span class="eco-dot" style="background:#38bdf8"></span>Flathub & Flatpak Auto-Setup</div>
+      <div class="eco-chip"><span class="eco-dot" style="background:#f97316"></span>Canonical Snap Store</div>
+      <div class="eco-chip"><span class="eco-dot" style="background:#ef4444"></span>APT (Debian / Ubuntu)</div>
+      <div class="eco-chip"><span class="eco-dot" style="background:#3b82f6"></span>DNF (Fedora / RHEL)</div>
+      <div class="eco-chip"><span class="eco-dot" style="background:#a855f7"></span>Portage (Gentoo)</div>
+      <div class="eco-chip"><span class="eco-dot" style="background:#10b981"></span>Portable AppImages</div>
+    </div>
+
+    <!-- Interactive Glass Mockup of GUL -->
+    <div class="mockup-container" id="preview">
+      <div class="mockup-titlebar">
+        <div class="window-dots">
+          <div class="window-dot" style="background:#ef4444"></div>
+          <div class="window-dot" style="background:#f59e0b"></div>
+          <div class="window-dot" style="background:#10b981"></div>
+        </div>
+        <div class="mono" style="font-size:0.75rem; color:#94a3b8;">GUL — Universal Linux Manager (CachyOS x86_64)</div>
+        <div style="font-size:0.72rem; color:#38bdf8;" class="mono">⚡ Rust + Tauri v2</div>
+      </div>
+
+      <div class="mockup-body">
+        <!-- Sidebar -->
+        <div class="mockup-sidebar">
+          <div>
+            <button class="mock-nav-btn active" onclick="switchMockTab('store', this)">
+              <span>🧭 GUL Store</span>
+              <span class="mono" style="font-size:0.68rem; color:#38bdf8;">Live</span>
+            </button>
+            <button class="mock-nav-btn" onclick="switchMockTab('flatseal', this)">
+              <span>🛡️ Permisos Flatpak</span>
+              <span class="mono" style="font-size:0.68rem;">Sandbox</span>
+            </button>
+            <button class="mock-nav-btn" onclick="switchMockTab('duplicates', this)">
+              <span>🔍 Duplicados</span>
+              <span class="mono" style="font-size:0.68rem; color:#f59e0b;">2</span>
+            </button>
+            <button class="mock-nav-btn" onclick="switchMockTab('snapshots', this)">
+              <span>⏪ Puntos Btrfs</span>
+              <span class="mono" style="font-size:0.68rem; color:#22d3ee;">Snapper</span>
+            </button>
+            <button class="mock-nav-btn" onclick="switchMockTab('cleaner', this)">
+              <span>🧹 Limpiador</span>
+              <span class="mono" style="font-size:0.68rem; color:#10b981;">4.2 GB</span>
+            </button>
+          </div>
+
+          <div style="padding:12px; border-radius:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06);">
+            <div style="font-size:0.74rem; font-weight:600; color:#e2e8f0; margin-bottom:6px;">Sistema Detectado</div>
+            <div style="display:flex; gap:5px; flex-wrap:wrap;">
+              <span class="mono" style="font-size:0.64rem; padding:2px 6px; border-radius:6px; background:rgba(245,158,11,0.15); color:#fcd34d;">PACMAN</span>
+              <span class="mono" style="font-size:0.64rem; padding:2px 6px; border-radius:6px; background:rgba(56,189,248,0.15); color:#7dd3fc;">FLATHUB</span>
+              <span class="mono" style="font-size:0.64rem; padding:2px 6px; border-radius:6px; background:rgba(217,70,239,0.15); color:#f0abfc;">AUR</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Interactive Preview Content -->
+        <div class="mock-content" id="mock-view-content">
+          <!-- Dynamically populated by JS below -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bento Grid Features Section -->
+  <section class="section container" id="features">
+    <div class="section-header">
+      <span class="section-tag">Arquitectura Todo-en-Uno</span>
+      <h2>Diseñado para dominar cualquier distribución</h2>
+      <p>Cada herramienta que antes requería instalar cinco programas distintos o memorizar banderas de terminal, ahora vive en una interfaz transparente, coherente y veloz.</p>
+    </div>
+
+    <div class="bento-grid">
+      <!-- Feature 1 -->
+      <div class="glass-card bento-item col-7">
+        <div>
+          <div class="feature-icon" style="background:rgba(56,189,248,0.14); color:#38bdf8;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+          </div>
+          <h3>Tienda Multi-Origen & Auto-Instalador de Flatpak</h3>
+          <p>
+            Busca simultáneamente en Flathub, repositorios oficiales nativos (Pacman, APT, DNF, Portage), AUR y Snapcraft gracias a su motor paralelo en Rust. ¿Tu sistema recién instalado aún no tiene Flatpak o Flathub? GUL lo instala y configura automáticamente con un solo clic.
+          </p>
+        </div>
+        <div class="mini-badges">
+          <span class="mini-badge mono">Búsqueda Paralela 0ms</span>
+          <span class="mini-badge mono">Auto-Setup Flathub</span>
+          <span class="mini-badge mono">Selector de Formato</span>
+        </div>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="glass-card bento-item col-5">
+        <div>
+          <div class="feature-icon" style="background:rgba(16,185,129,0.14); color:#10b981;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Flatseal Integrado (Permisos Sandbox)</h3>
+          <p>
+            Controla qué puede hacer cada aplicación Flatpak sin salir de GUL: red, servidores gráficos Wayland/X11, audio PipeWire, acceso a tu carpeta personal o webcams, con botón de reseteo instantáneo.
+          </p>
+        </div>
+        <div class="mini-badges">
+          <span class="mini-badge mono">Wayland / X11</span>
+          <span class="mini-badge mono">Filesystem Override</span>
+        </div>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="glass-card bento-item col-4">
+        <div>
+          <div class="feature-icon" style="background:rgba(245,158,11,0.14); color:#f59e0b;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </div>
+          <h3>Detector de Duplicados</h3>
+          <p>
+            Detecta si tienes la misma app instalada dos veces (por ejemplo, VLC en Pacman y a la vez en Flatpak), calcula el espacio desperdiciado y limpia las redundancias con un clic.
+          </p>
+        </div>
+        <div class="mini-badges">
+          <span class="mini-badge mono">Ahorro Inteligente</span>
+        </div>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="glass-card bento-item col-4">
+        <div>
+          <div class="feature-icon" style="background:rgba(6,182,212,0.14); color:#22d3ee;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          </div>
+          <h3>Snapshots Btrfs (Snapper & Timeshift)</h3>
+          <p>
+            Crea puntos de restauración antes de actualizar tu sistema. Si algo falla tras una actualización masiva, vuelve atrás en segundos gracias a la integración nativa con Btrfs.
+          </p>
+        </div>
+        <div class="mini-badges">
+          <span class="mini-badge mono">Copy-on-Write</span>
+          <span class="mini-badge mono">Pre-Update Hook</span>
+        </div>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="glass-card bento-item col-4">
+        <div>
+          <div class="feature-icon" style="background:rgba(217,70,239,0.14); color:#e879f9;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          </div>
+          <h3>Integrador de AppImages & OmniSync</h3>
+          <p>
+            Convierte cualquier archivo <code>.AppImage</code> descargado en un acceso directo del menú de tu escritorio con icono propio, y clona todo tu perfil de apps en un archivo JSON.
+          </p>
+        </div>
+        <div class="mini-badges">
+          <span class="mini-badge mono">gul-profile.json</span>
+          <span class="mini-badge mono">XDG Desktop</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Installation Section -->
+  <section class="section container" id="descargar">
+    <div class="section-header">
+      <span class="section-tag">Un solo comando universal</span>
+      <h2>Instala GUL en cualquier distribución Linux</h2>
+      <p>Ejecuta esta única línea en tu terminal: descarga GUL desde el repositorio oficial, lo integra con su icono en tu cajón de aplicaciones y lo abre automáticamente.</p>
+    </div>
+
+    <div class="terminal-box">
+      <button class="copy-btn mono" onclick="copyInstallCmd(this)">Copiar</button>
+      <div class="terminal-code mono" id="install-code">curl -fsSL https://raw.githubusercontent.com/mulineee21/gul/main/install.sh | bash</div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p style="margin-bottom:8px; color:#e2e8f0; font-weight:600;">GUL — Gestor Universal de Linux</p>
+      <p>Creado por <strong>Joel Molina</strong> · Licencia Libre GPL-3.0-or-later · Construido con Rust, Tauri v2, React 19 & Tailwind CSS</p>
+    </div>
+  </footer>
+
+  <script>
+    const mockViews = {
+      store: `
+        <div class="mock-banner">
+          <div>
+            <div style="font-weight:700; font-size:0.95rem; color:#fff;">Universal Application Store</div>
+            <div style="font-size:0.76rem; color:#cbd5e1;">Explora Flathub, Pacman, AUR y Snap en tiempo real con instalación de Flatpak en 1 clic.</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <span class="mono" style="font-size:0.72rem; padding:6px 12px; border-radius:10px; background:rgba(14,165,233,0.2); border:1px solid rgba(56,189,248,0.4); color:#bae6fd;">✓ Flathub Activo</span>
+            <span class="mono" style="font-size:0.72rem; padding:6px 12px; border-radius:10px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.35); color:#fde68a;">Pacman Repo</span>
+          </div>
+        </div>
+        <div class="mock-grid">
+          <div class="mock-app-card">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <strong style="color:#fff; font-size:0.9rem;">Firefox</strong>
+                <span class="mono" style="font-size:0.65rem; padding:2px 7px; border-radius:6px; background:rgba(245,158,11,0.18); color:#fcd34d;">Pacman</span>
+              </div>
+              <p style="font-size:0.76rem; color:#94a3b8;">Navegador web rápido, privado y seguro compilado nativamente.</p>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+              <span class="mono" style="font-size:0.7rem; color:#64748b;">157.0-1</span>
+              <span style="font-size:0.72rem; font-weight:600; color:#38bdf8;">Elegir Formato →</span>
+            </div>
+          </div>
+
+          <div class="mock-app-card">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <strong style="color:#fff; font-size:0.9rem;">OBS Studio</strong>
+                <span class="mono" style="font-size:0.65rem; padding:2px 7px; border-radius:6px; background:rgba(56,189,248,0.18); color:#7dd3fc;">Flathub</span>
+              </div>
+              <p style="font-size:0.76rem; color:#94a3b8;">Grabación de vídeo y retransmisión en directo con aislamiento sandbox.</p>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+              <span class="mono" style="font-size:0.7rem; color:#64748b;">com.obsproject.Studio</span>
+              <span style="font-size:0.72rem; font-weight:600; color:#38bdf8;">Elegir Formato →</span>
+            </div>
+          </div>
+
+          <div class="mock-app-card">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <strong style="color:#fff; font-size:0.9rem;">Blender 3D</strong>
+                <span class="mono" style="font-size:0.65rem; padding:2px 7px; border-radius:6px; background:rgba(16,185,129,0.18); color:#6ee7b7;">AppImage</span>
+              </div>
+              <p style="font-size:0.76rem; color:#94a3b8;">Suite de creación 3D portable integrada automáticamente en el menú.</p>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06);">
+              <span class="mono" style="font-size:0.7rem; color:#64748b;">Portable 4.3</span>
+              <span style="font-size:0.72rem; font-weight:600; color:#10b981;">✓ Instalada</span>
+            </div>
+          </div>
+        </div>
+      `,
+      flatseal: `
+        <div class="mock-banner" style="border-color:rgba(16,185,129,0.35);">
+          <div>
+            <div style="font-weight:700; font-size:0.95rem; color:#fff;">Gestor de Permisos Flatpak (Flatseal Integrado)</div>
+            <div style="font-size:0.76rem; color:#cbd5e1;">Activa o bloquea accesos al sistema para cada contenedor Flatpak en tiempo real.</div>
+          </div>
+          <span class="mono" style="font-size:0.72rem; padding:6px 12px; border-radius:10px; background:rgba(16,185,129,0.18); color:#6ee7b7;">com.discordapp.Discord</span>
+        </div>
+        <div class="mock-grid">
+          <div class="mock-app-card">
+            <strong style="color:#fff; font-size:0.86rem;">🌐 Acceso a Red (network)</strong>
+            <p style="font-size:0.75rem; color:#94a3b8;">Permite conexión a Internet y sockets locales.</p>
+            <span class="mono" style="font-size:0.72rem; color:#10b981;">● Activado</span>
+          </div>
+          <div class="mock-app-card">
+            <strong style="color:#fff; font-size:0.86rem;">🖥️ Servidor Wayland & X11</strong>
+            <p style="font-size:0.75rem; color:#94a3b8;">Renderizado nativo en sesiones Wayland modernas.</p>
+            <span class="mono" style="font-size:0.72rem; color:#10b981;">● Activado</span>
+          </div>
+          <div class="mock-app-card">
+            <strong style="color:#fff; font-size:0.86rem;">📁 Sistema de Archivos Raíz (host)</strong>
+            <p style="font-size:0.75rem; color:#94a3b8;">Bloqueado por seguridad para proteger el sistema operativo.</p>
+            <span class="mono" style="font-size:0.72rem; color:#f43f5e;">○ Restringido (Sandbox)</span>
+          </div>
+        </div>
+      `,
+      duplicates: `
+        <div class="mock-banner" style="border-color:rgba(245,158,11,0.35);">
+          <div>
+            <div style="font-weight:700; font-size:0.95rem; color:#fff;">Detector Inteligente de Aplicaciones Duplicadas</div>
+            <div style="font-size:0.76rem; color:#cbd5e1;">Se han detectado programas instalados simultáneamente en varios gestores de paquetes.</div>
+          </div>
+          <span class="mono" style="font-size:0.72rem; padding:6px 12px; border-radius:10px; background:rgba(245,158,11,0.2); color:#fde68a;">Ahorro potencial: 1.14 GB</span>
+        </div>
+        <div class="mock-grid">
+          <div class="mock-app-card">
+            <strong style="color:#fff; font-size:0.88rem;">VLC Media Player (2 versiones)</strong>
+            <p style="font-size:0.75rem; color:#94a3b8;">Instalado en <code>pacman:vlc</code> (68 MB) y en <code>flatpak:org.videolan.VLC</code> (890 MB).</p>
+            <span style="font-size:0.74rem; color:#38bdf8; font-weight:600;">Conservar versión recomendada (Pacman) →</span>
+          </div>
+        </div>
+      `,
+      snapshots: `
+        <div class="mock-banner" style="border-color:rgba(34,211,238,0.35);">
+          <div>
+            <div style="font-weight:700; font-size:0.95rem; color:#fff;">Puntos de Restauración Btrfs (Snapper / Timeshift)</div>
+            <div style="font-size:0.76rem; color:#cbd5e1;">Copias instantáneas Copy-on-Write antes de actualizar paquetes críticos.</div>
+          </div>
+          <span class="mono" style="font-size:0.72rem; padding:6px 12px; border-radius:10px; background:rgba(34,211,238,0.2); color:#a5f3fc;">+ Crear Snapshot Ahora</span>
+        </div>
+        <div class="mock-grid">
+          <div class="mock-app-card">
+            <strong style="color:#fff; font-size:0.86rem;">Snapshot #32 (Pre-Update)</strong>
+            <p style="font-size:0.75rem; color:#94a3b8;">GUL: Punto de seguridad automático previo a actualización del sistema.</p>
+            <span class="mono" style="font-size:0.7rem; color:#22d3ee;">Sistema Btrfs verificado</span>
+          </div>
+        </div>
+      `,
+      cleaner: `
+        <div class="mock-banner" style="border-color:rgba(16,185,129,0.35);">
+          <div>
+            <div style="font-weight:700; font-size:0.95rem; color:#fff;">Mantenimiento y Limpiador del Sistema</div>
+            <div style="font-size:0.76rem; color:#cbd5e1;">Limpia cachés de paquetes descargados, dependencias huérfanas y runtimes Flatpak obsoletos.</div>
+          </div>
+          <span class="mono" style="font-size:0.72rem; padding:6px 12px; border-radius:10px; background:rgba(16,185,129,0.2); color:#6ee7b7;">Liberar 4.2 GB</span>
+        </div>
+        <div class="mock-grid">
+          <div class="mock-app-card">
+            <strong style="color:#fff; font-size:0.86rem;">Caché de paquetes Pacman</strong>
+            <p style="font-size:0.75rem; color:#94a3b8;">Archivos antiguos en /var/cache/pacman/pkg (2.8 GB)</p>
+            <span class="mono" style="font-size:0.7rem; color:#10b981;">Seguro de limpiar</span>
+          </div>
+          <div class="mock-app-card">
+            <strong style="color:#fff; font-size:0.86rem;">Runtimes Flatpak sin uso</strong>
+            <p style="font-size:0.75rem; color:#94a3b8;">flatpak uninstall --unused (1.4 GB)</p>
+            <span class="mono" style="font-size:0.7rem; color:#10b981;">Seguro de limpiar</span>
+          </div>
+        </div>
+      `
+    };
+
+    function switchMockTab(tab, btn) {
+      document.querySelectorAll('.mock-nav-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      document.getElementById('mock-view-content').innerHTML = mockViews[tab];
+    }
+
+    // Initialize default mock view
+    switchMockTab('store', document.querySelector('.mock-nav-btn.active'));
+
+    function copyInstallCmd(btn) {
+      const code = document.getElementById('install-code').textContent;
+      navigator.clipboard.writeText(code);
+      const original = btn.textContent;
+      btn.textContent = "¡Copiado!";
+      setTimeout(() => btn.textContent = original, 1800);
+    }
+  </script>
+</body>
+</html>
+
